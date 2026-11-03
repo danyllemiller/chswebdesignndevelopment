@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Syllabus Quiz | CHS Web Design I</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=29"></script>
+  <script type="module" src="/js/auth-guard.js?v=2"></script>
+
+  <style>
+    .quiz-q { border-left: 4px solid var(--primary-color); }
+    .quiz-q.correct { border-left-color: #198754; background: #f0fff4; }
+    .quiz-q.incorrect { border-left-color: #dc3545; background: #fff5f5; }
+    .quiz-explain { display: none; font-size: .85rem; }
+    .quiz-q.answered .quiz-explain { display: block; }
+    .form-check-label { cursor: pointer; }
+    #quizResult { display: none; }
+  </style>
+</head>
+<body class="bg-white">
+
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container my-5" style="max-width: 800px;">
+    <div class="text-center mb-5">
+      <h1 class="gochi text-primary display-4 mb-2">Syllabus Quiz</h1>
+      <p class="text-muted fw-bold">Web Design I | Instructor: Ms. Miller</p>
+      <p class="text-muted small">12 questions on the grading policy, Career Readiness, tardies, and classroom expectations. Answer every question, then check your score.</p>
+    </div>
+
+    <form id="quizForm">
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">1. In Web Design I, what percentage of your grade comes from Assignments &amp; Skills?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1a" value="a"><label class="form-check-label" for="q1a">20%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1b" value="b"><label class="form-check-label" for="q1b">35%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1c" value="c"><label class="form-check-label" for="q1c">50%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1d" value="d"><label class="form-check-label" for="q1d">60%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Assignments &amp; Skills are 50% of your grade, the biggest category. The quality of your daily work matters most.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="a">
+        <div class="card-body">
+          <p class="fw-bold">2. How is the rest of your Web Design I grade split up?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2a" value="a"><label class="form-check-label" for="q2a">Projects, Tests &amp; Quizzes 20%, Semester Exams 20%, Career Readiness 10%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2b" value="b"><label class="form-check-label" for="q2b">Projects, Tests &amp; Quizzes 35%, Semester Exams 10%, Career Readiness 5%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2c" value="c"><label class="form-check-label" for="q2c">Projects, Tests &amp; Quizzes 10%, Semester Exams 30%, Career Readiness 10%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2d" value="d"><label class="form-check-label" for="q2d">Projects, Tests &amp; Quizzes 50%, with no Semester Exams or Career Readiness</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Assignments &amp; Skills (50%) + Projects, Tests &amp; Quizzes (20%) + Semester Exams (20%) + Career Readiness (10%) = 100%.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">3. How do you earn the $5 bonus on your bi-weekly simulated paycheck?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3a" value="a"><label class="form-check-label" for="q3a">Finishing every assignment early</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3b" value="b"><label class="form-check-label" for="q3b">Having a perfect Guild Score</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3c" value="c"><label class="form-check-label" for="q3c">Clocking in on time using the Employee Portal</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3d" value="d"><label class="form-check-label" for="q3d">Helping a classmate finish their project</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Every on-time clock-in through the Employee Portal earns a $5 bonus on your bi-weekly simulated paycheck. Tardiness is tracked, just like at a real job.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="d">
+        <div class="card-body">
+          <p class="fw-bold">4. Your Guild Score is a separate class ranking. What three things build it, and how much does each count?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4a" value="a"><label class="form-check-label" for="q4a">Grades 100%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4b" value="b"><label class="form-check-label" for="q4b">Grades 25%, Habits 25%, Attendance 50%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4c" value="c"><label class="form-check-label" for="q4c">Attendance 100%</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4d" value="d"><label class="form-check-label" for="q4d">Grades 50%, Habits (My Planner) 25%, Attendance (Clock-In) 25%</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Guild Score = Grades 50% + Habits (My Planner) 25% + Attendance (Clock-In) 25%. Your habit data is averaged over the last 28 days.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="b">
+        <div class="card-body">
+          <p class="fw-bold">5. You walk in after the bell. What do you need to do so you aren't marked absent?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5a" value="a"><label class="form-check-label" for="q5a">Nothing. The teacher fixes it automatically.</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5b" value="b"><label class="form-check-label" for="q5b">Take a Tardy Form from the tray by the door, fill it out, and turn it in before you leave</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5c" value="c"><label class="form-check-label" for="q5c">Interrupt the lesson to tell the teacher you're here</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5d" value="d"><label class="form-check-label" for="q5d">Email the teacher after school</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Everyone is marked absent at the start of class. Come in quietly, fill out a Tardy Form, and turn it in before you leave. If the form isn't turned in, the absence stays on your record.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="c">
+        <div class="card-body">
+          <p class="fw-bold">6. At which tardy does your teacher first contact home about it?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6a" value="a"><label class="form-check-label" for="q6a">The 1st</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6b" value="b"><label class="form-check-label" for="q6b">The 2nd</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6c" value="c"><label class="form-check-label" for="q6c">The 3rd</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6d" value="d"><label class="form-check-label" for="q6d">The 5th</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>The first call home comes at the third tardy. Tardies reset each grading period, and every 10 on-time arrivals in a row removes one tardy from your count.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="b">
+        <div class="card-body">
+          <p class="fw-bold">7. You want to redo a project to improve your grade. What's the rule?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7a" value="a"><label class="form-check-label" for="q7a">Redos aren't allowed</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7b" value="b"><label class="form-check-label" for="q7b">You can redo it until you're satisfied, within the current or the very next unit</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7c" value="c"><label class="form-check-label" for="q7c">You can redo it any time before the end of the school year</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7d" value="d"><label class="form-check-label" for="q7d">You can do extra credit instead of a redo</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Redos are welcome: redo any project until you're satisfied, within the current or the very next unit. There is no extra credit.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="a">
+        <div class="card-body">
+          <p class="fw-bold">8. You know you'll need extra time on an assignment. What's the correct move?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8a" value="a"><label class="form-check-label" for="q8a">Email at least 24 hours before it's due to ask for an extension</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8b" value="b"><label class="form-check-label" for="q8b">Just turn it in whenever. Extensions aren't needed.</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8c" value="c"><label class="form-check-label" for="q8c">Wait until the due date to ask</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8d" value="d"><label class="form-check-label" for="q8d">Ask a classmate to turn it in for you late</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Life happens. Ask for an extension by email at least 24 hours ahead, not the day it's due. Late work without an extension can earn at most 60% (D-).</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="b">
+        <div class="card-body">
+          <p class="fw-bold">9. A classmate emails you their finished HTML file and you turn it in as your own. What happens?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9a" value="a"><label class="form-check-label" for="q9a">Nothing, as long as you changed the colors</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9b" value="b"><label class="form-check-label" for="q9b">You both get a zero: the one who gave it and the one who copied it</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9c" value="c"><label class="form-check-label" for="q9c">Only you get a zero</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9d" value="d"><label class="form-check-label" for="q9d">You split the points</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>That's plagiarism, and both the giver and the taker get a zero. Helping a classmate find a bug is encouraged. Handing over your finished file is not.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="d">
+        <div class="card-body">
+          <p class="fw-bold">10. What's true about using AI tools like ChatGPT, Claude, or Copilot on your work?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10a" value="a"><label class="form-check-label" for="q10a">AI is banned entirely</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10b" value="b"><label class="form-check-label" for="q10b">You can turn in AI's work as your own without saying so</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10c" value="c"><label class="form-check-label" for="q10c">Using AI always gets a zero</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10d" value="d"><label class="form-check-label" for="q10d">AI is allowed for learning and help, but you must cite it and be able to explain every line</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>AI can help you learn and brainstorm. Turning in AI's work as your own, without understanding it or saying you used it, is not allowed. If you use it, cite it and be able to explain every line.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="a">
+        <div class="card-body">
+          <p class="fw-bold">11. You're stuck on a coding bug. What does the "Three Then Me" rule say to do?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q11" id="q11a" value="a"><label class="form-check-label" for="q11a">Check three resources (Google, your digital notebook, or a classmate) before asking the teacher</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q11" id="q11b" value="b"><label class="form-check-label" for="q11b">Raise your hand three times</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q11" id="q11c" value="c"><label class="form-check-label" for="q11c">Wait three minutes, then give up</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q11" id="q11d" value="d"><label class="form-check-label" for="q11d">Ask three classmates to fix it for you</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Check three resources (Google, your digital notebook, or a classmate) before asking the teacher. Real developers solve most problems this way.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3 quiz-q" data-answer="d">
+        <div class="card-body">
+          <p class="fw-bold">12. What food and drink is allowed at the computers?</p>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q12" id="q12a" value="a"><label class="form-check-label" for="q12a">Snacks are fine if you're careful</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q12" id="q12b" value="b"><label class="form-check-label" for="q12b">Any drink with a lid, kept next to the keyboard</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q12" id="q12c" value="c"><label class="form-check-label" for="q12c">Anything, as long as you clean up after</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="q12" id="q12d" value="d"><label class="form-check-label" for="q12d">Only water in a spill-proof bottle, kept on the floor or in your backpack. No food.</label></div>
+          <p class="quiz-explain text-muted mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>No food at the computers. Only water in a sealable, spill-proof bottle, kept on the floor or in your backpack. Damaging equipment means paying to repair or replace it.</p>
+        </div>
+      </div>
+
+      <div class="text-center mt-4 mb-5">
+        <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold">Check My Answers</button>
+      </div>
+
+      <div id="quizResult" class="card shadow-sm border-primary mb-5">
+        <div class="card-body text-center p-4">
+          <h3 class="fw-bold mb-2" id="quizScoreText"></h3>
+          <p class="text-muted mb-0" id="quizScoreNote"></p>
+        </div>
+      </div>
+
+    </form>
+  </section>
+
+  <div id="footer-placeholder" class="no-print"></div>
+  <a href="#" class="back-to-top text-decoration-none no-print" title="Back to Top">🚀</a>
+
+  <script>
+    document.getElementById('quizForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const questions = document.querySelectorAll('.quiz-q');
+      let correctCount = 0;
+      let unanswered = 0;
+
+      questions.forEach(q => {
+        const name = q.querySelector('input[type="radio"]').name;
+        const selected = q.querySelector(`input[name="${name}"]:checked`);
+        const answer = q.dataset.answer;
+
+        q.classList.add('answered');
+        q.classList.remove('correct', 'incorrect');
+
+        if (!selected) {
+          unanswered++;
+          return;
+        }
+        if (selected.value === answer) {
+          correctCount++;
+          q.classList.add('correct');
+        } else {
+          q.classList.add('incorrect');
+        }
+      });
+
+      const resultCard = document.getElementById('quizResult');
+      const scoreText = document.getElementById('quizScoreText');
+      const scoreNote = document.getElementById('quizScoreNote');
+      const pct = Math.round((correctCount / questions.length) * 100);
+
+      scoreText.textContent = `${correctCount} / ${questions.length} correct (${pct}%)`;
+      scoreNote.textContent = unanswered > 0
+        ? `You left ${unanswered} question(s) blank — those are marked as missed above.`
+        : (pct === 100 ? "Perfect score — you're ready to go." : 'Review the highlighted questions above, then try again.');
+      resultCard.style.display = 'block';
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Full credit for completion, recorded in the gradebook. The actual
+      // accuracy score is recorded separately (not part of the grade) so
+      // it doesn't penalize students for reading the syllabus for the
+      // first time, while still being visible for reporting.
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.student_id) {
+          await fetch('/api/submit-exam', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: user.student_id, exam_id: 'WD1 Syllabus Quiz', score: 20, total_points: 20 })
+          });
+          await fetch('/api/submit-exam', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: user.student_id, exam_id: 'WD1 Syllabus Quiz-Score', score: correctCount, total_points: questions.length })
+          });
+        }
+      } catch (err) { console.error('[SyllabusQuiz] Gradebook sync failed:', err); }
+    });
+  </script>
+</body>
+</html>
