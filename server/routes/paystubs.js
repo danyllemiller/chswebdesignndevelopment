@@ -794,3 +794,4 @@ router.post('/admin/payroll/mark-printed', async (req, res) => {
 
 module.exports = router;
 module.exports.runPayroll = runPayroll;
+module.exports.computePayrollForPeriod = computePayrollForPeriod;
