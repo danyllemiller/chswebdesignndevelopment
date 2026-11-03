@@ -554,11 +554,15 @@ async function tryAutoGradeNotebookActivity(connection, { student_id, title, is_
     const courseId = (await resolveCourseId(connection, student.section_id)) || '10003GS';
 
     const excludePlaceholders = RETIRED_CS_ACTIVITY_IDS.map(() => '?').join(', ');
-    const [activities] = await connection.execute(
+    const query = (course) => connection.execute(
         `SELECT exam_id, title, total_points FROM exams
          WHERE exam_id REGEXP '^cs_ch[0-9]+_' AND course_id = ? AND exam_id NOT IN (${excludePlaceholders})`,
-        [courseId, ...RETIRED_CS_ACTIVITY_IDS]
-    );
+        [course, ...RETIRED_CS_ACTIVITY_IDS]
+    ).then(([r]) => r);
+    // A student whose CS class is an additional one (Web Design is their main class) resolves to the
+    // Web Design course, and the CS activities only exist under the CS course.
+    let activities = await query(courseId);
+    if (activities.length === 0 && courseId !== '10003GS') activities = await query('10003GS');
     // Activity titles gained a leading "CH10 "-style tag (admin/due-dates.html
     // TITLE_MAP) -- strip it from both sides so a note started under the old,
     // untagged title still auto-grades against the renamed activity.
