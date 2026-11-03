@@ -78,10 +78,17 @@ function fmtDate(d) {
 router.get('/payroll/timesheets', requireSelfOrStaff(), async (req, res) => {
     const { student_id } = req.query;
     try {
-        const rows = await withConnection((connection) => connection.execute(
-            'SELECT * FROM timesheets WHERE student_id = ?',
-            [student_id]
-        ).then(([rows]) => rows));
+        // paid: whether payroll pays this shift (its class is Web Design 1, Web Design 2 or AS). A
+        // dual-enrolled student's CS shifts aren't paid, and the student's page used to count them
+        // into the estimated paycheck, so the real one came out lower than the estimate.
+        const { rows, paidSections } = await withConnection(async (connection) => {
+            const [rows] = await connection.execute('SELECT * FROM timesheets WHERE student_id = ?', [student_id]);
+            const paidSections = new Set();
+            for (const sec of new Set(rows.map(r => r.section_id || ''))) {
+                if (PAID_COURSE_IDS.has(await resolveCourseId(connection, sec))) paidSections.add(sec);
+            }
+            return { rows, paidSections };
+        });
 
         const timesheets = rows.map(row => {
             const inMin = timeToMinutes(row.clock_in);
@@ -98,7 +105,8 @@ router.get('/payroll/timesheets', requireSelfOrStaff(), async (req, res) => {
                 date: fmtDate(row.date),
                 clock_in_display: formatTimeOfDay(row.clock_in),
                 clock_out_display: formatTimeOfDay(row.clock_out),
-                duration_minutes: (inMin !== null && outMin !== null) ? Math.round(outMin - inMin) : null
+                duration_minutes: (inMin !== null && outMin !== null) ? Math.round(outMin - inMin) : null,
+                paid: paidSections.has(row.section_id || '')
             };
         });
         res.json({ timesheets });
