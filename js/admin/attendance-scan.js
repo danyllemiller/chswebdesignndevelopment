@@ -5,6 +5,7 @@
 // result clears itself after a few seconds so the station is ready for the
 // next student without anyone touching the screen.
 import { apiFetch } from '../modules/api-client.js';
+import { beep } from '../modules/scan-beep.js?v=1';
 
 const TARDY_FORM_URL = `${location.origin}/student/tardy-form.html`;
 let currentPeriod = null;
@@ -110,24 +111,6 @@ document.getElementById('hcMissingList').addEventListener('click', (e) => {
 function focusInput() {
     input.value = '';
     input.focus();
-}
-
-// Short synthesized tones via Web Audio -- no audio asset files needed, and
-// it means the teacher doesn't have to watch the screen to know a scan
-// landed (and landed as what).
-function beep(freq, durationMs) {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.value = freq;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        osc.start();
-        osc.stop(ctx.currentTime + durationMs / 1000);
-        setTimeout(() => ctx.close(), durationMs + 50);
-    } catch (e) { /* audio isn't essential */ }
 }
 
 function showFeedback(kind, { iconClass, name, sub, tardyLink, overrideStudentId, persistent }) {
