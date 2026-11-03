@@ -1822,6 +1822,11 @@ if (!courseCfg) {
 
       let audioCtx = null, analyser = null, stream = null, raf = null;
       let alarmLevel = 70, alarmEnabled = true, alarmActive = false, alarmAudioPrimed = false, alarmTimer = null;
+      // The alarm's own sound (and its echo) reaches the microphone, so after it stops the meter
+      // ignores the mic briefly; before this it set itself straight off again, over and over, in a
+      // quiet room. And it takes LOUD_FOR_MS of sustained noise to set it off, not one bang or cough.
+      const AFTER_ALARM_DEAF_MS = 2000, LOUD_FOR_MS = 1000;
+      let deafUntil = 0, loudSince = 0;
 
       const fill = body.querySelector('.ss-meter-fill');
       const label = body.querySelector('.ss-meter-label');
@@ -1848,9 +1853,11 @@ if (!courseCfg) {
       function primeAlarmAudio() {
         if (alarmAudioPrimed) return;
         alarmAudioPrimed = true;
+        // muted, not volume 0: iPads and iPhones ignore audio.volume (always full volume), so a "silent"
+        // priming played a burst of alarm that the microphone heard and that set the alarm off
         Object.values(ALARM_SOUNDS).forEach(a => {
-          a.volume = 0;
-          a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = alarmVolume; }).catch(() => { a.volume = alarmVolume; });
+          a.muted = true;
+          a.play().then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => { a.muted = false; });
         });
       }
       function activeAlarmSounds() {
@@ -1871,7 +1878,9 @@ if (!courseCfg) {
         }
       }
       function stopAlarm() {
+        if (alarmActive) deafUntil = performance.now() + AFTER_ALARM_DEAF_MS;
         alarmActive = false;
+        loudSince = 0;
         if (alarmTimer) { clearTimeout(alarmTimer); alarmTimer = null; }
         Object.values(ALARM_SOUNDS).forEach(a => { a.pause(); a.currentTime = 0; });
         widgetEl.classList.remove('alarm-active');
@@ -1914,8 +1923,20 @@ if (!courseCfg) {
           const pct = Math.min(100, Math.max(4, Math.round(rms * 260)));
           fill.style.height = pct + '%';
           label.textContent = pct < 25 ? 'Quiet' : pct < 60 ? 'OK' : 'Too Loud';
-          alarmSmoothPct = alarmSmoothPct * 0.7 + pct * 0.3;
-          if (alarmEnabled && !alarmActive && alarmSmoothPct > alarmLevel) startAlarm();
+          const now = performance.now();
+          if (alarmActive || now < deafUntil) {
+            // hearing the alarm itself: start fresh once it's over
+            alarmSmoothPct = 0; loudSince = 0;
+          } else {
+            // about a 0.3 s average, however fast the screen refreshes
+            const dt = Math.min(100, now - (tick.last || now));
+            alarmSmoothPct += (pct - alarmSmoothPct) * (1 - Math.exp(-dt / 300));
+            if (alarmSmoothPct > alarmLevel) {
+              if (!loudSince) loudSince = now;
+              if (alarmEnabled && now - loudSince >= LOUD_FOR_MS) startAlarm();
+            } else loudSince = 0;
+          }
+          tick.last = now;
           raf = requestAnimationFrame(tick);
         }
         tick();
