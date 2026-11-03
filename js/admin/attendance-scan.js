@@ -6,6 +6,7 @@
 // next student without anyone touching the screen.
 import { apiFetch } from '../modules/api-client.js';
 import { beep } from '../modules/scan-beep.js?v=1';
+import { addCameraScan } from '../modules/camera-scan.js?v=1';
 
 const TARDY_FORM_URL = `${location.origin}/student/tardy-form.html`;
 let currentPeriod = null;
@@ -266,6 +267,8 @@ input.addEventListener('keydown', (e) => {
         handleScan(id);
     }
 });
+// An iPad, iPhone or laptop camera can read the ID instead of a scanner
+addCameraScan(input, handleScan);
 
 document.addEventListener('click', (e) => {
     if (noIdPanelOpen || noIdPanel.contains(e.target) || e.target === noIdToggle) return;

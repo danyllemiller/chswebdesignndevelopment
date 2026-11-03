@@ -6,6 +6,7 @@
 // themselves so the station is ready for the next student.
 import { apiFetch } from '../modules/api-client.js';
 import { beep } from '../modules/scan-beep.js?v=1';
+import { addCameraScan } from '../modules/camera-scan.js?v=1';
 
 const input = document.getElementById('scanInput');
 const panel = document.getElementById('feedbackPanel');
@@ -143,6 +144,8 @@ input.addEventListener('keydown', (e) => {
     e.preventDefault();
     scan(input.value.trim());
 });
+// An iPad, iPhone or laptop camera can read the sticker or ID instead of a scanner
+addCameraScan(input, scan);
 document.addEventListener('click', (e) => {
     if (!e.target.closest('#noIdPanel, #noIdToggle, button, a')) focusInput();
 });
