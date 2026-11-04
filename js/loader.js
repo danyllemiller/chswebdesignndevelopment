@@ -40,6 +40,20 @@
 })();
 
 // ==========================================
+// CS "SAVE YOUR WORK" REMINDER (sitewide, self-guards to CS students and the
+// teacher during each class's last 5 meetings of the semester). Injected here,
+// not from includes/site-footer.html, because the CS chapter and project pages
+// have no footer.
+// ==========================================
+(function injectCsSemesterReminder() {
+  if (document.getElementById('cs-semester-reminder-script')) return;
+  const script = document.createElement('script');
+  script.id = 'cs-semester-reminder-script';
+  script.src = '/js/cs-semester-reminder.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // MESSAGES BADGE (sitewide, self-guards per role -- students and teacher alike)
 // ==========================================
 (function injectMessagesBadge() {

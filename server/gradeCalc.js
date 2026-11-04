@@ -6,6 +6,7 @@
 // a different number than the student-facing one this is meant to mirror.
 const { resolveCourseId } = require('./helpers');
 const { clockinDate, loadClockinDays } = require('./lib/clockinDays');
+const accommodations = require('./lib/accommodations');
 
 const COURSE_WEIGHTS = {
     WD1:  { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
@@ -182,6 +183,7 @@ async function computeStudentGrade(connection, studentId, sectionId) {
     const byKey = {};
     rows.forEach(r => { byKey[r.exam_id] = r; });
     const days = await loadClockinDays(connection);
+    const { extraDays } = await accommodations.settingsFor(connection, studentId);   // accommodation plan
 
     rows.forEach(r => {
         const key = r.exam_id;
@@ -234,7 +236,7 @@ async function computeStudentGrade(connection, studentId, sectionId) {
             // to score -- stays excluded until saveEvaluationAndAggregate
             // actually writes one.
             if (projectExamIds.has(key)) return;
-            const dueDate = formatDbDate(r.due_date);
+            const dueDate = accommodations.dueFor(formatDbDate(r.due_date), key, extraDays);
             const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
             if (!isPastDue) return;
         }

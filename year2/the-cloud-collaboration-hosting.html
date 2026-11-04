@@ -96,7 +96,7 @@
               <a href="/proficiencyScales/the-cloud-collaboration-hosting.html"  class="list-group-item list-group-item-action text-primary fw-bold">🎯🚀 1. Proficiency Scale</a>
               <a href="/pre-assessments/the-cloud-collaboration-hosting.html"  class="list-group-item list-group-item-action text-dark">🚀 2. Pre-Assessment</a>
               <a href="/notes/the-cloud-collaboration-hosting.html"  class="list-group-item list-group-item-action text-dark">📝 3. Guided Notes</a>
-              <a href="/studentFiles/pixelPioneers.zip" class="list-group-item list-group-item-action text-dark">📁 4. Chapter Files (.zip)</a>
+              <a href="/studentFiles/pixelPioneers.zip" class="list-group-item list-group-item-action text-dark">📁 4. Chapter Starter Files (.zip)</a>
             </div>
           </div>
         </div>
@@ -358,6 +358,26 @@
           <li class="mb-0">Run <code>git add .</code> and <code>git commit -m "Resolve merge conflict in index.html"</code> to finalize the merge.</li>
         </ol>
 
+        <!-- Conflict Lab (Oct 2026): scaffolded starter repo, Ch11 Day 2 -->
+        <div class="card border-danger shadow-sm mb-4 text-start">
+          <div class="card-header bg-danger text-white fw-bold small">Conflict Lab: Resolve a Real Conflict (with a partner)</div>
+          <div class="card-body small p-3">
+            <p class="mb-2">Open <code>day2-conflict-lab</code> from the <a href="/studentFiles/pixelPioneers.zip">Chapter Starter Files</a>. The repo is built and its two branches already clash on the same lines. Run <code>git merge feature/rebrand</code>, then do the <mark>highlighted</mark> part: replace the conflict with the one line you and your partner agree on. Do it again for the hours line in <code>about.html</code>.</p>
+            <pre class="p-3 rounded no-copy mb-0"><code>git merge feature/rebrand
+
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+    &lt;h1&gt;Local Legends Coffee Co.&lt;/h1&gt;
+=======
+    &lt;h1&gt;Local Legends Coffee Roasters&lt;/h1&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/rebrand
+
+<mark>    &lt;h1&gt;Local Legends Coffee Roasters&lt;/h1&gt;</mark>   (the line you agree on)
+
+git add index.html about.html
+git commit -m "Resolve rebrand conflicts"</code></pre>
+          </div>
+        </div>
+
         <div class="card border-success shadow-sm mt-4 mb-5">
             <div class="card-header bg-success text-white fw-bold">Quick Check: Git, GitHub &amp; the Command Line</div>
             <div class="card-body small">
@@ -386,13 +406,21 @@
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Navigate and construct client file architecture using only a Command Line Interface.</p>
                 <ol>
+                    <li class="mb-2">Download the Chapter Starter Files. Move <code>day1-portfolio-repo</code> to your Desktop and rename it <code>portfolio-repo</code>. It already has <code>index.html</code>, <code>css/</code>, and <code>assets/</code>.</li>
                     <li class="mb-2">Open your computer's Terminal (Mac) or Command Prompt / Git Bash (Windows).</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Using only CLI commands (<code>cd</code>, <code>mkdir</code>), navigate to your Desktop.</li>
-                    <li class="mb-2">Create a master folder called <code>portfolio-repo</code>.</li>
-                    <li class="mb-2"><code>cd</code> into that folder and use <code>mkdir</code> to create three sub-folders: <code>css</code>, <code>js</code>, and <code>assets</code>.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Using only CLI commands, <code>cd</code> into <code>portfolio-repo</code>, make the <code>js</code> folder, and create <code>js/main.js</code>.</li>
+                    <li class="mb-2">Run <code>ls -R</code> and check it against the target tree in <code>YOUR-TURN.txt</code>.</li>
                 </ol>
+                <div class="border border-success rounded p-3 mb-3 bg-light">
+                    <p class="fw-bold mb-1">📁 Starter files: <code>day1-portfolio-repo</code> in the <a href="/studentFiles/pixelPioneers.zip">Chapter Files (.zip)</a></p>
+                    <p class="mb-2">You write two lines. The <mark>highlighted</mark> part is the only thing you write. Everything else is already built.</p>
+                    <pre class="p-3 rounded no-copy mb-0"><code>cd ~/Desktop/portfolio-repo
+<mark>mkdir js</mark>
+<mark>touch js/main.js</mark>
+ls -R</code></pre>
+                </div>
                 <p class="mb-3 text-danger fw-bold">Turn In: Take a screenshot of your terminal window showing your executed commands.</p>
-                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                <a href="/student/notes.html?chapter=11&amp;day=1&amp;turnin=Milestone%201%3A%20Agency%20File%20Architecture%20Setup%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 1</a>
             </div>
         </div>
         
@@ -403,12 +431,19 @@
                 <p><strong>Objective:</strong> Initialize local version control to protect client assets and execute a commit.</p>
                 <ol>
                     <li class="mb-2">Ensure your terminal is inside your <code>portfolio-repo</code> folder.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Run <code>git init</code> to start tracking the folder.</li>
-                    <li class="mb-2">Add a blank <code>index.html</code> file to the folder.</li>
-                    <li class="mb-2">Run <code>git add .</code> to stage the file, then run <code>git commit -m "Initial commit: Added index structure"</code> to save your history locally!</li>
+                    <li class="mb-2">With your class, set your Git name and email and run <code>git init</code> to start tracking the folder.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Stage everything and commit it with a message that says what changed.</li>
+                    <li class="mb-2">Make 3 commits in all. Your partner reads <code>git log --oneline</code> and checks that every message says what changed.</li>
                 </ol>
+                <div class="border border-success rounded p-3 mb-3 bg-light">
+                    <p class="fw-bold mb-1">📁 Starter files: <code>day1-portfolio-repo</code> in the <a href="/studentFiles/pixelPioneers.zip">Chapter Files (.zip)</a></p>
+                    <p class="mb-2">You write the stage and commit lines. The <mark>highlighted</mark> part is the only thing you write. Everything else is already built.</p>
+                    <pre class="p-3 rounded no-copy mb-0"><code>git init
+<mark>git add .</mark>
+<mark>git commit -m "Add js folder and main.js"</mark></code></pre>
+                </div>
                 <p class="mb-3 text-danger fw-bold">Turn In: Take a screenshot of your terminal showing the successful commit message.</p>
-                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                <a href="/student/notes.html?chapter=11&amp;day=1&amp;turnin=Milestone%202%3A%20Local%20Agency%20Backup%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 1</a>
             </div>
         </div>
 
@@ -505,6 +540,19 @@
             <strong>Why the server OS matters to your file paths:</strong> Linux is <strong>case-sensitive</strong>. To a Linux server, <code>About.html</code> and <code>about.html</code> are two different files, so a link to <code>images/Logo.png</code> breaks if the file is really named <code>logo.png</code>, even though it worked fine on your Windows laptop or Mac (which ignore capital letters by default). That is why the agency rule is all-lowercase file names.
         </div>
 
+        <!-- Linux Link Hunt (Oct 2026): scaffolded starter site, Ch11 Day 4 -->
+        <div class="card border-primary shadow-sm mt-3 text-start">
+          <div class="card-header bg-primary text-white fw-bold small">Linux Link Hunt</div>
+          <div class="card-body small p-3">
+            <p class="mb-2">Open <code>day4-link-hunt</code> from the <a href="/studentFiles/pixelPioneers.zip">Chapter Starter Files</a>. The site works on your laptop but breaks on the Linux server. Compare every link in <code>index.html</code> with <code>server-ls.txt</code> and fix only the four <mark>highlighted</mark> values marked <code>FIX</code>.</p>
+            <pre class="p-3 rounded no-copy mb-0"><code>&lt;img src="<mark>images/Logo.svg</mark>" alt="Local Legends Coffee logo"&gt;
+&lt;a href="<mark>About.html</mark>"&gt;About&lt;/a&gt;
+&lt;a href="<mark>Menu.HTML</mark>"&gt;Menu&lt;/a&gt;
+&lt;a href="contact.html"&gt;Contact&lt;/a&gt;
+&lt;a href="<mark>MENU.html</mark>"&gt;full menu&lt;/a&gt;</code></pre>
+          </div>
+        </div>
+
         <h5 class="fw-bold mt-5 text-primary" id="compare-cloud-platforms">The Big Three: Meet the Cloud Giants</h5>
         <p>Three gigantic companies control the vast majority of the world's cloud computing infrastructure. When companies like Netflix, Spotify, or Fortnite need servers, they rent them from these Big Three.</p>
         
@@ -555,11 +603,16 @@
                 <p><strong>Objective:</strong> Synchronize a local Git repository with a remote GitHub cloud hub for the PixelPioneers account.</p>
                 <ol>
                     <li class="mb-2">Log into GitHub and create a new, empty repository named <code>portfolio-repo</code>.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Follow the GitHub instructions to link your local terminal repo to the cloud (<code>git remote add origin...</code>).</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Copy your new repo's URL from GitHub and write the one line that links your local repo to it.</li>
                     <li class="mb-2">Run <code>git push -u origin main</code> to upload your local commit history to the cloud.</li>
                 </ol>
+                <div class="border border-success rounded p-3 mb-3 bg-light">
+                    <p class="mb-2">You write the <mark>highlighted</mark> line, using your own repo URL. The push line is given.</p>
+                    <pre class="p-3 rounded no-copy mb-0"><code><mark>git remote add origin https://github.com/YOUR-NAME/portfolio-repo.git</mark>
+git push -u origin main</code></pre>
+                </div>
                 <p class="mb-3 text-danger fw-bold">Turn In: Submit the URL link to your live GitHub repository.</p>
-                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                <a href="/student/notes.html?chapter=11&amp;day=2&amp;turnin=Milestone%203%3A%20Syncing%20with%20the%20Agency%20Hub%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 2</a>
             </div>
         </div>
       </div>
@@ -775,13 +828,20 @@ MIT License — Copyright (c) 2026 CHS Web Design Agency</code></pre>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Document project infrastructure using standard Markdown practices for a client hand-off.</p>
                 <ol>
-                    <li class="mb-2">In your local <code>portfolio-repo</code>, create a new file named <code>README.md</code>.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Write a professional description of your project using Markdown syntax (e.g., <code>#</code> for headings, <code>-</code> for lists).</li>
-                    <li class="mb-2">Mention in the README that your project is designed to be hosted on a PaaS provider for maximum elasticity.</li>
+                    <li class="mb-2">Copy <code>README.md</code> from <code>day5-readme</code> into your <code>portfolio-repo</code>. The title, installation, features, and license sections are already written in Markdown.</li>
+                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Write the Hosting Recommendation section for the client on your card: the host type, why it fits, and one risk and how you handle it.</li>
                     <li class="mb-2">Run <code>git add</code>, <code>git commit</code>, and <code>git push</code> to sync this new file to GitHub.</li>
                 </ol>
+                <div class="border border-success rounded p-3 mb-3 bg-light">
+                    <p class="fw-bold mb-1">📁 Starter files: <code>day5-readme</code> in the <a href="/studentFiles/pixelPioneers.zip">Chapter Files (.zip)</a></p>
+                    <p class="mb-2">You write only the Hosting Recommendation lines. The <mark>highlighted</mark> part is the only thing you write. Everything else is already built.</p>
+                    <pre class="p-3 rounded no-copy mb-0"><code>## Hosting Recommendation
+<mark>- Host type (IaaS / PaaS / SaaS): ______</mark>
+<mark>- Why it fits this client: ______</mark>
+<mark>- One risk and how we handle it: ______</mark></code></pre>
+                </div>
                 <p class="mb-3 text-danger fw-bold">Turn In: Submit the GitHub URL showing your rendered README.</p>
-                <a href="#submission-zone" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                <a href="/student/notes.html?chapter=11&amp;day=5&amp;turnin=Milestone%204%3A%20Client%20Infrastructure%20Proposal%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 5</a>
             </div>
         </div>
       </div>
@@ -1107,7 +1167,7 @@ MIT License — Copyright (c) 2026 CHS Web Design Agency</code></pre>
                     <li class="mb-2">A shared repository promotes which WRS skill? <strong>Inclusive Collaboration</strong>!</li>
                 </ol>
                 <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload a screenshot of your terminal successfully cloning your partner's repository!</p>
-                <a href="#submission-zone" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox</a>
+                <a href="/student/notes.html?chapter=11&amp;day=5&amp;turnin=Project%3A%20The%20Agency%20Codebase%20Sync%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 5</a>
             </div>
         </div>
       </div>

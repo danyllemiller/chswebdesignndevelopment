@@ -42,63 +42,14 @@
     </div>
   </section>
 
-  <script src="/js/wrsLogic.js?v=6"></script>
+  <script src="/js/wrsLogic.js?v=7"></script>
   <script>
   (function () {
 
-    // ── PART 1: TRUE / FALSE (25 items) ──────────────────────────────────────
-    var tfSection = [
-      { q: "Creative employees who propose new workplace approaches are stepping outside their assigned job boundaries.", a: "F",
-        hint: "Creativity and innovation are valued workplace skills — suggesting improvements shows initiative, not overreach." },
-      { q: "Evaluating all available solutions before acting is better practice than choosing the first idea that seems workable.", a: "T",
-        hint: "Critical thinking means weighing all options before committing. The first idea is rarely the best one." },
-      { q: "Waiting to be told what to do before starting a new task is a sign of professional self-direction.", a: "F",
-        hint: "Self-direction means identifying what needs to be done and starting without waiting to be prompted every time." },
-      { q: "Using a company device for personal social media is acceptable as long as your assigned tasks are complete.", a: "F",
-        hint: "Company devices and time are for work purposes. Personal use can violate policy and create security risks." },
-      { q: "Consistently arriving a few minutes early and prepared to work demonstrates a positive work ethic.", a: "T",
-        hint: "Punctuality and preparation show respect for your employer, teammates, and customers — core markers of strong work ethic." },
-      { q: "The goal of resolving a workplace conflict is to identify which party was at fault.", a: "F",
-        hint: "The goal of conflict resolution is a workable solution, not assigning blame. Blame-seeking usually escalates the problem." },
-      { q: "Paraphrasing a client's request back to them before beginning work is a professional listening technique.", a: "T",
-        hint: "Restating what you heard confirms shared understanding and prevents costly errors caused by miscommunication." },
-      { q: "A professional must treat colleagues of all cultural backgrounds with equal respect.", a: "T",
-        hint: "Equal professional respect regardless of background, culture, or lifestyle is a non-negotiable workplace standard." },
-      { q: "A client's negative feedback is best addressed by explaining why your original decision was correct.", a: "F",
-        hint: "Good customer service means listening to understand, not defending yourself. Acknowledge concerns before explaining anything." },
-      { q: "Completing your own portion of a team project is sufficient — your teammates' work is their own responsibility.", a: "F",
-        hint: "Teams fail or succeed together. Supporting teammates beyond your own task is a core part of professional teamwork." },
-      { q: "Understanding how your role contributes to your organization's goals is a core part of professional responsibility.", a: "T",
-        hint: "Big-picture thinking — seeing how your work supports the organization's mission — is a sign of professional maturity." },
-      { q: "Gross pay and net pay are the same amount on a paycheck.", a: "F",
-        hint: "Gross pay is total earnings before deductions. Net pay (take-home) is lower because taxes, insurance, and benefits are removed first." },
-      { q: "When an employer adopts new tools, the professional response is to learn them even if you preferred the old ones.", a: "T",
-        hint: "Adaptability is a critical career skill. Resisting change limits growth and can put your position at risk." },
-      { q: "Prioritizing tasks means completing the shortest task first so you can cross it off the list quickly.", a: "F",
-        hint: "True prioritizing means tackling the most urgent, highest-consequence tasks first — not the easiest or quickest ones." },
-      { q: "A popular social media post is the most credible source for current professional standards or technical regulations in any field.", a: "F",
-        hint: "Evaluate sources by author authority, accuracy, and currency. Official and government publications far outrank social media." },
-      { q: "Backing up project files regularly protects your work in the event of hardware failure or data corruption.", a: "T",
-        hint: "Data loss can be catastrophic. Regular backups to approved storage protect your work and your employer's records." },
-      { q: "A PDF is a good format for sharing a finished document with someone who may not have the software used to create it.", a: "T",
-        hint: "PDFs preserve formatting and open on any device without special software — ideal for sharing finalized documents." },
-      { q: "A professional should match their language and tone to the audience and setting they are communicating in.", a: "T",
-        hint: "Adjusting tone and formality to fit the audience and setting is a core professional communication skill." },
-      { q: "An invoice is a document that requests payment from a client for services already delivered.", a: "T",
-        hint: "Knowing common workplace documents (invoices, memos, work orders) is an essential professional literacy skill." },
-      { q: "Using a piece of equipment you have never been trained on is acceptable when the task is urgent.", a: "F",
-        hint: "Urgency never overrides safety. Using equipment without training is dangerous and often violates workplace policy." },
-      { q: "Making a decision based on incomplete information is always better than waiting to gather more relevant facts.", a: "F",
-        hint: "Critical thinking means gathering enough facts before deciding. Rushing on incomplete information usually creates bigger problems." },
-      { q: "Ignoring a workplace conflict and hoping it resolves on its own is an effective long-term strategy.", a: "F",
-        hint: "Unresolved conflicts typically escalate. Early, respectful resolution is always more effective than hoping a problem disappears." },
-      { q: "An employee who focuses only on their own tasks without considering how their work affects the team is demonstrating strong professionalism.", a: "F",
-        hint: "Professionalism includes considering your impact on the team and organization, not just completing your personal to-do list." },
-      { q: "Proofreading a professional document before sending it is an optional step that experienced workers can skip.", a: "F",
-        hint: "Errors in professional documents damage your credibility. Proofreading is a basic and expected workplace standard." },
-      { q: "A 15% tip on a $40.00 meal is $6.00.", a: "T",
-        hint: "15% × $40 = $6.00. Practice percentage calculations — they apply to tipping, taxes, budgeting, and many job roles." }
-    ];
+    // ── PART 1: TRUE / FALSE: none ───────────────────────────────────────────
+    // The Nevada WPR state test has no true/false questions (2026-11-02), so the 25
+    // statements that were here are multiple choice now, at the end of Part 3.
+    var tfSection = [];
 
     // ── PART 2: MATCHING (5 sets × 5 items = 25 items) ───────────────────────
     var matchSection = [
@@ -219,7 +170,7 @@
       }
     ];
 
-    // ── PART 3: MULTIPLE CHOICE (44 items) ───────────────────────────────────
+    // ── PART 3: MULTIPLE CHOICE (69 items) ───────────────────────────────────
     var mcSection = [
       {
         q: "A tool your team normally uses to complete work for a customer is unavailable on a deadline day. The most resourceful response is to:",
@@ -488,6 +439,157 @@
         options: ["Stay out of it — it is between the two of them","Publicly defend the affected coworker in front of the whole team","Check in privately with the affected coworker and, if appropriate, report the incident through proper channels","Immediately tell the coworker who made the comment that they must apologize"],
         answer: "Check in privately with the affected coworker and, if appropriate, report the incident through proper channels",
         hint: "A private check-in respects the affected person's privacy and autonomy. Reporting through proper channels (if they want it) then addresses the root issue professionally."
+      },
+      // ── Rewritten from Part 1's true/false statements (2026-11-02) ──
+      {
+        q: "An employee suggests a new way to organize the team's shared files that could save everyone time. How will most employers view this?",
+        options: ["As initiative and creative thinking they want to encourage","As overstepping the employee's job boundaries","As a sign the employee does not have enough work","As something only a manager should suggest"],
+        answer: "As initiative and creative thinking they want to encourage",
+        hint: "Creativity and innovation are valued workplace skills — suggesting improvements shows initiative, not overreach."
+      },
+      {
+        q: "Your team has three possible fixes for a recurring scheduling problem. What is the best critical-thinking approach?",
+        options: ["Compare all three fixes before choosing one","Use the first fix someone suggested","Pick the fix that is quickest to explain","Wait for the problem to go away on its own"],
+        answer: "Compare all three fixes before choosing one",
+        hint: "Critical thinking means weighing all options before committing. The first idea is rarely the best one."
+      },
+      {
+        q: "You finish your assigned work an hour before your shift ends. Which response best shows self-direction?",
+        options: ["Find the next task that needs doing and start it","Wait at your station until your supervisor gives you something","Catch up on personal messages until the shift ends","Leave early since your assigned work is finished"],
+        answer: "Find the next task that needs doing and start it",
+        hint: "Self-direction means identifying what needs to be done and starting without waiting to be prompted every time."
+      },
+      {
+        q: "Your work for the day is finished early. Which use of your company laptop follows a typical workplace technology policy?",
+        options: ["Reviewing training materials for your job","Scrolling personal social media until your shift ends","Downloading a game to pass the time","Shopping online for personal items"],
+        answer: "Reviewing training materials for your job",
+        hint: "Company devices and time are for work purposes. Personal use can violate policy and create security risks."
+      },
+      {
+        q: "Which habit best demonstrates a positive work ethic?",
+        options: ["Arriving a few minutes early and ready to start","Arriving right at start time and settling in for 15 minutes","Arriving late and quietly staying late to make up the time","Arriving on time only when your supervisor is working"],
+        answer: "Arriving a few minutes early and ready to start",
+        hint: "Punctuality and preparation show respect for your employer, teammates, and customers — core markers of strong work ethic."
+      },
+      {
+        q: "What is the main goal of resolving a workplace conflict?",
+        options: ["Reaching a workable solution both sides can accept","Deciding which person was at fault","Getting the conflict on record with HR","Making sure the more senior employee wins"],
+        answer: "Reaching a workable solution both sides can accept",
+        hint: "The goal of conflict resolution is a workable solution, not assigning blame. Blame-seeking usually escalates the problem."
+      },
+      {
+        q: "A client explains a complicated request over the phone. What should you do before you begin the work?",
+        options: ["Restate the request in your own words to confirm you understood","Start right away so the client sees quick results","Ask the client to put every detail in writing first","Assume the details you missed are not important"],
+        answer: "Restate the request in your own words to confirm you understood",
+        hint: "Restating what you heard confirms shared understanding and prevents costly errors caused by miscommunication."
+      },
+      {
+        q: "How should a professional treat coworkers whose cultural backgrounds differ from their own?",
+        options: ["With the same respect they give every coworker","With extra caution and less conversation","With respect only after getting to know them","Differently, depending on how well they fit in"],
+        answer: "With the same respect they give every coworker",
+        hint: "Equal professional respect regardless of background, culture, or lifestyle is a non-negotiable workplace standard."
+      },
+      {
+        q: "A client gives negative feedback on your finished work. What is the best first response?",
+        options: ["Listen fully and acknowledge their concerns","Explain why your original decisions were correct","Offer a full refund before hearing the details","Pass the client to a coworker"],
+        answer: "Listen fully and acknowledge their concerns",
+        hint: "Good customer service means listening to understand, not defending yourself. Acknowledge concerns before explaining anything."
+      },
+      {
+        q: "You finish your part of a team project two days early, but a teammate is behind on theirs. What is the most professional response?",
+        options: ["Offer to help your teammate so the project finishes on time","Turn in your part and let your teammate handle theirs","Report to the supervisor that your teammate is behind","Start a personal project since your part is done"],
+        answer: "Offer to help your teammate so the project finishes on time",
+        hint: "Teams fail or succeed together. Supporting teammates beyond your own task is a core part of professional teamwork."
+      },
+      {
+        q: "Why should an employee understand how their job contributes to the organization's goals?",
+        options: ["It helps them make decisions that support the mission","It is only needed by employees who want to be managers","It lets them skip tasks that seem unimportant","It is only required during the first week on the job"],
+        answer: "It helps them make decisions that support the mission",
+        hint: "Big-picture thinking — seeing how your work supports the organization's mission — is a sign of professional maturity."
+      },
+      {
+        q: "What is the difference between gross pay and net pay?",
+        options: ["Gross pay is before deductions; net pay is what you take home","Gross pay is what you take home; net pay is before deductions","Gross pay includes overtime; net pay never does","There is no difference; they are the same amount"],
+        answer: "Gross pay is before deductions; net pay is what you take home",
+        hint: "Gross pay is total earnings before deductions. Net pay (take-home) is lower because taxes, insurance, and benefits are removed first."
+      },
+      {
+        q: "Your employer switches to new scheduling software, but you preferred the old system. What is the most professional response?",
+        options: ["Learn the new software and use it well","Keep using the old system as long as you can","Complain to coworkers until the change is reversed","Ask a coworker to do your scheduling for you"],
+        answer: "Learn the new software and use it well",
+        hint: "Adaptability is a critical career skill. Resisting change limits growth and can put your position at risk."
+      },
+      {
+        q: "You have several tasks due this week. What does it mean to prioritize them?",
+        options: ["Do the most urgent, highest-impact tasks first","Do the shortest tasks first so the list shrinks fast","Do the tasks you enjoy most first","Do the tasks in the order they were assigned"],
+        answer: "Do the most urgent, highest-impact tasks first",
+        hint: "True prioritizing means tackling the most urgent, highest-consequence tasks first — not the easiest or quickest ones."
+      },
+      {
+        q: "A post about a new rule in your industry is going viral on social media. What should you do before following it?",
+        options: ["Check the rule against an official source","Follow it, since so many people shared it","Forward it to every coworker right away","Ignore every rule change you hear about"],
+        answer: "Check the rule against an official source",
+        hint: "Evaluate sources by author authority, accuracy, and currency. Official and government publications far outrank social media."
+      },
+      {
+        q: "What is the main reason to back up your work files regularly?",
+        options: ["To protect your work if hardware fails or files are corrupted","To make your computer run faster","To free up space in your email inbox","To keep coworkers from editing your files"],
+        answer: "To protect your work if hardware fails or files are corrupted",
+        hint: "Data loss can be catastrophic. Regular backups to approved storage protect your work and your employer's records."
+      },
+      {
+        q: "You need to send a finished report to a client who may not have the program you used to make it. Which file format is the best choice?",
+        options: ["PDF","The original editable project file","A screenshot of each page","A zipped folder of the program's working files"],
+        answer: "PDF",
+        hint: "PDFs preserve formatting and open on any device without special software — ideal for sharing finalized documents."
+      },
+      {
+        q: "How should a professional's communication change when speaking with a client instead of a close coworker?",
+        options: ["Match the language and tone to the audience and setting","Keep the same casual tone with everyone","Add technical jargon to sound more professional","Say as little as possible to avoid mistakes"],
+        answer: "Match the language and tone to the audience and setting",
+        hint: "Adjusting tone and formality to fit the audience and setting is a core professional communication skill."
+      },
+      {
+        q: "Before a repair job begins, which document describes the work to be done and goes to the worker who will do it?",
+        options: ["Work order","Invoice","Receipt","Memo"],
+        answer: "Work order",
+        hint: "A work order describes the job to be done; an invoice requests payment after the work is delivered. Knowing common workplace documents is an essential professional literacy skill."
+      },
+      {
+        q: "A task is urgent, and the fastest way to finish it is with a machine you have never been trained to use. What should you do?",
+        options: ["Ask for training or have a trained coworker run it","Use the machine carefully since the task is urgent","Watch an online video and then use the machine","Use the machine only while your supervisor is away"],
+        answer: "Ask for training or have a trained coworker run it",
+        hint: "Urgency never overrides safety. Using equipment without training is dangerous and often violates workplace policy."
+      },
+      {
+        q: "You must recommend one of three vendors, but you are still missing pricing from one of them. What is the best approach?",
+        options: ["Get the missing information before deciding, if time allows","Decide right away, since quick decisions are always best","Pick the vendor with the best-looking website","Leave that vendor out without mentioning it"],
+        answer: "Get the missing information before deciding, if time allows",
+        hint: "Critical thinking means gathering enough facts before deciding. Rushing on incomplete information usually creates bigger problems."
+      },
+      {
+        q: "Two coworkers keep disagreeing about how to split shared tasks, and the tension is growing. What is the most effective long-term approach?",
+        options: ["Address the disagreement early in a respectful conversation","Ignore it and hope it resolves on its own","Avoid working with either coworker","Wait until annual reviews to bring it up"],
+        answer: "Address the disagreement early in a respectful conversation",
+        hint: "Unresolved conflicts typically escalate. Early, respectful resolution is always more effective than hoping a problem disappears."
+      },
+      {
+        q: "Which employee shows the strongest professionalism?",
+        options: ["One who considers how their work affects the team","One who focuses only on their own to-do list","One who works fast even if it creates extra work for others","One who keeps their progress private until the deadline"],
+        answer: "One who considers how their work affects the team",
+        hint: "Professionalism includes considering your impact on the team and organization, not just completing your personal to-do list."
+      },
+      {
+        q: "Before you send a professional email to a client, what should you always do?",
+        options: ["Proofread it for errors","Add emojis to make it friendly","Copy your whole department on it","Send it fast and fix mistakes later"],
+        answer: "Proofread it for errors",
+        hint: "Errors in professional documents damage your credibility. Proofreading is a basic and expected workplace standard."
+      },
+      {
+        q: "What is a 15% tip on a $40.00 meal?",
+        options: ["$6.00","$4.00","$5.50","$15.00"],
+        answer: "$6.00",
+        hint: "15% × $40.00 = 0.15 × 40 = $6.00. Practice percentage calculations: they apply to tipping, taxes, budgeting, and many job roles."
       }
     ];
 

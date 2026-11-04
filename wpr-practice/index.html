@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  <script src="/js/wrs-test-ui.js?v=6"></script>
+  <script src="/js/wrs-test-ui.js?v=7"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -29,6 +29,9 @@
   <a href="/wpr-practice/privacy.html">Privacy Policy</a> · <a href="/wpr-practice/terms.html">Terms of Use</a> · <a href="mailto:contact@wprpracticepro.com?subject=WPR%20Practice%20Pro%20bug%20or%20idea" data-wfb-open>Report a bug / Request a feature</a><br>
   Independent practice tool. Not affiliated with or endorsed by the Nevada Department of Education. No student information is kept after a session ends.
 </footer>
+<script src="/wpr-practice/assets/standards.js?v=1"></script>
+<script src="/wpr-practice/assets/report-pdf.js?v=2"></script>
+<script src="/wpr-practice/assets/feedback.js?v=2"></script>
 <script>
 // Student side of the WPR Practice Test (server/routes/wprPractice.js).
 // No login: students join with the teacher's class code, their name, and
@@ -77,8 +80,10 @@
           lastName: document.getElementById('last').value, studentId: document.getElementById('sid').value
         });
         me = { code: out.code, token: out.token, label: out.label, count: out.count, seconds: out.seconds, name: document.getElementById('first').value.trim() };
+        // Already finished (came back from a closed tab or another device): straight to their results
+        if (out.submitted) { me.submitted = true; me.reason = out.endReason || ''; }
         try { sessionStorage.setItem('wpr_join', JSON.stringify(me)); } catch (x) {}
-        showRules(out.started);
+        if (out.submitted) showResults(); else showRules(out.started);
       } catch (err) { showJoin(err.message); }
     });
   }
@@ -88,7 +93,7 @@
       <h1 class="h4 fw-bold mb-1">Ready, ${esc(me.name || '')}?</h1>
       <p class="text-muted">${esc(me.label)}</p>
       <ul class="mb-3">
-        <li><strong>${me.count} questions</strong>, multiple choice and true/false, on Nevada Workplace Readiness Skills, including workplace safety. You have <strong>${fmtTime(me.seconds)}</strong>.</li>
+        <li><strong>${me.count} questions</strong>, multiple choice like the state test, on Nevada Workplace Readiness Skills, including workplace safety. You have <strong>${fmtTime(me.seconds)}</strong>.</li>
         <li>Answer as many as you can. The test submits itself when time runs out.</li>
         <li>Like the state test: <strong>Flag</strong> questions to come back to, use the on-screen <strong>Calculator</strong> and <strong>Scratch Paper</strong>, and check the <strong>Review</strong> screen before you submit.</li>
         <li class="text-danger fw-bold">The test runs full screen. Do not leave it. Switching tabs, opening another site, exiting full screen, or translating the page locks the test with a warning and tells your teacher. The second time, your test is submitted.</li>
@@ -114,6 +119,9 @@
         saveBeacon: answers => navigator.sendBeacon && navigator.sendBeacon('/api/wpr/save', new Blob([JSON.stringify({ code: me.code, token: me.token, answers })], { type: 'application/json' })),
         onViolation: count => api('/wpr/violation', { code: me.code, token: me.token, count }),
         clock: () => api('/wpr/clock', { code: me.code, token: me.token }),
+        clockEvery: 5000,   // a pause for a break (or Read aloud) from the teacher shows up within 5 seconds
+        readAloud: !!data.readAloud,
+        paused: !!data.paused,
         noTranslate: true,   // the state test can't be translated, so the practice can't either
         submit: async (answers, reason) => {
           const out = await api('/wpr/submit', { code: me.code, token: me.token, answers, reason });
@@ -132,6 +140,8 @@
   // ---- After submitting: the score now; the answers and the report once the teacher ends the test
   const remember = () => { try { sessionStorage.setItem('wpr_join', JSON.stringify(me)); } catch (x) {} };
   let resultsPoll = null;
+  // A tab left in the background checks far less often, so check again as soon as it's back in front
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && resultsPoll) checkResults(); });
   function showResults(score) {
     screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>
       <div id="scoreBox">${score ? WrsTestUI.scoreHtml(score, me.reason) : '<p class="text-muted">Loading your score…</p>'}</div>
@@ -151,13 +161,13 @@
     try { out = await api('/wpr/results', { code: me.code, token: me.token }); }
     catch (e) {
       if (e.status !== 404) return;   // try again on the next check
-      clearInterval(resultsPoll);
+      clearInterval(resultsPoll); resultsPoll = null;
       try { sessionStorage.removeItem('wpr_join'); } catch (x) {}
       screen.innerHTML = '<h1 class="h4 fw-bold mb-3">Your results</h1><div class="alert alert-secondary mb-0">The results for this test have been erased. Ask your teacher if you need your score.</div>';
       return;
     }
     if (out.status === 'held' && !screen.querySelector('.wt-big')) { document.getElementById('scoreBox').innerHTML = WrsTestUI.scoreHtml(out.result, out.endReason); addSurvey(); }
-    if (out.status === 'released') { clearInterval(resultsPoll); showReleased(out); }
+    if (out.status === 'released') { clearInterval(resultsPoll); resultsPoll = null; showReleased(out); }
   }
   function showReleased(out) {
     const until = new Date(out.report.availableUntil).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -180,7 +190,5 @@
   if (me && me.token) { if (me.submitted) showResults(); else showRules(true); } else showJoin();
 })();
 </script>
-<script src="/wpr-practice/assets/report-pdf.js?v=1"></script>
-<script src="/wpr-practice/assets/feedback.js?v=2"></script>
 </body>
 </html>

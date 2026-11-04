@@ -9,6 +9,8 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <script src="/wpr-practice/assets/standards.js?v=1"></script>
+  <script src="/wpr-practice/assets/report-pdf.js?v=2"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 1050px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -19,6 +21,7 @@
     td.num, th.num { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .pill { font-size: .75rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; }
     .pill.joined { background: #e9ecef; color: #495057; } .pill.testing { background: #fff3cd; color: #7a5b00; } .pill.submitted { background: #d1f2e0; color: #0f5132; }
+    .pill.paused { background: #cff4fc; color: #055160; }
   </style>
 </head>
 <body>
@@ -39,6 +42,8 @@
   const KEY = 'wpr_teacher_session';
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   let sess = null, data = null, poll = null, confirmEnd = false, timeFor = null;   // timeFor: the student whose time is being set
+  // supFor: the student whose supports are open; headOk: the teacher checked "has headphones" there (kept across the 4-second refresh)
+  let supFor = null, headOk = false, supNote = '';
   try { sess = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
 
   // ---- Question banks (server/routes/wprBanks.js) ----
@@ -230,7 +235,34 @@ Answer: False"></textarea>
       <span class="small fw-bold">Time allowed for ${esc(s.firstName)} ${esc(s.lastName)}:</span>
       ${[1, 1.5, 2].map(x => `<button class="btn btn-sm fw-bold ${(s.timeX || 1) === x ? 'btn-primary' : 'btn-outline-primary'}" data-time="${esc(s.studentId)}" data-x="${x}">${TIME_LABEL[x]} · ${mins(base * x)}</button>`).join('')}
       <button class="btn btn-sm btn-link" data-timefor="">Close</button>
-      ${s.status === 'testing' ? '<span class="small text-muted">Their clock changes within 15 seconds.</span>' : ''}</div></td></tr>`;
+      ${s.status === 'testing' ? '<span class="small text-muted">Their clock changes within 5 seconds.</span>' : ''}</div></td></tr>`;
+  }
+  // A student's supports button, and under their row the choices while it's open: Read aloud (once the teacher
+  // confirms headphones or testing alone) and, on a timed test, pausing their clock for a break.
+  function supCell(s) {
+    if (s.status === 'submitted') return `<span class="small text-muted">${[s.readAloud ? 'Read aloud' : '', s.pausedSeconds ? `Break ${fmtLeft(s.pausedSeconds)}` : ''].filter(Boolean).join(', ') || 'None'}</span>`;
+    const on = [s.readAloud ? '<i class="fas fa-volume-high" title="Read aloud is on"></i>' : '', s.paused ? '<i class="fas fa-circle-pause" title="Paused for a break"></i>' : ''].filter(Boolean).join(' ');
+    return `<button class="btn btn-sm py-0 ${on ? 'btn-outline-primary fw-bold' : 'btn-outline-secondary'}" data-supfor="${esc(s.studentId)}" aria-expanded="${supFor === s.studentId}" title="Read aloud and breaks for this student">${on || 'Add'}</button>`;
+  }
+  function supRow(s, cols) {
+    if (supFor !== s.studentId || s.status === 'submitted') return '';
+    const sid = esc(s.studentId);
+    const read = s.readAloud
+      ? `<span class="small">On. A <b>Read aloud</b> button is on their test.</span> <button class="btn btn-sm btn-outline-secondary fw-bold" data-sup="read-off" data-sid="${sid}">Turn off</button>`
+      : `<label class="small d-flex align-items-center gap-1 mb-0"><input type="checkbox" class="form-check-input mt-0" id="supHead" ${headOk ? 'checked' : ''}> This student has headphones, or is testing alone</label>
+         <button class="btn btn-sm btn-primary fw-bold" data-sup="read-on" data-sid="${sid}">Turn on</button>`;
+    const brk = s.status !== 'testing' ? '<span class="small text-muted">You can pause their clock once they start the test.</span>'
+      : s.paused ? `<span class="small"><b>Paused.</b> Their clock is stopped (breaks so far: ${fmtLeft(s.pausedSeconds)}).</span> <button class="btn btn-sm btn-success fw-bold" data-sup="resume" data-sid="${sid}">Restart their clock</button>`
+      : `<button class="btn btn-sm btn-outline-primary fw-bold" data-sup="pause" data-sid="${sid}">Pause their clock for a break</button>
+         <span class="small text-muted">Wait until their screen says <b>Your test is paused</b> (about 5 seconds) before they step away.</span>`;
+    return `<tr class="table-active"><td colspan="${cols}"><div class="py-1">
+      <div class="small fw-bold mb-2">Supports for ${esc(s.firstName)} ${esc(s.lastName)}</div>
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2"><i class="fas fa-volume-high text-primary"></i><span class="small fw-bold">Read aloud:</span>${read}</div>
+      ${data.timed !== false ? `<div class="d-flex flex-wrap align-items-center gap-2 mb-2"><i class="fas fa-circle-pause text-primary"></i><span class="small fw-bold">Break:</span>${brk}</div>` : ''}
+      ${supNote ? `<div class="small text-danger fw-bold mb-1">${esc(supNote)}</div>` : ''}
+      <button class="btn btn-sm btn-link px-0" data-supfor="">Close</button>
+      ${s.status === 'testing' ? '<span class="small text-muted ms-2">Their screen changes within 5 seconds.</span>' : ''}
+    </div></td></tr>`;
   }
 
   function render() {
@@ -239,7 +271,7 @@ Answer: False"></textarea>
     const st = data.students;
     const done = st.filter(s => s.status === 'submitted');
     const sorted = [...st].sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
-    const timed = data.timed !== false, cols = timed ? 9 : 8;
+    const timed = data.timed !== false, cols = timed ? 10 : 9;
     const testing = st.filter(s => s.status === 'testing').length;
     screen.innerHTML = `
       ${data.endedAt ? `<div class="alert alert-warning"><i class="fas fa-hourglass-half me-1"></i><strong>Test ended at ${clock(data.endedAt)}.</strong> Students can see their answers and save their report until <strong>${clock(data.expiresAt)}</strong>. Then everything is erased, including this page. Download what you need now.</div>` : ''}
@@ -263,22 +295,26 @@ Answer: False"></textarea>
         ${done.length ? `<div><span class="fs-3 fw-bold">${Math.round(done.reduce((s, x) => s + pct(x.result.correct, x.result.total), 0) / done.length)}%</span> class average</div>` : ''}
       </div>
       <div class="table-responsive mb-3"><table class="table table-sm align-middle mb-0">
-        <thead class="table-light"><tr><th>Student</th><th>ID</th><th class="num">Status</th><th class="num">Time left</th>${timed ? '<th class="num">Time allowed</th>' : ''}<th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th></tr></thead>
+        <thead class="table-light"><tr><th>Student</th><th>ID</th><th class="num">Status</th><th class="num">Time left</th>${timed ? '<th class="num">Time allowed</th>' : ''}<th class="num">Supports</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th></tr></thead>
         <tbody>${sorted.length ? sorted.map(s => `<tr>
           <td class="fw-bold">${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td>
-          <td class="num"><span class="pill ${s.status}">${s.status}</span></td>
+          <td class="num"><span class="pill ${s.paused ? 'paused' : s.status}">${s.paused ? 'paused' : s.status}</span></td>
           <td class="num">${s.status === 'testing' ? fmtLeft(s.secondsLeft) : ''}</td>
           ${timed ? `<td class="num">${timeCell(s)}</td>` : ''}
+          <td class="num">${supCell(s)}</td>
           <td class="num">${s.result ? s.result.answered : s.answeredSoFar}</td>
           <td class="num">${s.result ? s.result.correct : ''}</td>
           <td class="num fw-bold">${s.result ? pct(s.result.correct, s.result.total) + '%' : ''}</td>
-          <td class="num ${s.violations ? 'text-danger fw-bold' : 'text-muted'}">${s.violations ? s.violations + '×' : '0'}${s.endReason === 'left-test' ? ' · auto-submitted' : ''}</td></tr>${timed ? timeRow(s, cols) : ''}`).join('')
+          <td class="num ${s.violations ? 'text-danger fw-bold' : 'text-muted'}">${s.violations ? s.violations + '×' : '0'}${s.endReason === 'left-test' ? ' · auto-submitted' : ''}</td></tr>${timed ? timeRow(s, cols) : ''}${supRow(s, cols)}`).join('')
           : `<tr><td colspan="${cols}" class="text-center text-muted py-4">Waiting for students to join…</td></tr>`}</tbody>
       </table></div>
       <div class="d-flex flex-wrap gap-2 mb-2">
         <button class="btn btn-success fw-bold" data-dl="summary" ${done.length ? '' : 'disabled'}><i class="fas fa-file-csv me-1"></i>Score summary (CSV)</button>
         <button class="btn btn-success fw-bold" data-dl="items" ${done.length ? '' : 'disabled'}><i class="fas fa-table-list me-1"></i>Question-by-question (CSV)</button>
         <button class="btn btn-success fw-bold" data-dl="report" ${done.length ? '' : 'disabled'}><i class="fas fa-chart-column me-1"></i>Printable class report</button>
+        <button class="btn btn-success fw-bold" data-dl="standards" ${done.length ? '' : 'disabled'}><i class="fas fa-list-check me-1"></i>By standard (CSV)</button>
+        <button class="btn btn-success fw-bold" data-dl="reteach" ${done.length ? '' : 'disabled'}><i class="fas fa-bullseye me-1"></i>Where to reteach</button>
+        <button class="btn btn-success fw-bold" data-dl="pdfs" ${done.length ? '' : 'disabled'}><i class="fas fa-file-pdf me-1"></i>All student reports (PDF)</button>
         <button class="btn ${confirmEnd ? 'btn-danger' : 'btn-outline-danger'} fw-bold ms-auto" id="endBtn">${data.endedAt ? (confirmEnd ? 'Yes, erase everything now' : 'Erase everything now') : confirmEnd ? `Yes, end the test${testing ? ` (${testing} still testing)` : ''}` : 'End the test'}</button>
       </div>
       <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i>Nothing is saved. ${data.endedAt ? '' : 'Ending the test shows students their answers and lets them save their report for 15 minutes; anyone still testing is scored on their saved answers. '}Results are erased 15 minutes after you end the test, after 12 hours, or if the server restarts. Download what you need. Only students who finished appear in the downloads.</p>`;
@@ -301,8 +337,9 @@ Answer: False"></textarea>
   const allowed = s => data.timed === false ? 'Untimed' : `${Math.round(s.secondsAllowed / 60)} minutes`;
 
   function summaryCsv() {
-    const rows = [['Last name', 'First name', 'Student ID', 'Answered', 'Correct', 'Total questions', 'Score %', 'Accuracy % (of answered)', 'Times left test', 'How it ended', 'Time allowed']];
-    finished().forEach(s => rows.push([s.lastName, s.firstName, s.studentId, s.result.answered, s.result.correct, s.result.total, pct(s.result.correct, s.result.total), pct(s.result.correct, s.result.answered), s.violations, endedBy(s), allowed(s)]));
+    const rows = [['Last name', 'First name', 'Student ID', 'Answered', 'Correct', 'Total questions', 'Score %', 'Accuracy % (of answered)', 'Times left test', 'How it ended', 'Time allowed', 'Read aloud', 'Break time']];
+    finished().forEach(s => rows.push([s.lastName, s.firstName, s.studentId, s.result.answered, s.result.correct, s.result.total, pct(s.result.correct, s.result.total), pct(s.result.correct, s.result.answered), s.violations, endedBy(s), allowed(s),
+      s.readAloud ? 'Yes' : 'No', s.pausedSeconds ? fmtLeft(s.pausedSeconds) : '']));
     download(`wpr-practice-summary-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
   }
   function itemsCsv() {
@@ -310,6 +347,73 @@ Answer: False"></textarea>
     finished().forEach(s => s.items.forEach(it => rows.push([s.lastName, s.firstName, s.studentId, it.n, it.topic === 'safety' ? 'Workplace safety' : 'WRS', it.q, it.yours, it.answer, it.right === null ? 'Not answered' : it.right ? 'Right' : 'Wrong'])));
     download(`wpr-practice-questions-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
   }
+
+  // ---- By state standard (wpr-practice/assets/standards.js): percents are of the questions answered
+  const STD = window.WprStandards;
+  const flat = t => t.flatMap(x => [x, ...x.indicators]);
+  const BAND_LABEL = { green: 'On track', yellow: 'Almost', red: 'Reteach' };
+  const chip = p => `<span class="chip ${STD.band(p)}">${BAND_LABEL[STD.band(p)]}</span>`;
+  const CHIP_CSS = '.chip{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px} .chip.green{background:#d1f2e0;color:#0f5132} .chip.yellow{background:#fff3cd;color:#6b4f00} .chip.red{background:#f8d7da;color:#842029} tr.std td{background:#f1f3f5}';
+  const initialsOf = s => [s.firstName, s.lastName].map(n => (String(n || '').trim()[0] || '').toUpperCase()).filter(Boolean).map(c => c + '.').join('');
+  function standardsTable(t) {
+    const rows = t.filter(x => x.seen).map(x => `<tr class="std"><td><b>${x.id} ${esc(x.name)}</b></td><td class="num"><b>${x.pct}%</b></td><td class="num">${x.right} of ${x.seen}</td><td>${chip(x.pct)}</td></tr>` +
+      x.indicators.filter(i => i.seen).map(i => `<tr><td style="padding-left:18px">${i.id} ${esc(i.name)}</td><td class="num">${i.pct}%</td><td class="num">${i.right} of ${i.seen}</td><td>${chip(i.pct)}</td></tr>`).join('')).join('');
+    return rows ? `<table><thead><tr><th>Standard / indicator</th><th class="num">Right</th><th class="num">Answers</th><th>Band</th></tr></thead><tbody>${rows}</tbody></table>
+      <div style="font-size:11px;color:#6c757d;margin-top:4px">Nevada CTE Employability Skills for Career Readiness. Percent right of all the answers your class gave. Green 80% and up, yellow 70-79%, red under 70% (reteach).</div>` : '<p style="font-size:13px">These questions aren\'t tagged with state standards (question banks).</p>';
+  }
+  function standardsCsv() {
+    const cols = flat(STD.tally([]));
+    const rows = [['Last name', 'First name', 'Student ID', 'Score %', ...cols.map(c => `${c.id} ${c.name} %`)]];
+    finished().forEach(s => {
+      const by = {}; flat(STD.tally(s.items)).forEach(x => { by[x.id] = x; });
+      rows.push([s.lastName, s.firstName, s.studentId, pct(s.result.correct, s.result.total), ...cols.map(c => (by[c.id].seen ? by[c.id].pct : ''))]);
+    });
+    download(`wpr-practice-standards-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
+  }
+  // Weakest indicators first, then the most-missed questions with the wrong answer students picked most
+  function reteachHtml() {
+    const st = finished();
+    const perStudent = st.map(s => { const by = {}; flat(STD.tally(s.items)).forEach(x => { by[x.id] = x; }); return by; });
+    const weak = flat(STD.tally(st.flatMap(s => s.items))).filter(x => /^1\.\d+\.\d+$/.test(x.id) && x.seen)
+      .map(x => Object.assign(x, { under: perStudent.filter(by => by[x.id].seen && by[x.id].pct < 70).length, tried: perStudent.filter(by => by[x.id].seen).length }))
+      .sort((a, b) => a.pct - b.pct || b.seen - a.seen);
+    const qs = new Map();
+    st.forEach(s => s.items.forEach(it => {
+      if (it.right === null) return;
+      const e = qs.get(it.q) || { q: it.q, prompt: it.prompt, answer: it.answer, indicator: it.indicator, seen: 0, wrong: 0, picks: {} };
+      e.seen++; if (!it.right) { e.wrong++; e.picks[it.yours] = (e.picks[it.yours] || 0) + 1; }
+      qs.set(it.q, e);
+    }));
+    const missed = [...qs.values()].filter(e => e.wrong && e.seen >= Math.min(2, st.length)).sort((a, b) => b.wrong / b.seen - a.wrong / a.seen || b.seen - a.seen).slice(0, 20);
+    const top = e => Object.entries(e.picks).sort((a, b) => b[1] - a[1])[0];
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Where to reteach ${esc(data.code)}</title>
+      <style>body{font-family:Arial,Helvetica,sans-serif;color:#212529;margin:28px;max-width:860px} h1{font-size:22px;margin:0} h2{font-size:16px;margin:24px 0 8px;border-bottom:2px solid #1f2a44;padding-bottom:4px}
+      table{border-collapse:collapse;width:100%;font-size:12px} th,td{border:1px solid #dee2e6;padding:5px 7px;text-align:left;vertical-align:top} th{background:#f1f3f5} .num{text-align:center} .noprint{margin-bottom:16px} @media print{.noprint{display:none}} tr{page-break-inside:avoid} ${CHIP_CSS}</style></head><body>
+      <div class="noprint"><button onclick="window.print()" style="font-size:15px;padding:8px 16px;font-weight:700">Print or save as PDF</button></div>
+      <h1>Where to reteach</h1>
+      <div style="color:#6c757d;font-size:13px">${esc(data.teacher || '')}${data.teacher ? ' · ' : ''}${new Date(data.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · ${esc(data.label)} · Class code ${esc(data.code)} · ${st.length} students</div>
+      <h2>Weakest indicators first</h2>
+      ${weak.length ? `<table><thead><tr><th>Indicator</th><th class="num">Class right</th><th class="num">Answers</th><th class="num">Students under 70%</th><th>Band</th></tr></thead><tbody>
+        ${weak.map(x => `<tr><td><b>${x.id}</b> ${esc(x.name)}</td><td class="num"><b>${x.pct}%</b></td><td class="num">${x.right} of ${x.seen}</td><td class="num">${x.under} of ${x.tried}</td><td>${chip(x.pct)}</td></tr>`).join('')}</tbody></table>
+        <div style="font-size:11px;color:#6c757d;margin-top:4px">Percent right of the answers given. "Students under 70%" counts students who answered at least one question on that indicator.</div>` : '<p style="font-size:13px">These questions aren\'t tagged with state standards (question banks).</p>'}
+      <h2>Most-missed questions</h2>
+      ${missed.length ? `<table><thead><tr><th>Question</th><th>Indicator</th><th>Correct answer</th><th class="num">Missed</th><th>Most common wrong answer</th></tr></thead><tbody>
+        ${missed.map(e => { const t = top(e); return `<tr><td>${e.prompt && e.prompt !== 'True or false?' ? `<span style="color:#6c757d">${esc(e.prompt)}</span><br>` : ''}${esc(e.q)}</td><td>${e.indicator ? `${e.indicator} ${esc((STD.byId[e.indicator] || {}).name || '')}` : ''}</td><td>${esc(e.answer)}</td><td class="num">${e.wrong} of ${e.seen}</td><td>${t ? `${esc(t[0] || '(blank)')} <span style="color:#6c757d">(${t[1]})</span>` : ''}</td></tr>`; }).join('')}</tbody></table>` : '<p style="font-size:13px">No question was missed by enough students yet. Each student gets a different random set of questions, so this fills in with larger classes.</p>'}
+      </body></html>`;
+  }
+  async function allReports(btn) {
+    const label = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Making the reports…';
+    try {
+      const list = finished().map(s => ({
+        report: { initials: initialsOf(s), teacher: data.teacher, code: data.code, label: data.label, submittedAt: s.submittedAt, violations: s.violations, endReason: s.endReason },
+        result: { answered: s.result.answered, correct: s.result.correct, total: s.result.total, review: s.items.filter(it => it.right !== null) }
+      }));
+      (await WprReport.build(list)).save(`wpr-practice-student-reports-${data.code}-${stamp()}.pdf`);
+    } catch (err) { alert(err.message); }
+    btn.disabled = false; btn.innerHTML = label;
+  }
+  const openPage = (html, name) => { const w = window.open('', '_blank'); if (w) { w.document.write(html); w.document.close(); } else download(name, html, 'text/html'); };
 
   function reportHtml() {
     const st = finished();
@@ -345,12 +449,13 @@ Answer: False"></textarea>
     return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>WPR Practice Report ${esc(data.code)}</title>
       <style>body{font-family:Arial,Helvetica,sans-serif;color:#212529;margin:28px;max-width:800px} h1{font-size:22px;margin:0} h2{font-size:16px;margin:24px 0 8px;border-bottom:2px solid #1f2a44;padding-bottom:4px}
       .stats{display:flex;gap:28px;flex-wrap:wrap;margin:14px 0} .stats b{display:block;font-size:26px} table{border-collapse:collapse;width:100%;font-size:12px} th,td{border:1px solid #dee2e6;padding:5px 7px;text-align:left;vertical-align:top} th{background:#f1f3f5}
-      .num{text-align:center} .noprint{margin-bottom:16px} @media print{.noprint{display:none}} tr{page-break-inside:avoid}</style></head><body>
+      .num{text-align:center} .noprint{margin-bottom:16px} @media print{.noprint{display:none}} tr{page-break-inside:avoid} ${CHIP_CSS}</style></head><body>
       <div class="noprint"><button onclick="window.print()" style="font-size:15px;padding:8px 16px;font-weight:700">Print or save as PDF</button></div>
       <h1>WPR Practice Test: Class Report</h1>
       <div style="color:#6c757d;font-size:13px">${esc(data.teacher || '')}${data.teacher ? ' · ' : ''}${new Date(data.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · ${esc(data.label)} · Class code ${esc(data.code)}</div>
       <div class="stats"><div><b>${st.length}</b>students finished</div><div><b>${avg}%</b>class average</div><div><b>${median}%</b>median</div><div><b>${passing} of ${st.length}</b>scored 75% or higher</div></div>
       <h2>Score distribution</h2>${hist}<div style="font-size:11px;color:#6c757d">Score = correct out of all questions. Green bars are 70% and up.</div>
+      <h2>By state standard</h2>${standardsTable(STD.tally(st.flatMap(s => s.items)))}
       <h2>By topic</h2>${bar('Workplace Readiness Skills', wrsRight, wrsSeen)}${bar('Workplace safety & ergonomics', safetyRight, safetySeen)}
       <h2>Most-missed questions</h2>${missed.length ? `<table><thead><tr><th>Question</th><th>Correct answer</th><th class="num">Missed</th></tr></thead><tbody>${missed.map(m => `<tr><td>${esc(m.q)}</td><td>${esc(m.answer)}</td><td class="num">${m.wrong} of ${m.seen}</td></tr>`).join('')}</tbody></table>` : '<p style="font-size:13px">Not enough overlap yet. Each student gets a different random set of questions, so this fills in with larger classes.</p>'}
       <h2>Students</h2><table><thead><tr><th>Student</th><th>ID</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th><th>How it ended</th><th class="num">Time allowed</th></tr></thead><tbody>
@@ -366,6 +471,26 @@ Answer: False"></textarea>
     }
     const tf = e.target.closest('[data-timefor]');
     if (tf) { timeFor = tf.dataset.timefor && tf.dataset.timefor !== timeFor ? tf.dataset.timefor : null; render(); return; }
+    const sf = e.target.closest('[data-supfor]');
+    if (sf) { supFor = sf.dataset.supfor && sf.dataset.supfor !== supFor ? sf.dataset.supfor : null; headOk = false; supNote = ''; render(); return; }
+    const sp = e.target.closest('[data-sup]');
+    if (sp && data) {
+      const act = sp.dataset.sup, body = { studentId: sp.dataset.sid };
+      if (act === 'read-on') {
+        if (!headOk) { supNote = 'Check the box first: make sure the student has headphones, or is testing alone.'; return render(); }
+        body.readAloud = true; body.headphones = true;
+      } else if (act === 'read-off') body.readAloud = false;
+      else body.paused = act === 'pause';
+      sp.textContent = 'Saving…';
+      try {
+        const res = await fetch(`/api/wpr/session/${encodeURIComponent(sess.code)}/supports`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-teacher-token': sess.token },
+          body: JSON.stringify(body) });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || 'Could not change that.');
+        supNote = ''; headOk = false;
+      } catch (err) { supNote = err.message; }
+      return refresh();
+    }
     const tx = e.target.closest('[data-time]');
     if (tx && data) {
       tx.textContent = 'Saving…';
@@ -382,7 +507,10 @@ Answer: False"></textarea>
     if (d && data) {
       if (d.dataset.dl === 'summary') summaryCsv();
       else if (d.dataset.dl === 'items') itemsCsv();
-      else { const w = window.open('', '_blank'); if (w) { w.document.write(reportHtml()); w.document.close(); } else download(`wpr-practice-report-${data.code}-${stamp()}.html`, reportHtml(), 'text/html'); }
+      else if (d.dataset.dl === 'standards') standardsCsv();
+      else if (d.dataset.dl === 'reteach') openPage(reteachHtml(), `wpr-practice-reteach-${data.code}-${stamp()}.html`);
+      else if (d.dataset.dl === 'pdfs') allReports(d);
+      else openPage(reportHtml(), `wpr-practice-report-${data.code}-${stamp()}.html`);
       return;
     }
     if (e.target.closest('#endBtn')) {
@@ -405,6 +533,9 @@ Answer: False"></textarea>
       refresh();
     }
   });
+
+  // The headphones box survives the page's 4-second refresh
+  screen.addEventListener('change', (e) => { if (e.target.id === 'supHead') { headOk = e.target.checked; if (headOk) supNote = ''; } });
 
   if (sess && sess.code) startPolling(); else showStart();
 })();

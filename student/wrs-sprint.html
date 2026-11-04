@@ -11,7 +11,7 @@
   <link href="/css/student-pages.css" rel="stylesheet" />
   <script src="/js/loader.js?v=29"></script>
   <script type="module" src="/js/auth-guard.js?v=2"></script>
-  <script src="/js/wrs-test-ui.js?v=2"></script>
+  <script src="/js/wrs-test-ui.js?v=7"></script>
   <style>
     .sprint-wrap { max-width: 900px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
     .sprint-card { background: #fff; border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); padding: 1.5rem; }
@@ -67,7 +67,7 @@
 
   function rulesHtml() {
     return `<ul class="mb-3">
-      <li><strong>100 questions</strong> about workplace skills, including a few on workplace safety and ergonomics. Multiple choice and true/false, a different shuffled mix every week.</li>
+      <li><strong>100 questions</strong> about workplace skills, including a few on workplace safety and ergonomics. All multiple choice, like the state test, with a different shuffled mix every week.</li>
       <li>You have <strong>10 minutes</strong>. Answer as many as you can. The test submits itself when time runs out.</li>
       <li>Just like the state WRS test: <strong>Flag</strong> questions to come back to, use the on-screen <strong>Calculator</strong> and <strong>Scratch Paper</strong>, and check the <strong>Review</strong> screen before you submit.</li>
       <li><strong>The test runs full screen. Do not leave it.</strong> Switching tabs, opening another site, or exiting full screen locks the test with a warning. The second time, your test is submitted.</li>
@@ -109,6 +109,7 @@
         questions: data.questions,
         answers: data.answers || {},
         secondsLeft: data.secondsLeft,
+        readAloud: !!data.readAloud,   // from the student's accommodation plan (admin/accommodations.html)
         flagKey: `wrs_sprint_flags_${new Date().toLocaleDateString('en-CA')}`,
         save: answers => api('/wrs-sprint/save', { answers }),
         saveBeacon: answers => navigator.sendBeacon && navigator.sendBeacon('/api/wrs-sprint/save', new Blob([JSON.stringify({ answers })], { type: 'application/json' })),

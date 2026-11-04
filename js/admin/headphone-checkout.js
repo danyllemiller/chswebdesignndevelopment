@@ -5,6 +5,8 @@
 // The input stays focused so every scan lands, and results clear
 // themselves so the station is ready for the next student.
 import { apiFetch } from '../modules/api-client.js';
+import { beep } from '../modules/scan-beep.js?v=1';
+import { addCameraScan } from '../modules/camera-scan.js?v=1';
 
 const input = document.getElementById('scanInput');
 const panel = document.getElementById('feedbackPanel');
@@ -36,17 +38,6 @@ function focusInput() {
     if (!noIdPanel.classList.contains('d-none') && document.activeElement === nameSearch) return;
     input.value = '';
     input.focus();
-}
-
-function beep(freq, ms) {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
-        osc.frequency.value = freq; osc.connect(gain); gain.connect(ctx.destination);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        osc.start(); osc.stop(ctx.currentTime + ms / 1000);
-        setTimeout(() => ctx.close(), ms + 50);
-    } catch (e) { /* audio isn't essential */ }
 }
 
 function showFeedback(kind, iconClass, name, sub) {
@@ -153,6 +144,8 @@ input.addEventListener('keydown', (e) => {
     e.preventDefault();
     scan(input.value.trim());
 });
+// An iPad, iPhone or laptop camera can read the sticker or ID instead of a scanner
+addCameraScan(input, scan);
 document.addEventListener('click', (e) => {
     if (!e.target.closest('#noIdPanel, #noIdToggle, button, a')) focusInput();
 });

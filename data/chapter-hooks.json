@@ -1,0 +1,26 @@
+{
+  "about": "Hook, Line & Sinker for each chapter (WD) and unit (CS): HOOK grabs attention, LINE connects it to what the chapter teaches and why it matters, SINKER is a challenge students commit to. Shown at the top of the chapter pages (js/chapter-hook.js) and on the Learning Notebook's chapter openers (scripts/learning-notebook/build.js). Lesson hooks live in each Jotability lesson.",
+  "hooks": {
+    "wd1-3": {
+      "title": "Chapter 3: The Blueprint",
+      "hook": "Look up the classic \"tree swing\" cartoon: how the customer explained it, how the project leader understood it, how the programmer wrote it... and what the customer really needed. Every panel is the same simple swing, built wrong.",
+      "line": "Every one of those teams skipped the blueprint. This chapter is how pros find out who a site is for and what it really needs before anyone builds anything.",
+      "sinker": "Which panel's mistake is YOUR team most likely to make? Write it down now. At the end of the chapter, check whether your blueprint saved you from it.",
+      "pages": ["/year1/the-blueprint.html"]
+    },
+    "wd2-10": {
+      "title": "Chapter 10: The Game Developer",
+      "hook": "In 1972, Atari gave a brand-new engineer a practice project: a simple ping-pong game. It became Pong, one of the first hit video games. By the end of this chapter, you'll build a game in a web page with nothing but JavaScript.",
+      "line": "Games are just loops, objects, and collisions: the same logic behind the interactive features clients pay for.",
+      "sinker": "Write the name of the game you'd build if you could build anything. Keep it: on Day 9 you'll see how close you got.",
+      "pages": ["/year2/the-game-dev-advanced-js-game-logic.html"]
+    },
+    "cs-6": {
+      "title": "Unit 6: Intermediate Algorithms & Programming",
+      "hook": "Open any playlist. You can add a song, remove one, move one to the top, or shuffle them all. Every one of those taps is a program changing how data is stored. And the app itself was built by a team that kept changing it after users tried it.",
+      "line": "This unit is how programs keep lots of data organized and fast, and how teams build software people actually want to use.",
+      "sinker": "Pick an app you use every day. Predict one way it stores its data and one thing that changed after users complained. Check your guesses by the end of the unit.",
+      "pages": ["/compsci/advanced_data_structures.html", "/compsci/modularity_procedures.html", "/compsci/software_development_lifecycle.html"]
+    }
+  }
+}

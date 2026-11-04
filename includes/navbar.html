@@ -21,7 +21,17 @@
 
       <!-- RIGHT ALIGNED NAVIGATION -->
       <ul class="navbar-nav ms-auto align-items-lg-center fw-bold">        
-        <li class="nav-item"><a class="nav-link" href="/index.html"><i class="fas fa-home me-1 text-primary"></i> Home</a></li>        
+        <li class="nav-item"><a class="nav-link" href="/index.html"><i class="fas fa-home me-1 text-primary"></i> Home</a></li>
+
+        <!-- SEARCH: every chapter and the student's own notes (student/search.html) -->
+        <li class="nav-item my-1 my-lg-0 mx-lg-2">
+          <form class="d-flex" role="search" action="/student/search.html">
+            <div class="input-group input-group-sm flex-nowrap">
+              <input class="form-control" type="search" name="q" placeholder="Search chapters &amp; notes" aria-label="Search the chapters and your notes" style="min-width: 9.5rem;">
+              <button class="btn btn-outline-primary" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+            </div>
+          </form>
+        </li>
         
         <!-- LOGGED-IN: WD STUDENT TOOLS (Hidden by default) -->
         <li class="nav-item dropdown d-none" id="student-menu-wd">
@@ -100,8 +110,10 @@
           <a aria-expanded="false" class="nav-link dropdown-toggle text-danger" data-bs-toggle="dropdown" href="javascript:void(0);" id="navbarAdmin" role="button"><i class="fas fa-shield-alt me-1"></i> Admin<span class="badge rounded-pill bg-danger ms-1 d-none" id="msg-badge-admin">0</span><span class="badge rounded-pill bg-warning text-dark ms-1 d-none" id="ic-badge-admin" title="Needs Infinite Campus update">0</span></a>
           <ul aria-labelledby="navbarAdmin" class="dropdown-menu dropdown-menu-end shadow border-danger">
             <li><a class="nav-link dropdown-item" href="/admin/roster.html"><i class="fas fa-users me-2 text-primary"></i> Roster Management</a></li>
+            <li><a class="nav-link dropdown-item" href="/admin/accommodations.html"><i class="fas fa-universal-access me-2 text-success"></i> Accommodations</a></li>
             <li><a class="nav-link dropdown-item" href="/admin/gradebook.html"><i class="fas fa-graduation-cap me-2 text-primary"></i> Master Gradebook</a></li>
             <li><a class="nav-link dropdown-item" href="/admin/notebooks.html"><i class="fas fa-book-open me-2 text-info"></i> Digital Notebooks</a></li>
+            <li><a class="nav-link dropdown-item" href="/admin/answer-keys.html"><i class="fas fa-key me-2 text-warning"></i> Answer Keys</a></li>
             <li><a class="nav-link dropdown-item" href="/admin/messages.html"><i class="fas fa-envelope me-2 text-primary"></i> Messages<span class="badge rounded-pill bg-danger ms-1 d-none" id="msg-badge-admin-item" style="color:#000099;">0</span></a></li>
             <li><a class="nav-link dropdown-item" href="/admin/ic-sync-reminder.html"><i class="fas fa-right-left me-2 text-warning"></i> Infinite Campus Sync<span class="badge rounded-pill bg-warning text-dark ms-1 d-none" id="ic-badge-admin-item">0</span></a></li>
             <li><a class="nav-link dropdown-item" href="/calendar.html"><i class="fas fa-calendar-alt me-2 text-secondary"></i> Calendar</a></li>

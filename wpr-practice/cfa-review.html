@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Baseline CFA Review | WPR Practice Pro</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/wpr-practice/assets/wpr-practice-pro-favicon-64.png">
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <script src="/wpr-practice/assets/standards.js?v=1"></script>
+  <style>
+    body { background: #eef1f5; min-height: 100vh; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    .card-main { background: #fff; border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); padding: 1.5rem; }
+    .brand { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; color: #1f2a44; }
+    .std-head { margin: 2rem 0 .25rem; padding-bottom: .3rem; border-bottom: 3px solid #1f2a44; color: #1f2a44; }
+    .ind-head { margin: 1.4rem 0 .6rem; }
+    .ind-head .full { font-size: .85rem; color: #6c757d; }
+    .q { border: 2px solid #dee2e6; border-radius: .8rem; padding: 1rem 1.1rem; margin-bottom: .9rem; }
+    .q.mine-keep { border-color: #198754; } .q.mine-swap { border-color: #fd7e14; }
+    .q .stem { font-weight: 700; font-size: 1.05rem; }
+    .q ol { margin: .4rem 0 .6rem; padding-left: 1.6rem; }
+    .q li.right { color: #146c43; font-weight: 700; }
+    .alt { border: 2px dashed #ced4da; border-radius: .6rem; padding: .6rem .8rem; margin-top: .5rem; cursor: pointer; }
+    .alt:hover { border-color: #fd7e14; }
+    .alt.sel { border-style: solid; border-color: #fd7e14; background: #fff8f1; }
+    .team { font-size: .85rem; color: #495057; }
+    .badge-new { background: #6f42c1; }
+    .swap-txt { color: #a85300; }
+    .bar-sum { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid #dee2e6; margin: 0 -1.5rem 1rem; padding: .6rem 1.5rem; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><a href="/" aria-label="WPR Practice Pro home"><img src="/wpr-practice/assets/wpr-practice-pro-logo.svg" alt="WPR Practice Pro" style="height:56px;width:auto"></a><div class="ms-2 border-start ps-3"><div class="fw-bold">Baseline CFA review</div><div class="small text-muted">For the PLC team: keep or swap each question on the draft</div></div></div>
+  <div id="screen" class="card-main"></div>
+</div>
+<script>
+// The PLC team reviews the draft baseline CFA here (server/routes/wprCfa.js): Keep or Swap each question,
+// with an optional note. Signed in with the WPR teacher passcode; the draft and its answers stay on the server.
+(function () {
+  const screen = document.getElementById('screen');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const PASS_KEY = 'wpr_teacher_pass', NAME_KEY = 'wpr_cfa_reviewer';
+  const get = (store, k) => { try { return store.getItem(k) || ''; } catch (e) { return ''; } };
+  const put = (store, k, v) => { try { store.setItem(k, v); } catch (e) {} };
+  let pass = get(sessionStorage, PASS_KEY), me = get(localStorage, NAME_KEY);
+  let items = [], votes = [], filter = 'all';
+  const KIND = { tf: 'True or false', mc: 'Multiple choice' };
+
+  async function api(method, url, body) {
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'x-wpr-passcode': pass }, body: body ? JSON.stringify(body) : undefined });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) { const e = new Error(out.error || 'Something went wrong.'); e.status = res.status; throw e; }
+    return out;
+  }
+
+  function showSignIn(msg) {
+    screen.innerHTML = `
+      <h1 class="h4 fw-bold mb-3">Review the baseline CFA</h1>
+      ${msg ? `<div class="alert alert-warning py-2">${esc(msg)}</div>` : ''}
+      <form id="signIn" class="d-flex flex-column gap-3" autocomplete="off">
+        <div><label class="form-label fw-bold" for="pass">STEP 1: Teacher passcode</label><input id="pass" type="password" class="form-control" required value="${esc(pass)}"></div>
+        <div><label class="form-label fw-bold" for="who">STEP 2: Your name</label><input id="who" class="form-control" maxlength="60" required value="${esc(me)}" placeholder="e.g. Ms. Rivera">
+          <div class="form-text">The team sees your name next to your votes.</div></div>
+        <button class="btn btn-primary btn-lg fw-bold" type="submit">STEP 3: Open the draft</button>
+      </form>`;
+    document.getElementById('signIn').addEventListener('submit', e => {
+      e.preventDefault();
+      pass = document.getElementById('pass').value.trim(); me = document.getElementById('who').value.trim();
+      if (me.length < 2) return showSignIn('Type your name in step 2.');
+      put(sessionStorage, PASS_KEY, pass); put(localStorage, NAME_KEY, me);
+      load();
+    });
+  }
+
+  async function load() {
+    screen.innerHTML = '<p class="text-muted mb-0">Loading the draft…</p>';
+    try {
+      const out = await api('GET', '/api/wpr/cfa/review');
+      items = out.items; votes = out.votes;
+      render();
+    } catch (e) { showSignIn(e.message); }
+  }
+
+  const votesFor = key => votes.filter(v => v.item_key === key);
+  const myVote = key => votesFor(key).find(v => v.reviewer === me);
+  const altLabel = (item, key) => { const i = item.alternates.findIndex(a => a.key === key); return i >= 0 ? `alternate ${i + 1}` : 'an alternate'; };
+  const optionsHtml = (x) => `<ol type="A">${x.options.map(o => `<li class="${o === x.answer ? 'right' : ''}">${esc(o)}${o === x.answer ? ' <i class="fas fa-check" aria-label="correct answer"></i>' : ''}</li>`).join('')}</ol>`;
+
+  function cardHtml(item, n) {
+    const mine = myVote(item.key), all = votesFor(item.key);
+    const keeps = all.filter(v => v.vote === 'keep'), swaps = all.filter(v => v.vote === 'swap');
+    const notes = all.filter(v => v.note);
+    const showAlts = mine && mine.vote === 'swap';
+    return `<div class="q ${mine ? 'mine-' + mine.vote : ''}" data-key="${esc(item.key)}">
+      <div class="d-flex flex-wrap justify-content-between gap-2 small fw-bold text-muted mb-1">
+        <span>Question ${n} · ${KIND[item.kind] || item.kind} ${item.src === 'new' ? '<span class="badge badge-new ms-1">NEW</span>' : ''}</span>
+        <span>${mine ? (mine.vote === 'keep' ? '<span class="text-success">You: Keep</span>' : `<span class="swap-txt">You: Swap${mine.swap_to ? ' for ' + altLabel(item, mine.swap_to) : ''}</span>`) : 'Not reviewed by you yet'}</span>
+      </div>
+      ${item.prompt ? `<div class="small text-muted fw-bold">${esc(item.prompt)}</div>` : ''}
+      <div class="stem">${esc(item.q)}</div>
+      ${optionsHtml(item)}
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <button class="btn btn-sm ${mine && mine.vote === 'keep' ? 'btn-success' : 'btn-outline-success'} fw-bold" data-vote="keep"><i class="fas fa-check me-1"></i>Keep</button>
+        <button class="btn btn-sm ${mine && mine.vote === 'swap' ? 'btn-warning' : 'btn-outline-warning'} fw-bold" data-vote="swap"><i class="fas fa-right-left me-1"></i>Swap</button>
+        ${mine ? '<button class="btn btn-sm btn-link text-muted" data-vote="clear">Clear my vote</button>' : ''}
+        <input class="form-control form-control-sm ms-auto" style="max-width:340px" data-note maxlength="500" placeholder="Note for the team (saves when you click away)" value="${esc(mine && mine.note || '')}" ${mine ? '' : 'disabled title="Pick Keep or Swap first"'}>
+      </div>
+      ${showAlts ? `<div class="mt-2 small fw-bold">Swap it for which one? Click an alternate:</div>${item.alternates.map((a, i) => `<div class="alt ${mine.swap_to === a.key ? 'sel' : ''}" data-alt="${esc(a.key)}" role="button" tabindex="0">
+          <div class="small fw-bold text-muted">Alternate ${i + 1} · ${KIND[a.kind] || a.kind}${mine.swap_to === a.key ? ' · <span class="swap-txt">your pick</span>' : ''}</div>
+          ${a.prompt ? `<div class="small text-muted fw-bold">${esc(a.prompt)}</div>` : ''}<div class="fw-bold">${esc(a.q)}</div>${optionsHtml(a)}</div>`).join('')}` : ''}
+      ${all.length ? `<div class="team mt-2"><i class="fas fa-users me-1"></i>Team: ${keeps.length ? `<span class="text-success fw-bold">Keep</span> ${keeps.map(v => esc(v.reviewer)).join(', ')}` : ''}${keeps.length && swaps.length ? ' · ' : ''}${swaps.length ? `<span class="swap-txt fw-bold">Swap</span> ${swaps.map(v => `${esc(v.reviewer)}${v.swap_to ? ` (${altLabel(item, v.swap_to)})` : ''}`).join(', ')}` : ''}
+        ${notes.map(v => `<div class="mt-1">“${esc(v.note)}” <span class="text-muted">· ${esc(v.reviewer)}</span></div>`).join('')}</div>` : ''}
+    </div>`;
+  }
+
+  function summary() {
+    const mine = items.filter(i => myVote(i.key)).length;
+    const reviewers = [...new Set(votes.map(v => v.reviewer))];
+    const swapItems = items.filter(i => votesFor(i.key).some(v => v.vote === 'swap')).length;
+    return `<div class="d-flex flex-wrap gap-3 align-items-center small">
+      <span class="fw-bold">You've reviewed ${mine} of ${items.length}.</span>
+      <span class="text-muted">${reviewers.length} reviewer${reviewers.length === 1 ? '' : 's'} so far${reviewers.length ? ': ' + reviewers.map(esc).join(', ') : ''} · ${swapItems} question${swapItems === 1 ? '' : 's'} with a swap vote</span>
+      <span class="ms-auto btn-group btn-group-sm" role="group" aria-label="Show">
+        ${[['all', 'All 50'], ['todo', 'Not reviewed by me'], ['swaps', 'Has swap votes']].map(([k, t]) => `<button class="btn ${filter === k ? 'btn-primary' : 'btn-outline-primary'}" data-filter="${k}">${t}</button>`).join('')}
+      </span></div>`;
+  }
+
+  function render() {
+    const S = window.WprStandards;
+    const show = item => filter === 'all' || (filter === 'todo' ? !myVote(item.key) : votesFor(item.key).some(v => v.vote === 'swap'));
+    let n = 0;
+    const numbered = items.map(i => ({ item: i, n: ++n }));
+    const body = S.standards.map(s => {
+      const inds = s.indicators.map(ind => {
+        const list = numbered.filter(x => x.item.indicator === ind.id && show(x.item));
+        return list.length ? `<div class="ind-head"><div class="fw-bold">${ind.id} ${esc(ind.name)}</div><div class="full">${esc(ind.full)}</div></div>${list.map(x => cardHtml(x.item, x.n)).join('')}` : '';
+      }).join('');
+      const count = items.filter(i => i.indicator.startsWith(s.id + '.')).length;
+      return inds ? `<h2 class="h5 fw-bold std-head">${s.id} ${esc(s.name)} <span class="text-muted fw-normal">(${count} questions)</span></h2>${inds}` : '';
+    }).join('');
+    screen.innerHTML = `
+      <div class="bar-sum" id="sum">${summary()}</div>
+      <h1 class="h4 fw-bold">Draft baseline CFA: ${items.length} questions</h1>
+      <p class="mb-2">Two questions for each of the 21 state indicators, plus 8 extras: 16 People Skills, 22 Professional Knowledge, 12 Technology. The test is untimed, and every student gets the questions in a different order with the choices shuffled.</p>
+      <p class="mb-2">For each question, click <strong>Keep</strong>, or click <strong>Swap</strong> and pick one of its alternates. Add a note if something is unclear. Your choices save as you go, and everyone with the passcode sees the same draft and everyone's votes. The correct answer is in green.</p>
+      <p class="small text-muted">Questions marked <span class="badge badge-new">NEW</span> were written for this test because the practice pool had only a few questions for that indicator.</p>
+      ${body || '<p class="text-muted">Nothing here. Try "All 50".</p>'}`;
+  }
+
+  async function vote(card, body) {
+    const key = card.dataset.key;
+    try {
+      await api('POST', '/api/wpr/cfa/review/vote', Object.assign({ key, reviewer: me }, body));
+      votes = votes.filter(v => !(v.item_key === key && v.reviewer === me));
+      if (body.vote !== 'clear') votes.push({ item_key: key, reviewer: me, vote: body.vote, swap_to: body.swapTo || null, note: body.note || null });
+      const item = items.find(i => i.key === key), n = items.indexOf(item) + 1;
+      card.outerHTML = cardHtml(item, n);
+      document.getElementById('sum').innerHTML = summary();
+    } catch (e) {
+      if (e.status === 401) return showSignIn(e.message);
+      alert(e.message);
+    }
+  }
+
+  screen.addEventListener('click', e => {
+    const f = e.target.closest('[data-filter]');
+    if (f) { filter = f.dataset.filter; return render(); }
+    const card = e.target.closest('.q'); if (!card) return;
+    const mine = myVote(card.dataset.key);
+    const v = e.target.closest('[data-vote]');
+    if (v) return vote(card, { vote: v.dataset.vote, swapTo: v.dataset.vote === 'swap' && mine ? mine.swap_to : null, note: mine ? mine.note : '' });
+    const alt = e.target.closest('[data-alt]');
+    if (alt) return vote(card, { vote: 'swap', swapTo: alt.dataset.alt, note: mine ? mine.note : '' });
+  });
+  screen.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-alt]')) { e.preventDefault(); e.target.click(); } });
+  screen.addEventListener('change', e => {
+    if (!e.target.matches('[data-note]')) return;
+    const card = e.target.closest('.q'), mine = myVote(card.dataset.key);
+    if (mine) vote(card, { vote: mine.vote, swapTo: mine.swap_to, note: e.target.value.trim() });
+  });
+
+  if (pass && me) load(); else showSignIn();
+})();
+</script>
+</body>
+</html>

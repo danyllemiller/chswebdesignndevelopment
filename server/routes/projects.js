@@ -435,17 +435,22 @@ router.post('/student/project-evaluation', async (req, res) => {
                 // Confirm the named peer is a real, active classmate (or an
                 // AS-aide covering this section) -- not just any ID the client
                 // happens to send.
-                const [revieweeRows] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [student_id]);
-                const revieweeSection = String(revieweeRows[0]?.section_id || '').toUpperCase();
-                const validSections = revieweeSection.startsWith('AS-')
-                    ? [revieweeSection, revieweeSection.slice(3)]
-                    : [revieweeSection, `AS-${revieweeSection}`];
+                // Every class the student is in counts (a dual-enrolled student's CS class is an
+                // additional one: Web Design is their main class).
+                const [revieweeRows] = await connection.execute(
+                    `SELECT section_id FROM students WHERE student_id = ?
+                     UNION SELECT section_id FROM student_additional_sections WHERE student_id = ?`, [student_id, student_id]);
+                const validSections = [...new Set(revieweeRows.flatMap((r) => {
+                    const sec = String(r.section_id || '').toUpperCase();
+                    return sec.startsWith('AS-') ? [sec, sec.slice(3)] : [sec, `AS-${sec}`];
+                }).filter((x) => x && x !== 'AS-'))];
+                const marks = validSections.map(() => '?').join(',') || "''";
                 const [peerRows] = await connection.execute(
                     `SELECT s.student_id FROM students s
                      WHERE s.student_id = ? AND (s.archived IS NULL OR s.archived = 0)
-                       AND (s.section_id IN (?, ?)
-                            OR s.student_id IN (SELECT student_id FROM student_additional_sections WHERE section_id IN (?, ?)))`,
-                    [evaluator_student_id, validSections[0], validSections[1], validSections[0], validSections[1]]
+                       AND (s.section_id IN (${marks})
+                            OR s.student_id IN (SELECT student_id FROM student_additional_sections WHERE section_id IN (${marks})))`,
+                    [evaluator_student_id, ...validSections, ...validSections]
                 );
                 if (peerRows.length === 0) {
                     return { status: 403, body: { error: 'evaluator_student_id must be an active classmate in the same section.' } };

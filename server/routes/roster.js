@@ -3,6 +3,7 @@ const router = express.Router();
 const { withConnection } = require('../db');
 const bcrypt = require('bcrypt');
 const { getCurrentSchoolYear, requireSelfOrStaff } = require('../helpers');
+const { webDesignSections, pickMain, webDesignFirst } = require('../lib/webDesignFirst');
 const fs = require('fs');
 const path = require('path');
 
@@ -169,6 +170,8 @@ router.post('/admin/set-student-sections', async (req, res) => {
                     [student_id, clean]
                 );
             }
+            // A Web Design class added here becomes the student's main class (lib/webDesignFirst.js)
+            await webDesignFirst(connection, student_id);
         });
         res.json({ success: true, count: section_ids.length });
     } catch (err) {
@@ -437,15 +440,21 @@ router.post('/admin/upload-roster', async (req, res) => {
             missingIds = activeRows.map((r) => r.student_id).filter((id) => !uploadedIds.has(id));
         }
 
-        const [existingRows] = await connection.execute('SELECT student_id, section_id, first_name, last_name, archived FROM students');
+        const [existingRows] = await connection.execute('SELECT student_id, section_id, course_id, first_name, last_name, archived FROM students');
         const existing = new Map(existingRows.map((r) => [r.student_id, r.section_id]));
         const before = new Map(existingRows.map((r) => [r.student_id, r]));
         const [extraRows] = await connection.execute('SELECT student_id, section_id, source FROM student_additional_sections');
+        // Web Design is always the main class (lib/webDesignFirst.js), including a Web Design class that was
+        // added by hand on the roster page and isn't in the school's file.
+        const wd = await webDesignSections(connection);
+        const mainFor = (s, cur) => pickMain([...new Set([...s.sections,
+            ...extraRows.filter((x) => x.student_id === s.student_id && x.source === 'manual' && wd.has(x.section_id)).map((x) => x.section_id)])], cur, wd);
 
         // A student in more than one of these classes is listed once per class
-        // (2026-10-26). They keep every class: their main class (section_id)
-        // stays the one they have now if the file still lists it, otherwise the
-        // first one listed, and the rest become additional sections. Before
+        // (2026-10-26). They keep every class: their main class (section_id) is
+        // their Web Design class if they have one (2026-11-03), otherwise the one
+        // they have now if the file still lists it, otherwise the first one
+        // listed, and the rest become additional sections. Before
         // this, each row overwrote the last and the student kept only one class.
         const byStudent = new Map();
         for (const s of resolved) {
@@ -458,7 +467,7 @@ router.post('/admin/upload-roster', async (req, res) => {
         const nameOf = (r) => `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.student_id;
         const plan = { added: [], returning: [], moved: [], multi: [], leaving: [], dropped: [] };
         for (const s of byStudent.values()) {
-            const was = before.get(s.student_id), main = s.sections.includes(was?.section_id) ? was.section_id : s.sections[0];
+            const was = before.get(s.student_id), main = mainFor(s, was?.section_id);
             const extra = s.sections.filter((x) => x !== main), who = nameOf(s);
             if (!was) plan.added.push({ name: who, sections: s.sections });
             else if (Number(was.archived) === 1) plan.returning.push({ name: who, sections: s.sections });
@@ -482,10 +491,11 @@ router.post('/admin/upload-roster', async (req, res) => {
         let created = 0, updated = 0, multiClass = 0;
         for (const s of byStudent.values()) {
             const cur = existing.get(s.student_id);
-            const main = s.sections.includes(cur) ? cur : s.sections[0];
+            const main = mainFor(s, cur);
             const extra = s.sections.filter((x) => x !== main);
             const role = main === 'Teacher' ? 'teacher' : 'student';
-            await connection.execute(stmt, [s.student_id, s.first_name, s.last_name, main, s.courseOf[main], role, year]);
+            const courseId = s.courseOf[main] || (main === cur && before.get(s.student_id)?.course_id) || wd.get(main) || null;
+            await connection.execute(stmt, [s.student_id, s.first_name, s.last_name, main, courseId, role, year]);
             if (existing.has(s.student_id)) { updated++; } else { created++; ensureUploadFolder(s.student_id); }
             await connection.execute('DELETE FROM student_additional_sections WHERE student_id = ? AND section_id = ?', [s.student_id, main]);
             for (const x of extra) {

@@ -1,6 +1,6 @@
 // server/lib/wrsPool.js
 // The question pool for the Monday WRS Sprint (server/routes/wrsSprint.js):
-// every true/false, multiple-choice, and matching question from WRS Practice
+// every multiple-choice and matching question from WRS Practice
 // Assessments A-D (pre-assessments/workplace-readiness-skills*.html) plus the
 // multiple-choice clock-in bank (server/wprQuestionBank.js). The practice
 // pages keep their questions as plain JS array literals (tfSection,
@@ -8,9 +8,15 @@
 // evaluated in an empty sandbox -- one source of truth, no copied bank to
 // drift out of date. Picture-labeling questions are left out (they need the
 // practice page's drawings).
+//
+// Each question also carries its Nevada CTE Employability Skills indicator
+// (1.1.1-1.3.4) from wprIndicators.json, keyed by the first 12 hex digits of
+// the SHA-1 of its normalized text, for the standards breakdowns in WPR
+// Practice Pro reports (wpr-practice/assets/standards.js names them).
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const crypto = require('crypto');
 const { WPR_MC_QUESTIONS } = require('../wprQuestionBank');
 const { SAFETY_MC, SAFETY_TF } = require('./wrsSafetyQuestions');
 const { WORKLIFE_MC, WORKLIFE_TF } = require('./wrsWorkLifeQuestions');
@@ -19,6 +25,11 @@ const PRACTICE_FILES = ['', '-b', '-c', '-d'].map(s =>
     path.join(__dirname, '..', '..', 'pre-assessments', `workplace-readiness-skills${s}.html`));
 
 let cache = null;
+const INDICATORS = require('./wprIndicators.json');
+const { cfaKeys } = require('./wprCfaQuestions');
+const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+const keyOf = q => crypto.createHash('sha1').update(norm(q)).digest('hex').slice(0, 12);
+const indicatorFor = q => INDICATORS[keyOf(q)] || '';
 
 function readSections(file) {
     const html = fs.readFileSync(file, 'utf8');
@@ -32,7 +43,6 @@ function readSections(file) {
 
 function loadPool() {
     if (cache) return cache;
-    const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
     const seen = new Set();
     const tf = [], mc = [], sets = [];
     const sources = PRACTICE_FILES.filter(f => fs.existsSync(f)).map(readSections);
@@ -69,14 +79,17 @@ const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0
 // "Match each situation to the most appropriate type of workplace
 // communication." -> "Which type of workplace communication best fits this
 // situation?" Matching sets become ordinary multiple-choice questions
-// (students asked for multiple choice and true/false only).
+// (the Nevada WPR state test is all multiple choice).
 function matchPrompt(title) {
     const m = String(title).match(/^Match each (.+?) to (?:the |its )?(?:most appropriate |correct |best )?(.+?)\.?$/i);
     if (!m) return String(title);
+    const [, item, target] = m;
     // "...to the WRS skill it best demonstrates" -> "Which WRS skill does this situation best demonstrate?"
-    const verb = m[2].match(/^(.+?) (?:it|they) best (\w+?)s?$/i);
-    if (verb) return `Which ${verb[1]} does this ${m[1]} best ${verb[2]}?`;
-    return `Which ${m[2]} best fits this ${m[1]}?`;
+    const verb = target.match(/^(.+?) (?:it|they) (.+)$/i);
+    if (verb) return `Which ${verb[1]} does this ${item} ${verb[2].replace(/\b(demonstrate|violate|show|represent|describe)s\b/g, '$1')}?`;
+    // "Match each career term to its correct definition": the items are the definitions and the choices are the terms
+    if (/^(definition|description)s?$/i.test(target)) return `Which ${item} matches this ${target}?`;
+    return `Which ${target} best fits this ${item}?`;
 }
 const stripLetter = c => String(c).replace(/^[A-Z]\.\s*/, '').trim();
 
@@ -91,26 +104,31 @@ function matchAsMc(set) {
     }).filter(Boolean);
 }
 
-const asTf = (x, topic) => ({ kind: 'tf', topic, prompt: 'True or false?', q: x.q, options: ['True', 'False'], correct: (x.answer || x.a) === 'T' ? 0 : 1, hint: x.hint || '' });
-const asMc = (x, topic) => { const options = shuffle(x.options); return { kind: 'mc', topic, prompt: x.prompt || '', q: x.q, options, correct: options.indexOf(x.answer), hint: x.hint || '' }; };
+const asTf = (x, topic) => ({ kind: 'tf', topic, prompt: 'True or false?', q: x.q, options: ['True', 'False'], correct: (x.answer || x.a) === 'T' ? 0 : 1, hint: x.hint || '', indicator: indicatorFor(x.q) });
+const asMc = (x, topic) => { const options = shuffle(x.options); return { kind: 'mc', topic, prompt: x.prompt || '', q: x.q, options, correct: options.indexOf(x.answer), hint: x.hint || '', indicator: indicatorFor(x.q) }; };
 
 // One student's 100-question test, answers included (kept server-side).
-// All multiple choice and true/false, every question shuffled:
+// All multiple choice, every question shuffled:
 //   2-5 workplace safety / ergonomics questions (2-5%), 1-3 work vs.
-//   personal life scenarios (wrsWorkLifeQuestions.js), about 30 true/false,
-//   and the rest multiple choice (including the converted matching items).
-// Each question: { kind, topic, prompt, q, options, correct, hint }.
+//   personal life scenarios (wrsWorkLifeQuestions.js), and the rest from the
+//   practice assessments and clock-in bank (including the converted matching
+//   items). The state test has no true/false, so since 2026-11-02 the pool has
+//   none either; the true/false path below only runs if some come back.
+// Each question: { kind, topic, prompt, q, options, correct, hint, indicator }.
 function buildTest(total = 100) {
     const { tf, mc, sets } = loadPool();
-    // Scales with test length: 2-5% safety (at least 1), about 30% true/false.
+    // Questions on the baseline CFA stay off practice tests (wprCfaQuestions.js)
+    const cfa = cfaKeys(), open = x => !cfa.has(keyOf(x.q));
+    // Scales with test length: 2-5% safety (at least 1), and up to 30% true/false if the pool had any.
     const safetyCount = Math.max(1, Math.round(total * (0.02 + Math.random() * 0.03)));
-    const safety = shuffle([...SAFETY_MC.map(x => asMc(x, 'safety')), ...SAFETY_TF.map(x => asTf(x, 'safety'))]).slice(0, safetyCount);
+    const safety = shuffle([...SAFETY_MC.filter(open).map(x => asMc(x, 'safety')), ...SAFETY_TF.filter(open).map(x => asTf(x, 'safety'))]).slice(0, safetyCount);
     const worklifeCount = Math.max(1, Math.round(total * (0.01 + Math.random() * 0.02)));
-    const worklife = shuffle([...WORKLIFE_MC.map(x => asMc(x, 'worklife')), ...WORKLIFE_TF.map(x => asTf(x, 'worklife'))]).slice(0, worklifeCount);
-    const tfPicks = shuffle(tf).slice(0, Math.min(tf.length, Math.round(total * 0.3))).map(x => asTf(x, 'wrs'));
-    const mcPool = [...mc, ...sets.flatMap(matchAsMc)];
+    const worklife = shuffle([...WORKLIFE_MC.filter(open).map(x => asMc(x, 'worklife')), ...WORKLIFE_TF.filter(open).map(x => asTf(x, 'worklife'))]).slice(0, worklifeCount);
+    const tfOpen = tf.filter(open);
+    const tfPicks = shuffle(tfOpen).slice(0, Math.min(tfOpen.length, Math.round(total * 0.3))).map(x => asTf(x, 'wrs'));
+    const mcPool = [...mc, ...sets.flatMap(matchAsMc)].filter(open);
     const mcPicks = shuffle(mcPool).slice(0, Math.max(0, total - safety.length - worklife.length - tfPicks.length)).map(x => asMc(x, 'wrs'));
     return shuffle([...safety, ...worklife, ...tfPicks, ...mcPicks]).filter(q => q.correct >= 0).slice(0, total);
 }
 
-module.exports = { loadPool, buildTest };
+module.exports = { loadPool, buildTest, indicatorFor };

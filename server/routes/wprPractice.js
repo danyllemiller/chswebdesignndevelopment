@@ -44,13 +44,17 @@ const sessions = new Map(); // code -> session
 // One student's time limit: the session's, or more if the teacher gave them time and a half or double
 // time (POST /wpr/session/:code/time).
 const secondsFor = (session, st) => Math.round(session.seconds * (st.timeX || 1));
+// Seconds of that time a student has used. The clock stops while the teacher has them paused for a break
+// (POST /wpr/session/:code/supports).
+const usedSeconds = (st, now = Date.now()) => (now - st.startedAt - (st.pausedMs || 0) - (st.pausedAt ? now - st.pausedAt : 0)) / 1000;
+const pausedSeconds = (st, now = Date.now()) => Math.round(((st.pausedMs || 0) + (st.pausedAt ? now - st.pausedAt : 0)) / 1000);
 
 function writeActiveMarker() {
     const now = Date.now();
     let active = 0, inUse = 0;
     sessions.forEach(s => {
         if (now - s.lastActive < IN_USE_MINUTES * 60 * 1000) inUse++;
-        s.students.forEach(st => { if (st.startedAt && !st.submittedAt && now - st.startedAt < (secondsFor(s, st) + 120) * 1000) active++; });
+        s.students.forEach(st => { if (st.startedAt && !st.submittedAt && usedSeconds(st, now) < secondsFor(s, st) + 120) active++; });
     });
     try {
         fs.writeFileSync(`${MARKER_DIR}/wpr_active_sessions`, String(active));
@@ -60,18 +64,19 @@ function writeActiveMarker() {
 setInterval(() => {
     const now = Date.now();
     sessions.forEach((s, code) => { if (now > s.expiresAt) sessions.delete(code); });
+    attempts.forEach((list, key) => { if (!list.some(t => now - t < PASS_MISSES.ms)) attempts.delete(key); });
     writeActiveMarker();
 }, 60 * 1000).unref();
 
-// Small in-memory throttle so the passcode and class codes can't be guessed.
+// Small in-memory throttles so the passcode and class codes can't be guessed. A whole school shares one
+// internet address (15 classes of 25 can start at once), so only wrong tries count: a class code that
+// doesn't exist, a wrong passcode. Students joining or rejoining, and teachers starting sessions, never do.
 const attempts = new Map();
-function throttled(key, max, windowMs) {
-    const now = Date.now();
-    const list = (attempts.get(key) || []).filter(t => now - t < windowMs);
-    list.push(now);
-    attempts.set(key, list);
-    return list.length > max;
-}
+const JOIN_MISSES = { max: 100, ms: 10 * 60 * 1000 }, PASS_MISSES = { max: 20, ms: 15 * 60 * 1000 };
+const MAX_STUDENTS = 200;   // per session, so a known class code can't be flooded with made-up students
+const recent = (key, limit) => (attempts.get(key) || []).filter(t => Date.now() - t < limit.ms);
+const tooMany = (key, limit) => recent(key, limit).length >= limit.max;
+const miss = (key, limit) => attempts.set(key, [...recent(key, limit), Date.now()]);
 const ipOf = req => String(req.headers['cf-connecting-ip'] || req.ip || '');
 const token = () => crypto.randomBytes(18).toString('hex');
 const safeEq = (a, b) => {
@@ -163,9 +168,13 @@ function buildSessionTest(session) {
 router.post('/wpr/session', async (req, res) => {
     const expected = process.env.WPR_TEACHER_PASSCODE || '';
     if (expected.length < 6) return res.status(503).json({ error: 'The WPR Practice Test is not set up yet.' });
-    if (throttled('pass:' + ipOf(req), 10, 15 * 60 * 1000)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
+    const passKey = 'pass:' + ipOf(req);
+    if (tooMany(passKey, PASS_MISSES)) return res.status(429).json({ error: 'Too many wrong passcodes. Wait 15 minutes.' });
     const body = req.body || {};
-    if (!safeEq(String(body.passcode || '').trim(), expected)) return res.status(401).json({ error: 'That teacher passcode isn\'t right.' });
+    if (!safeEq(String(body.passcode || '').trim(), expected)) {
+        miss(passKey, PASS_MISSES);
+        return res.status(401).json({ error: 'That teacher passcode isn\'t right.' });
+    }
     const length = LENGTHS[body.length] ? body.length : 'full';
     // Where questions come from: the standard WRS pool, the standard pool plus
     // teacher question banks (server/routes/wprBanks.js), or only the banks.
@@ -200,14 +209,15 @@ router.get('/wpr/session/:code', (req, res) => {
     const students = [...s.students.values()].map(st => ({
         firstName: st.firstName, lastName: st.lastName, studentId: st.studentId,
         status: st.submittedAt ? 'submitted' : st.startedAt ? 'testing' : 'joined',
-        secondsLeft: st.startedAt && !st.submittedAt ? Math.max(0, Math.round((st.startedAt + secondsFor(s, st) * 1000 - now) / 1000)) : null,
+        secondsLeft: st.startedAt && !st.submittedAt ? Math.max(0, Math.round(secondsFor(s, st) - usedSeconds(st, now))) : null,
         timeX: st.timeX || 1, secondsAllowed: secondsFor(s, st),
+        readAloud: !!st.readAloud, paused: !!(st.pausedAt && !st.submittedAt), pausedSeconds: st.startedAt ? pausedSeconds(st, now) : 0,
         answeredSoFar: st.submittedAt ? st.result.answered : Object.keys(st.answers || {}).length,
-        violations: st.violations, endReason: st.endReason || '',
+        violations: st.violations, endReason: st.endReason || '', submittedAt: st.submittedAt || null,
         result: st.submittedAt ? { answered: st.result.answered, correct: st.result.correct, total: st.result.total } : null,
         // Question-by-question detail (only after submitting)
         items: st.submittedAt ? st.questions.map((q, i) => ({
-            n: i + 1, topic: q.topic, q: q.q, answer: q.options[q.correct],
+            n: i + 1, topic: q.topic, indicator: q.indicator || '', prompt: q.prompt || '', q: q.q, answer: q.options[q.correct],
             yours: st.answers[i] !== undefined ? q.options[st.answers[i]] : '', right: st.answers[i] !== undefined ? st.answers[i] === q.correct : null
         })) : null
     }));
@@ -235,7 +245,7 @@ router.post('/wpr/session/:code/end', (req, res) => {
 });
 
 // POST /wpr/session/:code/time -- { studentId, x } gives one student standard time (1), time and a half
-// (1.5), or double time (2). It can change mid-test: the student's clock catches up within 15 seconds
+// (1.5), or double time (2). It can change mid-test: the student's clock catches up within 5 seconds
 // (/wpr/clock). Downloads call it "Time allowed" and never say why.
 router.post('/wpr/session/:code/time', (req, res) => {
     const s = teacherSession(req);
@@ -248,6 +258,36 @@ router.post('/wpr/session/:code/time', (req, res) => {
     st.timeX = x;
     writeActiveMarker();
     res.json({ success: true, secondsAllowed: secondsFor(s, st) });
+});
+
+// POST /wpr/session/:code/supports -- { studentId, readAloud, headphones, paused } for one student:
+// readAloud turns on the test's Read aloud button (only once the teacher confirms, with headphones: true,
+// that the student has headphones or is testing alone), and paused stops their clock for a break and
+// starts it again. Their screen picks it up within 5 seconds (/wpr/clock). Like the time limit, downloads
+// show what was used and never say why.
+router.post('/wpr/session/:code/supports', (req, res) => {
+    const s = teacherSession(req);
+    if (!s) return res.status(404).json({ error: 'Session not found. It may have ended or expired.' });
+    const b = req.body || {};
+    const st = s.students.get(String(b.studentId || ''));
+    if (!st) return res.status(404).json({ error: 'That student isn\'t in this session.' });
+    if (st.submittedAt) return res.status(409).json({ error: 'That student already finished.' });
+    if (typeof b.readAloud === 'boolean') {
+        if (b.readAloud && b.headphones !== true) return res.status(400).json({ error: 'Check the box first: the student has headphones, or is testing alone.' });
+        st.readAloud = b.readAloud;
+    }
+    if (typeof b.paused === 'boolean') {
+        const now = Date.now();
+        if (b.paused && !st.pausedAt) {
+            if (!st.startedAt) return res.status(409).json({ error: 'That student hasn\'t started the test yet.' });
+            st.pausedAt = now;
+        } else if (!b.paused && st.pausedAt) {
+            st.pausedMs = (st.pausedMs || 0) + (now - st.pausedAt);
+            st.pausedAt = null;
+        }
+        writeActiveMarker();
+    }
+    res.json({ success: true, readAloud: !!st.readAloud, paused: !!st.pausedAt });
 });
 
 // DELETE /wpr/session/:code -- the teacher erases everything now (or, on an older page, ends without the 15 minutes)
@@ -263,19 +303,29 @@ router.delete('/wpr/session/:code', (req, res) => {
 
 // POST /wpr/join -- { code, firstName, lastName, studentId }
 router.post('/wpr/join', (req, res) => {
-    if (throttled('join:' + ipOf(req), 60, 10 * 60 * 1000)) return res.status(429).json({ error: 'Too many tries. Wait a few minutes.' });
+    const joinKey = 'join:' + ipOf(req);
+    if (tooMany(joinKey, JOIN_MISSES)) return res.status(429).json({ error: 'Too many wrong class codes. Wait a few minutes.' });
     const body = req.body || {};
     const session = sessions.get(String(body.code || '').trim().toUpperCase());
-    if (!session) return res.status(404).json({ error: 'That class code has ended or does not exist. Check with your teacher.' });
-    if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
+    if (!session) {
+        miss(joinKey, JOIN_MISSES);
+        return res.status(404).json({ error: 'That class code has ended or does not exist. Check with your teacher.' });
+    }
     session.lastActive = Date.now();
     const firstName = clean(body.firstName, 40), lastName = clean(body.lastName, 40), studentId = clean(body.studentId, 20);
     if (!firstName || !lastName || !studentId) return res.status(400).json({ error: 'Enter your first name, last name, and student ID.' });
     let st = session.students.get(studentId);
-    if (st && st.submittedAt) return res.status(409).json({ error: 'You already took this test. If you closed your results page, ask your teacher for your score.' });
     if (st && (st.firstName.toLowerCase() !== firstName.toLowerCase() || st.lastName.toLowerCase() !== lastName.toLowerCase())) {
         return res.status(409).json({ error: 'That student ID is already in use in this class. Check your ID or ask your teacher.' });
     }
+    // A student who finished can come back to their results (a closed tab, a refresh in a new tab, another
+    // device), including after the teacher ends the test, when their answers and report unlock.
+    // Their key stays the same, so a results page they still have open elsewhere keeps working.
+    if (st && st.submittedAt) {
+        return res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: secondsFor(session, st), started: true, submitted: true, endReason: st.endReason });
+    }
+    if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
+    if (!st && session.students.size >= MAX_STUDENTS) return res.status(409).json({ error: `This class code is full (${MAX_STUDENTS} students). Check with your teacher.` });
     if (!st) {
         st = { token: token(), firstName, lastName, studentId, joinedAt: Date.now(), startedAt: null, questions: null, answers: {}, violations: 0, submittedAt: null };
         session.students.set(studentId, st);
@@ -296,21 +346,23 @@ router.post('/wpr/start', (req, res) => {
         st.startedAt = Date.now();
         writeActiveMarker();
     }
-    const elapsed = (Date.now() - st.startedAt) / 1000;
+    const elapsed = usedSeconds(st);
     if (elapsed > secondsFor(session, st) + GRACE_SECONDS) {
         finish(session, st, st.answers, 'time');
         return res.status(409).json({ error: 'Time ran out. Your saved answers were scored.' });
     }
-    res.json({ questions: publicQuestions(st.questions), answers: st.answers, secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - elapsed)) });
+    res.json({ questions: publicQuestions(st.questions), answers: st.answers, secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - elapsed)),
+        readAloud: !!st.readAloud, paused: !!st.pausedAt });
 });
 
-// POST /wpr/clock -- { code, token } -> the student's time left, which changes if the teacher changes their time
+// POST /wpr/clock -- { code, token } -> the student's time left, which changes if the teacher changes their time,
+// and their supports (read aloud, paused for a break), which the teacher can change mid-test
 router.post('/wpr/clock', (req, res) => {
     const { session, st, error } = getStudent(req);
     if (error) return res.status(404).json({ error });
     if (st.submittedAt) return res.json({ secondsLeft: 0 });   // the teacher ended the test: the student's screen wraps up
-    if (!st.startedAt) return res.json({ secondsLeft: null });
-    res.json({ secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - (Date.now() - st.startedAt) / 1000)) });
+    if (!st.startedAt) return res.json({ secondsLeft: null, readAloud: !!st.readAloud });
+    res.json({ secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - usedSeconds(st))), readAloud: !!st.readAloud, paused: !!st.pausedAt });
 });
 
 // POST /wpr/results -- { code, token } -> 'testing', 'held' (the score only), or 'released' once the teacher
@@ -327,7 +379,7 @@ router.post('/wpr/results', (req, res) => {
 router.post('/wpr/save', (req, res) => {
     const { session, st, error } = getStudent(req);
     if (error) return res.status(404).json({ error });
-    if (st.startedAt && !st.submittedAt && (Date.now() - st.startedAt) / 1000 <= secondsFor(session, st) + GRACE_SECONDS) {
+    if (st.startedAt && !st.submittedAt && usedSeconds(st) <= secondsFor(session, st) + GRACE_SECONDS) {
         st.answers = cleanAnswers(req.body.answers, st.questions.length);
     }
     res.json({ success: true });
@@ -347,7 +399,7 @@ router.post('/wpr/submit', (req, res) => {
     if (error) return res.status(404).json({ error });
     if (!st.startedAt) return res.status(400).json({ error: 'The test has not started.' });
     if (!st.submittedAt) {
-        const inTime = (Date.now() - st.startedAt) / 1000 <= secondsFor(session, st) + GRACE_SECONDS;
+        const inTime = usedSeconds(st) <= secondsFor(session, st) + GRACE_SECONDS;
         const answers = inTime ? cleanAnswers(req.body.answers, st.questions.length) : st.answers;
         const reason = ['student', 'time', 'left-test'].includes(req.body.reason) ? req.body.reason : 'student';
         finish(session, st, answers, reason);

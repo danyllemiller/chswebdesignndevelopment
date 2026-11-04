@@ -17,7 +17,11 @@
  *                   save(answers), saveBeacon(answers),
  *                   submit(answers, reason) -> Promise,   // reason: 'student' | 'time' | 'left-test'
  *                   onViolation(count),
- *                   clock() -> Promise<{ secondsLeft }>,  // optional: checked every 15 s, for a time limit the teacher changes
+ *                   clock() -> Promise<{ secondsLeft, readAloud, paused }>,  // optional: checked every clockEvery ms
+ *                                                         // (default 15 s), for changes the teacher makes mid-test
+ *                   clockEvery,
+ *                   readAloud, paused,                    // supports the teacher turned on (WPR Practice): a Read aloud
+ *                                                         // button, and the clock stopped for a break
  *                   noTranslate });                       // true: translating the page counts as leaving
  *   WrsTestUI.reviewHtml(result)                // results + every answered question
  *   WrsTestUI.scoreHtml(result)                 // just the score (answers held until the teacher ends the test)
@@ -65,6 +69,8 @@
       .wt-got { border-left: 4px solid #198754; background: #f1faf4; }
       .wt-missed { border-left: 4px solid #dc3545; background: #fdf3f4; }
       .wt-big { font-size: 3rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+      .wt-reading { background: #fff3cd !important; outline: 3px solid #ffc107; outline-offset: 2px; border-radius: .4rem; }
+      #wtPause { z-index: 2001; }
     `;
     const PANELS = `
       <div id="wtCalc" class="wt-panel" hidden>
@@ -92,6 +98,14 @@
           <p class="fs-5 fw-bold text-warning" id="wtLockWarn">This is your only warning. If you leave again, your test will be submitted.</p>
           <p class="small opacity-75">Your teacher can see that this happened. The clock is still running.</p>
           <button id="wtReturn" class="btn btn-warning btn-lg fw-bold mt-2">Return to the test</button>
+        </div>
+      </div>
+      <div id="wtPause" class="wt-lock" hidden>
+        <div class="box">
+          <div style="font-size:3rem"><i class="fas fa-circle-pause text-info"></i></div>
+          <h2 class="fw-bold">Your test is paused</h2>
+          <p class="fs-5">Your teacher paused your test for a break. Your time is stopped, and your answers are saved.</p>
+          <p class="fs-5 fw-bold text-info">Your test starts again when your teacher restarts it.</p>
         </div>
       </div>`;
 
@@ -131,16 +145,19 @@
         try { flags = new Set(JSON.parse(sessionStorage.getItem(flagKey) || '[]')); } catch (e) {}
         let cur = 0, showNav = false, submitting = false, dirty = false, onReview = false;
         let violations = 0, away = false;
+        // Supports the teacher can turn on (WPR Practice): Read aloud, and the clock paused for a break
+        let readAloud = !!opts.readAloud, readHint = readAloud, speakError = false, paused = false, pausedLeft = 0;
         const calcPanel = document.getElementById('wtCalc');
         const scratchPanel = document.getElementById('wtScratch');
         const lock = document.getElementById('wtLock');
+        const pausePanel = document.getElementById('wtPause');
         const answered = () => Object.keys(answers).length;
         const saveFlags = () => { try { sessionStorage.setItem(flagKey, JSON.stringify([...flags])); } catch (e) {} };
 
         document.body.classList.add('wt-locked');
 
         function timerText() {
-            const s = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+            const s = paused ? pausedLeft : Math.max(0, Math.round((endAt - Date.now()) / 1000));
             const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
             return { s, text: h ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}` };
         }
@@ -148,17 +165,20 @@
             const t = timerText();
             const el = document.getElementById('wtTimer');
             if (el) { el.textContent = t.text; el.classList.toggle('low', t.s <= 60); }
-            if (t.s <= 0) finish('time');
+            if (t.s <= 0 && !paused) finish('time');
         }
         const tick = setInterval(tickNow, 250);
         const autosave = setInterval(() => { if (dirty) { dirty = false; Promise.resolve(opts.save(answers)).catch(() => { dirty = true; }); } }, 10000);
-        // The teacher can change a student's time limit mid-test; the clock catches up here.
+        // The teacher can change a student's time limit and supports mid-test; the screen catches up here.
         const clockCheck = opts.clock ? setInterval(() => {
             Promise.resolve(opts.clock()).then(r => {
-                const left = r && r.secondsLeft;
-                if (Number.isFinite(left) && Math.abs(Date.now() + left * 1000 - endAt) > 3000) { endAt = Date.now() + left * 1000; tickNow(); }
+                if (!r || submitting) return;
+                if (typeof r.readAloud === 'boolean') setReadAloud(r.readAloud);
+                setPaused(!!r.paused, r.secondsLeft);
+                const left = r.secondsLeft;
+                if (!paused && Number.isFinite(left) && Math.abs(Date.now() + left * 1000 - endAt) > 3000) { endAt = Date.now() + left * 1000; tickNow(); }
             }).catch(() => {});
-        }, 15000) : null;
+        }, opts.clockEvery || 15000) : null;
 
         function bar(title) {
             return `<div class="wt-bar">
@@ -167,6 +187,8 @@
                   <div class="fw-bold d-none d-sm-block">${title}</div>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
+                  ${readAloud && !onReview ? `<button class="btn btn-sm wt-tool ${speaking ? 'on' : ''}" data-wt-tool="speak"><i class="fas ${speaking ? 'fa-stop' : 'fa-volume-high'} me-1"></i>${speaking ? 'Stop reading' : 'Read aloud'}</button>
+                  <button class="btn btn-sm wt-tool ${readSlow ? 'on' : ''}" data-wt-tool="slow" aria-pressed="${readSlow}" title="Read more slowly"><i class="fas fa-gauge-simple me-1"></i>Slower</button>` : ''}
                   <button class="btn btn-sm wt-tool ${calcPanel.hidden ? '' : 'on'}" data-wt-tool="calc"><i class="fas fa-calculator me-1"></i>Calculator</button>
                   <button class="btn btn-sm wt-tool ${scratchPanel.hidden ? '' : 'on'}" data-wt-tool="scratch"><i class="fas fa-pen-to-square me-1"></i>Scratch Paper</button>
                   ${onReview ? '' : '<button class="btn btn-sm btn-warning fw-bold" data-wt="review"><i class="fas fa-list-check me-1"></i>Review &amp; Submit</button>'}
@@ -184,7 +206,9 @@
                 <div class="wt-meta">Question ${cur + 1} of ${questions.length} · ${kind}</div>
                 <button class="btn btn-sm ${flagged ? 'btn-warning' : 'btn-outline-warning'} fw-bold" data-wt="flag"><i class="fas fa-flag me-1"></i>${flagged ? 'Flagged for review' : 'Flag for review'}</button>
               </div>
-              ${q.prompt && q.kind !== 'tf' ? `<div class="small fw-bold text-primary mt-2">${esc(q.prompt)}</div>` : ''}
+              ${readAloud && readHint ? '<div class="alert alert-info py-2 small fw-bold mt-2 mb-0"><i class="fas fa-headphones me-1"></i>Read aloud is on. Put on your headphones, then click <b>Read aloud</b> (or press R) to hear the question and the answers.</div>' : ''}
+              ${readAloud && speakError ? '<div class="alert alert-warning py-2 small fw-bold mt-2 mb-0">Read aloud doesn\'t work in this browser. Raise your hand and tell your teacher.</div>' : ''}
+              ${q.prompt && q.kind !== 'tf' ? `<div class="wt-prompt small fw-bold text-primary mt-2">${esc(q.prompt)}</div>` : ''}
               <div class="wt-q">${esc(q.q)}</div>
               <div role="radiogroup">${q.options.map((o, i) => `<button class="wt-opt ${answers[cur] === i ? 'sel' : ''}" role="radio" aria-checked="${answers[cur] === i}" data-opt="${i}"><span class="letter">${LETTERS[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>
               <div class="d-flex justify-content-between align-items-center my-3 gap-2">
@@ -194,7 +218,8 @@
               </div>
               ${showNav ? `<div class="small text-muted mb-1"><span class="wt-key" style="background:#198754"></span> answered &nbsp; <span class="wt-key" style="background:#ffc107"></span> flagged &nbsp; <span class="wt-key" style="outline:2px solid #0d6efd"></span> current</div>
               <div class="wt-grid">${questions.map((_, i) => `<button class="${answers[i] !== undefined ? 'ans' : ''} ${i === cur ? 'cur' : ''} ${flags.has(i) ? 'flag' : ''}" data-go="${i}">${i + 1}</button>`).join('')}</div>` : ''}
-              <div class="small text-muted mt-2">Shortcuts: A–D or 1–4 choose · ← → move · F flag</div>`;
+              <div class="small text-muted mt-2">Shortcuts: A–D or 1–4 choose · ← → move · F flag${readAloud ? ' · R read aloud' : ''}</div>`;
+            highlight();
             tickNow();
         }
 
@@ -220,14 +245,86 @@
             tickNow();
         }
 
-        const go = i => { if (i >= 0 && i < questions.length) { cur = i; renderQuestion(); } };
+        const go = i => { if (i >= 0 && i < questions.length) { stopReading(); cur = i; renderQuestion(); } };
         const toggleFlag = () => { flags.has(cur) ? flags.delete(cur) : flags.add(cur); saveFlags(); renderQuestion(); };
 
+        // ---- Read aloud (a support the teacher turns on): the browser's own text-to-speech reads the question
+        // and each answer choice, highlighting the part being read. readId ignores a cancelled reading's events.
+        const synth = window.speechSynthesis || null;
+        let speaking = false, readSlow = false, readingSel = null, readId = 0;
+        function highlight() {
+            mount.querySelectorAll('.wt-reading').forEach(el => el.classList.remove('wt-reading'));
+            const el = speaking && readingSel ? mount.querySelector(readingSel) : null;
+            if (el) el.classList.add('wt-reading');
+        }
+        function speakButton() {
+            const b = mount.querySelector('[data-wt-tool="speak"]');
+            if (b) { b.classList.toggle('on', speaking); b.innerHTML = `<i class="fas ${speaking ? 'fa-stop' : 'fa-volume-high'} me-1"></i>${speaking ? 'Stop reading' : 'Read aloud'}`; }
+        }
+        function stopReading() {
+            readId++;
+            if (synth && (speaking || synth.speaking || synth.pending)) synth.cancel();
+            speaking = false; readingSel = null;
+            highlight(); speakButton();
+        }
+        function readQuestion() {
+            // No alert() here: a dialog takes focus, which the lockdown would count as leaving the test
+            if (!synth || typeof SpeechSynthesisUtterance === 'undefined') { speakError = true; return renderQuestion(); }
+            stopReading();
+            const id = readId;
+            if (readHint) { readHint = false; renderQuestion(); }
+            const q = questions[cur];
+            const parts = [];
+            if (q.kind === 'tf') parts.push(['True or false?', null]);
+            else if (q.prompt) parts.push([q.prompt, '.wt-prompt']);
+            parts.push([q.q, '.wt-q']);
+            q.options.forEach((o, i) => parts.push([`${LETTERS[i]}. ${o}`, `[data-opt="${i}"]`]));
+            const voices = synth.getVoices();
+            const voice = voices.find(v => /^en[-_]US/i.test(v.lang) && v.localService) || voices.find(v => /^en[-_]US/i.test(v.lang)) || voices.find(v => /^en\b/i.test(v.lang)) || null;
+            speaking = true;
+            parts.forEach(([text, sel], i) => {
+                const u = new SpeechSynthesisUtterance(text);
+                if (voice) u.voice = voice;
+                u.lang = voice ? voice.lang : 'en-US';
+                u.rate = readSlow ? 0.75 : 1;
+                u.onstart = () => { if (id === readId) { readingSel = sel; highlight(); } };
+                if (i === parts.length - 1) u.onend = u.onerror = () => { if (id === readId) { speaking = false; readingSel = null; highlight(); speakButton(); } };
+                synth.speak(u);
+            });
+            synth.resume();   // Chrome can be left paused by an earlier cancel
+            speakButton();
+        }
+        // Supports the teacher changes mid-test (from the clock check)
+        function setReadAloud(on) {
+            if (on === readAloud) return;
+            readAloud = on; readHint = on;
+            if (!on) stopReading();
+            onReview ? renderReview() : renderQuestion();
+        }
+        function setPaused(on, left) {
+            if (on === paused) return;
+            paused = on;
+            if (on) {
+                pausedLeft = Number.isFinite(left) ? left : Math.max(0, Math.round((endAt - Date.now()) / 1000));
+                stopReading();
+                lock.hidden = true; away = false;
+                pausePanel.hidden = false;
+            } else {
+                if (Number.isFinite(left)) endAt = Date.now() + left * 1000;
+                pausePanel.hidden = true;
+                // A break can mean stepping out of full screen; coming back from one doesn't count as leaving
+                if (fullscreenSupported() && !isFullscreen()) { away = true; showLock('resume'); }
+            }
+            tickNow();
+        }
+
         function onClick(e) {
-            if (submitting) return;
+            if (submitting || paused) return;
             const o = e.target.closest('[data-opt]'); if (o) { answers[cur] = Number(o.dataset.opt); dirty = true; return renderQuestion(); }
             const g = e.target.closest('[data-go]'); if (g) return go(Number(g.dataset.go));
             const t = e.target.closest('[data-wt-tool]');
+            if (t && t.dataset.wtTool === 'speak') return speaking ? stopReading() : readQuestion();
+            if (t && t.dataset.wtTool === 'slow') { readSlow = !readSlow; return renderQuestion(); }
             if (t) { const p = t.dataset.wtTool === 'calc' ? calcPanel : scratchPanel; p.hidden = !p.hidden; return onReview ? renderReview() : renderQuestion(); }
             const b = e.target.closest('[data-wt]'); if (!b) return;
             const a = b.dataset.wt;
@@ -235,16 +332,17 @@
             else if (a === 'next') go(cur + 1);
             else if (a === 'nav') { showNav = !showNav; renderQuestion(); }
             else if (a === 'flag') toggleFlag();
-            else if (a === 'review') renderReview();
+            else if (a === 'review') { stopReading(); renderReview(); }
             else if (a === 'back') renderQuestion();
             else if (a === 'submit') finish('student');
         }
         function onKey(e) {
-            if (submitting || !lock.hidden || onReview || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+            if (submitting || paused || !lock.hidden || onReview || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
             const q = questions[cur];
             const k = e.key.toUpperCase();
             const idx = /^[1-6]$/.test(k) ? Number(k) - 1 : LETTERS.indexOf(k);
-            if (k === 'F') toggleFlag();
+            if (k === 'R' && readAloud) { e.preventDefault(); speaking ? stopReading() : readQuestion(); }
+            else if (k === 'F') toggleFlag();
             else if (k.length === 1 && idx >= 0 && idx < q.options.length) { e.preventDefault(); answers[cur] = idx; dirty = true; renderQuestion(); }
             else if (e.key === 'ArrowRight') go(cur + 1);
             else if (e.key === 'ArrowLeft') go(cur - 1);
@@ -282,7 +380,8 @@
         const LOCK = {
             leave: ['You left the test', 'Leaving the test screen, switching tabs, or exiting full screen is not allowed.', 'This is your only warning. If you leave again, your test will be submitted.'],
             translate: ['Translating is not allowed', 'The state test is only in English, so this practice test is too. Turn the translator off and switch the page back to English, then return to the test.', 'This is your only warning. If the test is translated again, it will be submitted.'],
-            still: ['The translator is still on', 'Turn the translator off and switch the page back to English first, then return to the test.', 'This is your only warning. If the test is translated again, it will be submitted.']
+            still: ['The translator is still on', 'Turn the translator off and switch the page back to English first, then return to the test.', 'This is your only warning. If the test is translated again, it will be submitted.'],
+            resume: ['Welcome back', 'Your teacher restarted your test, so your clock is running again.', 'Click Return to the test to go back to full screen.']
         };
         function showLock(kind) {
             const [title, why, warn] = LOCK[kind];
@@ -292,7 +391,7 @@
             lock.hidden = false;
         }
         function leftTest(kind) {
-            if (submitting || away) return;
+            if (submitting || away || paused) return;   // stepping away during a break the teacher started is fine
             away = true;
             violations++;
             Promise.resolve(opts.onViolation && opts.onViolation(violations)).catch(() => {});
@@ -343,7 +442,8 @@
             document.removeEventListener('webkitfullscreenchange', onFs);
             window.removeEventListener('beforeunload', onUnload);
             if (watch) watch.disconnect();
-            calcPanel.hidden = true; scratchPanel.hidden = true; lock.hidden = true;
+            stopReading();
+            calcPanel.hidden = true; scratchPanel.hidden = true; lock.hidden = true; pausePanel.hidden = true;
             document.body.classList.remove('wt-locked');
             try { sessionStorage.removeItem(flagKey); } catch (e) {}
             exitFullscreen();
@@ -363,6 +463,7 @@
         }
 
         renderQuestion();
+        if (opts.paused) setPaused(true, opts.secondsLeft);   // reloaded the page during a break
     }
 
     // The score: how it ended, then correct / answered / accuracy.

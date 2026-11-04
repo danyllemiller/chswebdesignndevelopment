@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Answer Keys | CHS Admin</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta name="robots" content="noindex">
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=29"></script>
+  <script type="module" src="/js/auth-guard.js?v=2"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .keys-wrap { max-width: 980px; margin: 2rem auto; padding: 0 1rem; }
+    .pick-bar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; }
+    .pick-bar .form-select { min-width: 220px; }
+    .act-card { border: 0; border-left: 5px solid #0d6efd; }
+    .act-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+    .act-pts { font-weight: 700; color: #0d6efd; white-space: nowrap; }
+    .turn-in { background: #f1f5ff; border-radius: .5rem; padding: .5rem .75rem; font-size: .9rem; }
+    .step { border-top: 1px solid #e9ecef; padding: .85rem 0; }
+    .step:first-child { border-top: 0; }
+    .step-ask { font-size: .85rem; color: #6c757d; font-weight: 600; margin-bottom: .35rem; }
+    .step-answer { font-size: .95rem; }
+    .key-label { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #198754; }
+    /* dacStyleSheets.css forces a pale, uncopyable look on every pre/code (with !important);
+       the key's code needs to be readable and copyable, so these win on specificity. */
+    .keys-wrap pre.key-code { background-color: #1e1e2e !important; color: #e6e6f0 !important; -webkit-user-select: text; user-select: text;
+      border-radius: .5rem; padding: .75rem 1rem; font-size: .82rem; white-space: pre-wrap; margin: .5rem 0 0; }
+    .key-output { background: #f8f9fa; border: 1px dashed #adb5bd; border-radius: .5rem; padding: .5rem .75rem; font-family: monospace; font-size: .82rem; white-space: pre-wrap; margin-top: .5rem; }
+    .keys-wrap .step-answer code, .keys-wrap .list-box code { background-color: #eef1f6 !important; color: #b0185f !important; padding: 0 .25rem; border-radius: .25rem; }
+    .key-table { font-size: .88rem; margin: .5rem 0 0; }
+    .list-box { border-radius: .5rem; padding: .6rem .9rem; font-size: .9rem; }
+    .list-box ul { margin: .25rem 0 0; padding-left: 1.2rem; }
+    .look-for { background: #e9f7ef; }
+    .mistakes { background: #fdf0ef; }
+    .disc-item { border-top: 1px solid #e9ecef; padding: .7rem 0; }
+    .disc-item:first-child { border-top: 0; }
+    .empty-note { color: #6c757d; font-style: italic; }
+    @media print {
+      body { background: #fff; }
+      #nav-placeholder, #footer-placeholder, .no-print { display: none !important; }
+      .keys-wrap { max-width: none; margin: 0; padding: 0; }
+      .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+      .act-card { border-left: 5px solid #0d6efd !important; break-inside: auto; }
+      .step, .disc-item, .list-box { break-inside: avoid; }
+      .keys-wrap pre.key-code { background-color: #fff !important; color: #000 !important; border: 1px solid #999; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="keys-wrap">
+  <div class="card shadow-sm border-0 mb-4 no-print">
+    <div class="card-body p-4">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-key me-2"></i>Answer Keys</h2>
+      <p class="text-muted mb-3">The key for every activity inside each chapter. Only your teacher account can open these; students can't see them, and they aren't on GitHub.</p>
+      <div class="pick-bar">
+        <div>
+          <label class="form-label small fw-bold mb-1" for="classSelect">Class</label>
+          <select id="classSelect" class="form-select fw-bold">
+            <option value="cs">Computer Science</option>
+            <option value="wd1">Web Design I</option>
+            <option value="wd2">Web Design II &amp; AS</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label small fw-bold mb-1" for="chapterSelect">Chapter</label>
+          <select id="chapterSelect" class="form-select fw-bold"></select>
+        </div>
+        <button id="printBtn" type="button" class="btn btn-outline-primary fw-bold"><i class="fas fa-print me-1"></i>Print this key</button>
+        <a id="pageLink" class="btn btn-link fw-bold" href="#" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square me-1"></i>Open the chapter page</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="keyBody"></div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script type="module" src="/js/admin/answer-keys.js?v=1"></script>
+</body>
+</html>

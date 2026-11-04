@@ -6,6 +6,7 @@ const { insertQuestionDetails } = require('../lib/missedQuestionsStore');
 const { dailyOverrideCode, isValidDailyCode } = require('../lib/dailyCode');
 const { isCsUnitProject, syncCsProjectGrade } = require('../lib/csProjectGate');
 const { clockinDate, loadClockinDays } = require('../lib/clockinDays');
+const accommodations = require('../lib/accommodations');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -82,6 +83,20 @@ router.get('/student/course-gradebook', requireSelfOrStaff(), async (req, res) =
                 [student_id, student_id, student_id, courseCode]
             );
             rows.forEach(r => { r.due_date = formatDbDate(r.due_date); });
+            // Extra school days on assignments from the student's accommodation plan: their own due dates,
+            // so their grades page counts an assignment missing only after their real deadline
+            const { extraDays } = await accommodations.settingsFor(connection, student_id);
+            if (extraDays) rows.forEach(r => {
+                if (!accommodations.isShiftable(r.exam_id) || clockinDate(r.exam_id)) return;
+                r.due_date = accommodations.shiftDue(r.due_date, extraDays);
+                if (r.period_due_dates) {
+                    try {
+                        const pd = typeof r.period_due_dates === 'string' ? JSON.parse(r.period_due_dates) : r.period_due_dates;
+                        Object.keys(pd).forEach(k => { pd[k] = accommodations.shiftDue(formatDbDate(pd[k]), extraDays); });
+                        r.period_due_dates = JSON.stringify(pd);
+                    } catch (e) { /* malformed override: leave it */ }
+                }
+            });
             // A clock-in day this student's period didn't meet isn't theirs
             // to miss (server/lib/clockinDays.js); one they clocked in on anyway still counts.
             const days = await loadClockinDays(connection);
@@ -163,11 +178,53 @@ async function checkWdChapterPrework(connection, studentId, examId, chNum) {
     return { ok: preScaleOk && preTestOk, scoreOk: true, projectOk: true, projectRequired: false, preScaleOk, preTestOk };
 }
 
+// The CS Final ("Final-Exam", exams/cs-final-exam.html) unlocks once a student has taken all seven
+// unit tests (any score) AND finished the Unit 3-7 Projects (teacher 2026-10-29: students were
+// reaching the Final with projects undone, since only the unit tests were checked, and only on
+// the workspace's Final tab; Units 1-2 stay out, the same as PROJECT_EXEMPT_UNITS for the unit
+// tests, since most of those files were on the server that died). "Finished" counts the way the
+// unit-test lock above does -- a self review AND a peer review in -- or a project grade that has
+// posted (for a project under the upload + peer review gate in server/lib/csProjectGate.js, or EX).
+// Students excused from projects (projectExemptions) skip that half; the same override row (daily
+// code / admin tool) clears it.
+const CS_UNITS = [1, 2, 3, 4, 5, 6, 7];
+async function checkCsFinalPrereq(connection, studentId) {
+    await ensureUnitPrereqOverridesTable(connection);
+    const [overrideRows] = await connection.execute(
+        'SELECT id FROM unit_prereq_overrides WHERE student_id = ? AND unit_exam_id = ?', [studentId, 'Final-Exam']);
+    if (overrideRows.length > 0) return { ok: true, final: true, missingExams: [], missingProjects: [] };
+    const marks = CS_UNITS.map(() => '?').join(',');
+    const [examRows] = await connection.execute(
+        `SELECT DISTINCT exam_id FROM responses WHERE student_id = ? AND exam_id IN (${marks})`,
+        [studentId, ...CS_UNITS.map(n => `Unit${n}-Exam`)]);
+    const taken = new Set(examRows.map(r => r.exam_id));
+    const missingExams = CS_UNITS.filter(n => !taken.has(`Unit${n}-Exam`));
+    let missingProjects = [];
+    if (!isProjectExempt(studentId)) {
+        const [projectRows] = await connection.execute(
+            `SELECT cp.chapter_id, cp.exam_id, pga.status, r.score
+             FROM chapter_projects cp
+             LEFT JOIN project_grade_aggregates pga
+               ON pga.chapter_project_id = cp.id AND pga.exam_id = cp.exam_id AND pga.student_id = ?
+             LEFT JOIN responses r ON r.exam_id = cp.exam_id AND r.student_id = ?
+             WHERE cp.course_id = '10003GS' AND cp.is_active = 1 AND cp.chapter_id IN (${marks})`,
+            [studentId, studentId, ...CS_UNITS.map(n => `UNIT${n}`)]);
+        const finished = p => p.status === 'complete' || p.score === 'EX' || (isCsUnitProject(p.exam_id) && Number(p.score) > 0);
+        // A unit whose project was never seeded can't be required (same as the unit-test lock)
+        missingProjects = CS_UNITS.filter(n => !PROJECT_EXEMPT_UNITS.has(n)).filter(n => {
+            const rows = projectRows.filter(p => p.chapter_id === `UNIT${n}`);
+            return rows.length > 0 && !rows.some(finished);
+        });
+    }
+    return { ok: !missingExams.length && !missingProjects.length, final: true, missingExams, missingProjects };
+}
+
 async function checkUnitPrerequisite(connection, studentId, examId) {
     // The teacher's own account previews every exam exactly as students see
     // it, so none of these locks apply to it (it never has the pre-work).
     const [[viewer]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [studentId]);
     if (viewer && viewer.section_id === 'Teacher') return { ok: true };
+    if (examId === 'Final-Exam') return checkCsFinalPrereq(connection, studentId);
     const wd = /^Ch(\d+)-Exam$/.exec(examId || '');
     if (wd) return checkWdChapterPrework(connection, studentId, examId, parseInt(wd[1], 10));
     const m = /^Unit(\d+)-Exam$/i.exec(examId || '');
@@ -269,7 +326,7 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
     if (!m) return { ok: true };
 
     const attempts = preloadedAttempts || (await connection.execute(
-        'SELECT score, total_points FROM exam_attempts WHERE student_id = ? AND exam_id = ? ORDER BY attempt_number ASC',
+        'SELECT score, total_points, timestamp FROM exam_attempts WHERE student_id = ? AND exam_id = ? ORDER BY attempt_number ASC',
         [studentId, examId]
     ))[0];
     if (attempts.length === 0) return { ok: true };
@@ -331,11 +388,16 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
         // too (only 73 of ~1,300 unit Worksheet rows are ever submitted); that
         // tier stays stricter only by excluding bare 'Notes' (see categories).
         const savedCounts = 'OR LENGTH(content) >= 300';
+        // The test tab's scratchpad also saves as plain "Unit Exam Scratchpad", with no unit number (teacher
+        // 2026-10-29: students' real post-fail notes were sitting there unseen, and every one of them landed on
+        // the teacher's "approve notes" list). Those count when they were saved after the failed try.
+        const lastAt = last.timestamp ? new Date(last.timestamp) : new Date('9999-12-31');
         const [qualifying] = await connection.execute(
             `SELECT id FROM turnins WHERE student_id = ?
-             AND (chapter LIKE ? OR chapter = ? OR chapter = ?) AND category IN (${placeholders})
+             AND (chapter LIKE ? OR chapter = ? OR chapter = ? OR (chapter = 'Unit Exam Scratchpad' AND timestamp > ?))
+             AND category IN (${placeholders})
              AND ((is_submitted = 1 AND LENGTH(content) > 100) ${savedCounts}) LIMIT 1`,
-            [studentId, `Unit ${unitMatch[1]} - %`, `Unit ${unitMatch[1]} Exam Scratchpad`, `Unit ${unitMatch[1]} General`, ...categories]
+            [studentId, `Unit ${unitMatch[1]} - %`, `Unit ${unitMatch[1]} Exam Scratchpad`, `Unit ${unitMatch[1]} General`, lastAt, ...categories]
         );
         if (qualifying.length > 0) {
             await connection.execute(
@@ -346,9 +408,11 @@ async function checkRetakeClearance(connection, studentId, examId, preloadedAtte
         }
     }
 
+    // The student does it on their own: the next time they open the test, the check above finds the work and the
+    // test unlocks by itself (teacher 2026-10-29: no teacher approval step).
     const message = requirement === 'notes'
-        ? 'Before retaking this test, show your teacher your notes on this chapter.'
-        : 'Before retaking this test, finish every activity and worksheet in this chapter and check in with your teacher.';
+        ? 'Before you retake this test, write your notes for this unit in your Comp Sci workspace (a full paragraph or more) and save them. Then come back here: the test unlocks by itself.'
+        : 'Before you retake this test a second time, finish and save a worksheet or reflection for this unit in your Comp Sci workspace. Then come back here: the test unlocks by itself.';
     return { ok: false, requirement, message };
 }
 
@@ -411,6 +475,10 @@ router.post('/submit-exam', async (req, res) => {
         }
 
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
+        if (!prereq.ok && prereq.final) {
+            const reasons = [...prereq.missingExams.map(n => `the Unit ${n} Test`), ...prereq.missingProjects.map(n => `the Unit ${n} Project`)];
+            return { status: 403, body: { error: `The CS Final is locked. Finish ${reasons.join(', ')} first.` } };
+        }
         if (!prereq.ok) {
             const isWdChapter = /^Ch\d+-Exam$/.test(exam_id);
             const reasons = [];
@@ -745,7 +813,12 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
              WHERE r.id IS NULL`);
         const scopedSet = new Set(scopedIds.map(String));
         const pending = pendingRows.filter(r => scopedSet.has(String(r.student_id)));
-        return { students: scopedStudents, assignments: registry, grades, pending };
+        // Extra school days on assignments, per student (accommodation plans), for the gradebook's due dates
+        const ext = await accommodations.settingsMap(connection);
+        const extensions = {};
+        scopedStudents.forEach(s => { const e = ext.get(String(s.student_id)); if (e && e.extraDays) extensions[s.student_id] = e.extraDays; });
+        return { students: scopedStudents, assignments: registry, grades, pending, extensions,
+            offDays: Object.keys(extensions).length ? [...accommodations.offDays()] : [] };
         });
         res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch gradebook' }); }

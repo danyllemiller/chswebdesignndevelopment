@@ -12,6 +12,7 @@ const { withConnection } = require('../db');
 const { requireLogin, requireStaff, isStaffSession } = require('../helpers');
 const { getLocalDateStr } = require('../tardyLogic');
 const { buildTest } = require('../lib/wrsPool');
+const accommodations = require('../lib/accommodations');
 
 const SECTIONS = ['B2', 'AS-B2'];
 // Extra one-off days the Sprint is open as a PRACTICE run (is_preview = 2):
@@ -24,6 +25,8 @@ const PRACTICE_DATES = new Set(['2026-10-21']);
 const BETA_TESTERS = new Set(['8009627']); // Monique Bongo (AS-B2), added 2026-10-21
 const TEST_SECONDS = 600;
 const LATE_GRACE_SECONDS = 30; // network delay on the auto-submit
+// A student whose accommodation plan gives more time on tests gets 1.5x or 2x (admin/accommodations.html)
+const secondsFor = async (connection, studentId) => Math.round(TEST_SECONDS * ((await accommodations.settingsFor(connection, studentId)).testTimeX || 1));
 
 async function ensureTable(connection) {
     await connection.execute(`
@@ -172,13 +175,15 @@ router.post('/wrs-sprint/start', requireLogin, async (req, res) => {
             const [[{ now }]] = await connection.execute('SELECT NOW() AS now');
             const elapsed = (new Date(now) - new Date(row.started_at)) / 1000;
             const answers = row.answers_json ? JSON.parse(row.answers_json) : {};
-            if (elapsed > TEST_SECONDS + LATE_GRACE_SECONDS) {
+            const seconds = await secondsFor(connection, studentId);
+            if (elapsed > seconds + LATE_GRACE_SECONDS) {
                 await finish(connection, row, answers);
                 return { status: 409, body: { error: 'Time ran out on this attempt. Your saved answers were scored.', expired: true } };
             }
             return { status: 200, body: {
                 questions: publicQuestions(JSON.parse(row.questions_json)),
-                answers, secondsLeft: Math.max(0, Math.round(TEST_SECONDS - elapsed))
+                answers, secondsLeft: Math.max(0, Math.round(seconds - elapsed)),
+                readAloud: (await accommodations.settingsFor(connection, studentId)).readAloud
             } };
         });
         res.status(out.status).json(out.body);
@@ -194,9 +199,10 @@ router.post('/wrs-sprint/save', requireLogin, async (req, res) => {
     try {
         await withConnection(async (connection) => {
             await ensureTable(connection);
+            const seconds = await secondsFor(connection, studentId);
             const [[row]] = await connection.execute(
                 `SELECT id, total, started_at FROM wrs_sprint_attempts WHERE student_id = ? AND week_date = ? AND submitted_at IS NULL
-                 AND started_at > NOW() - INTERVAL ${TEST_SECONDS + LATE_GRACE_SECONDS} SECOND`, [studentId, getLocalDateStr()]);
+                 AND started_at > NOW() - INTERVAL ${seconds + LATE_GRACE_SECONDS} SECOND`, [studentId, getLocalDateStr()]);
             if (row) {
                 await connection.execute('UPDATE wrs_sprint_attempts SET answers_json = ? WHERE id = ?',
                     [JSON.stringify(cleanAnswers(req.body && req.body.answers, row.total)), row.id]);
@@ -222,7 +228,7 @@ router.post('/wrs-sprint/submit', requireLogin, async (req, res) => {
                 const [[{ now }]] = await connection.execute('SELECT NOW() AS now');
                 const elapsed = (new Date(now) - new Date(row.started_at)) / 1000;
                 // Past the deadline, only the last autosave counts.
-                const answers = elapsed <= TEST_SECONDS + LATE_GRACE_SECONDS
+                const answers = elapsed <= (await secondsFor(connection, studentId)) + LATE_GRACE_SECONDS
                     ? cleanAnswers(req.body && req.body.answers, row.total)
                     : (row.answers_json ? JSON.parse(row.answers_json) : {});
                 const reason = ['student', 'time', 'left-test'].includes(req.body && req.body.reason) ? req.body.reason : 'student';

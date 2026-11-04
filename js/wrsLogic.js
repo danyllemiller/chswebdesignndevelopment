@@ -73,6 +73,17 @@
     }
 
     // ── Utilities ─────────────────────────────────────────────────────────────
+
+    // The score boxes on the results page, one per question type the test has.
+    // A type with no questions is left out (the Nevada WPR test has no true/false,
+    // so the practice assessments don't either, as of 2026-11-02).
+    function scoreCols(cols) {
+        var shown = cols.filter(function (c) { return c[1] > 0; });
+        var w = 'col-' + Math.floor(12 / Math.max(1, shown.length));
+        return shown.map(function (c) {
+            return '<div class="' + w + '"><div ' + c[3] + '>' + c[0] + '/' + c[1] + '</div><div class="small text-muted">' + c[2] + '</div></div>';
+        }).join('');
+    }
     function esc(s) {
         if (typeof s !== 'string') return s === undefined ? '' : String(s);
         return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -193,7 +204,7 @@
             + '<div class="alert alert-light border small mb-4">'
             + '<strong>' + total + ' scoreable items</strong>'
             + '<ul class="mb-0 mt-2">'
-            + '<li>' + tfCt + ' True / False</li>'
+            + (tfCt ? '<li>' + tfCt + ' True / False</li>' : '')
             + '<li>' + mItems + ' Matching (' + mSets + ' grouped sets of ' + Math.round(mItems / mSets) + ')</li>'
             + '<li>' + mcCt + ' Multiple Choice</li>'
             + '<li>' + lItems + ' Labeling (' + lDiags + ' grouped diagram' + (lDiags !== 1 ? 's' : '') + ')</li>'
@@ -478,7 +489,7 @@
                 + (ok ? '<span class="badge bg-success">&#10003; Correct</span>' : '<span class="badge bg-danger">&#10007; Incorrect</span>')
                 + '</p>' + (!ok ? hintHtml(item.hint) : '') + '</div>';
         });
-        sections += secHead('True / False', sc.tfRight, sc.tfTotal, '#003087') + tfHtml;
+        if (sc.tfTotal) sections += secHead('True / False', sc.tfRight, sc.tfTotal, '#003087') + tfHtml;
 
         // ── Matching ──────────────────────────────────────────────────────────
         var matchHtml = '';
@@ -568,10 +579,12 @@
             + '<div class="display-2 fw-bold text-' + (pass ? 'success' : 'warning') + ' mb-1">' + pct + '%</div>'
             + '<p class="fw-bold text-dark mb-3">' + sc.right + ' of ' + sc.total + ' correct</p>'
             + '<div class="row g-2 text-center">'
-            + '<div class="col-3"><div class="fw-bold fs-5 text-primary">' + sc.tfRight + '/' + sc.tfTotal + '</div><div class="small text-muted">True / False</div></div>'
-            + '<div class="col-3"><div class="fw-bold fs-5 text-success">' + sc.matchRight + '/' + sc.matchTotal + '</div><div class="small text-muted">Matching</div></div>'
-            + '<div class="col-3"><div class="fw-bold fs-5 text-primary">' + sc.mcRight + '/' + sc.mcTotal + '</div><div class="small text-muted">Mult. Choice</div></div>'
-            + '<div class="col-3"><div class="fw-bold fs-5" style="color:#fd7e14">' + sc.labelRight + '/' + sc.labelTotal + '</div><div class="small text-muted">Labeling</div></div>'
+            + scoreCols([
+                [sc.tfRight, sc.tfTotal, 'True / False', 'class="fw-bold fs-5 text-primary"'],
+                [sc.matchRight, sc.matchTotal, 'Matching', 'class="fw-bold fs-5 text-success"'],
+                [sc.mcRight, sc.mcTotal, 'Mult. Choice', 'class="fw-bold fs-5 text-primary"'],
+                [sc.labelRight, sc.labelTotal, 'Labeling', 'class="fw-bold fs-5" style="color:#fd7e14"']
+            ])
             + '</div>'
             + (pass ? '<div class="alert alert-success mt-3 mb-0 py-2 small">You are on track for the real WRS assessment!</div>'
                     : '<div class="alert alert-warning mt-3 mb-0 py-2 small">Keep reviewing &mdash; you need 75% to pass the real assessment.</div>')

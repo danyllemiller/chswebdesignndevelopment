@@ -69,6 +69,11 @@ async function init() {
     document.querySelectorAll('[data-dir]').forEach(btn => {
         btn.addEventListener('click', () => transfer(btn.dataset.dir));
     });
+    document.getElementById('addRoommateBtn').addEventListener('click', () => housing('add_roommate'));
+    document.getElementById('housingCard').addEventListener('click', e => {
+        const btn = e.target.closest('[data-housing]');
+        if (btn) housing(btn.dataset.housing, btn.dataset.id);
+    });
 
     await loadState();
 }
@@ -167,10 +172,70 @@ function renderState(data) {
     }
     document.querySelectorAll('[data-dir]').forEach(btn => { btn.disabled = isStaffPreview; });
 
+    if (data.housing) renderHousing(data.housing);
     renderTransactions(data.transactions);
     if (!isStaffPreview) {
         maybeShowPaycheckBanner(data.transactions);
         maybeShowLifeEventBanner(data.transactions);
+    }
+}
+
+// Where You Live: an apartment or a home they own, roommates, and the homes
+// they own (live in one, rent out the rest, or rent out all of them and rent
+// an apartment). The server does the math; this lays it out and asks before
+// anything that brings Rent back or loses a tenant.
+let housingState = null;
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function renderHousing(h) {
+    housingState = h;
+    const off = isStaffPreview ? ' disabled' : '';
+    document.getElementById('homeLine').innerHTML = h.home
+        ? `<i class="fas fa-house me-1 text-success"></i>You live in your <b>${esc(h.home.label)}</b>. Instead of rent, you pay its Property Tax &amp; HOA: <b>${money(h.tax_hoa)}</b> every pay period.`
+        : `<i class="fas fa-building me-1 text-primary"></i>You rent an apartment. Rent is 1/3 of your average paycheck: <b>${money(h.rent)}</b> every pay period.`;
+
+    const place = h.home ? `Your ${h.home.label}` : 'Your apartment';   // plain text (textContent below)
+    document.getElementById('roommateList').innerHTML = h.roommates.length
+        ? h.roommates.map(m => `<div class="housing-row"><span><i class="fas fa-user me-1 text-muted"></i>${esc(m.name)}${m.pending ? ' <span class="badge text-bg-warning">moves in next payday</span>' : ''}</span>
+            <button class="btn btn-outline-danger btn-sm" data-housing="remove_roommate" data-id="${m.id}"${off}>Ask to Move Out</button></div>`).join('')
+        : `<div class="small text-muted">No roommates. You pay ${h.home ? 'the utilities' : 'the whole rent and utilities'} yourself.</div>`;
+    document.getElementById('addRoommateBtn').disabled = isStaffPreview;
+    document.getElementById('roommateHelp').textContent = (h.home
+        ? `A roommate rents a spare room: they pay you ${money(h.room_rent)} every payday and split the utilities with you.`
+        : 'A roommate splits the rent and utilities with you, so each of you pays less. But a roommate can come up short on their share, or move out.')
+        + ` ${place} has room for ${h.rooms} roommate${h.rooms === 1 ? '' : 's'}.`;
+
+    document.getElementById('propertyList').innerHTML = h.properties.length
+        ? h.properties.map(p => {
+            const what = p.status === 'live' ? 'You live here.'
+                : p.status === 'rented' ? `Rented to ${esc(p.tenant || 'a tenant')}. They pay you <b>${money(p.tenant_rent)}</b> every payday.`
+                : 'Empty. Nobody lives here, and you still pay its Property Tax &amp; HOA.';
+            const btns = (p.status !== 'rented' ? `<button class="btn btn-primary btn-sm fw-bold" data-housing="rent_out" data-id="${p.id}"${off}>Rent It Out (${money(p.tenant_rent)}/payday)</button>` : `<button class="btn btn-outline-secondary btn-sm" data-housing="stop_renting" data-id="${p.id}"${off}>Stop Renting It</button>`)
+                + (p.status !== 'live' ? ` <button class="btn btn-outline-primary btn-sm" data-housing="move_in" data-id="${p.id}"${off}>Move In</button>` : '');
+            return `<div class="housing-row"><span><b>${esc(p.label)}</b> &mdash; ${what}</span><span>${btns}</span></div>`;
+        }).join('') + `<p class="small text-muted mb-0 mt-2">Renting out a home: your tenant pays you every payday, but you still pay its Property Tax &amp; HOA (${money(h.tax_hoa)}), and repairs and empty months come out of your pocket. If you rent out the home you live in, you move into an apartment and pay Rent again.</p>`
+        : `<div class="small text-muted">You don't own a home yet. Homes are in <a href="/student/budget-game-mall.html">The Mall</a> under Housing. Once you own one, you can live in it or rent it out to a tenant.</div>`;
+}
+
+async function housing(action, id) {
+    const h = housingState, msg = document.getElementById('housingMsg');
+    const p = h && h.properties.find(x => String(x.id) === String(id));
+    if (action === 'rent_out' && p && p.status === 'live'
+        && !confirm(`You'll move out of your ${p.label} and rent an apartment, so Rent (${money(h.rent)}) goes back on your bills. Your tenant pays you ${money(p.tenant_rent)} every payday, starting next payday.\n\nRent it out?`)) return;
+    if (action === 'move_in' && p && p.status === 'rented'
+        && !confirm(`${p.tenant || 'Your tenant'} will move out, and you won't get their rent anymore.\n\nMove into your ${p.label}?`)) return;
+    msg.className = 'small mt-2';
+    msg.textContent = '';
+    try {
+        const out = await apiFetch('/api/student/budget-game/housing', {
+            method: 'POST',
+            body: JSON.stringify({ student_id: studentData.student_id, action, property_id: action === 'remove_roommate' ? undefined : id, roommate_id: action === 'remove_roommate' ? id : undefined })
+        });
+        await loadState();
+        msg.className = 'small mt-2 text-success fw-bold';
+        msg.textContent = out.message || 'Done.';
+    } catch (e) {
+        msg.className = 'small mt-2 text-danger fw-bold';
+        msg.textContent = e.message || 'That didn\'t work. Try again.';
     }
 }
 

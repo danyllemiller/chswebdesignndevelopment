@@ -39,18 +39,20 @@
     /* Detachable "check" portion -- deliberately a different (serif, not
        monospace) feel from the earnings statement above it, like a real
        paycheck's check stub vs. the check itself. */
-    /* Fixed height, not auto -- so every check in a printed stack is
+    /* Fixed 8.25in x 3in, not auto -- so every check in a printed stack is
        identical regardless of a student's name length or dollar amount,
-       which is what actually makes a paper-cutter/perforation pass line
-       up across every page. box-sizing so padding/border count inside
-       that height instead of adding to it. */
+       and always fits inside the top third of the page (11in / 3 = 3.67in)
+       so the sheet folds in thirds for privacy without creasing the check.
+       box-sizing so padding/border count inside that size instead of
+       adding to it. */
     .fake-check {
       font-family: Georgia, 'Times New Roman', serif;
-      width: 100%;
+      width: 8.25in;
+      max-width: 100%;
       box-sizing: border-box;
-      height: 2.75in;
+      height: 3in;
       overflow: hidden;
-      margin: 0 0 1.5rem;
+      margin: 0 auto 1.5rem;
       border: 2px solid #1a3a1a;
       border-radius: 4px;
       padding: 1.1rem 1.4rem;
@@ -84,8 +86,8 @@
     .missing-block { width: 100%; box-sizing: border-box; margin: 1rem 0 0; border: 2px solid #dc3545; border-radius: 4px; padding: .6rem .9rem; background: #fff; }
 
     .stub-sheet:not(:last-child) { page-break-after: always; }
-    /* Uniform 0.25in buffer on every side, on top of the @page margin (also
-       0.25in) -- set on .stub-sheet itself (not body/section.container)
+    /* On screen: a uniform 0.25in buffer on every side (printing sets it to
+       0 and places everything with the @page margin instead, below) -- set on .stub-sheet itself (not body/section.container)
        specifically because it's the element that repeats fresh on every
        single page, unlike a parent container's margin which only ever
        applies once at the start of the whole printed flow. Without this,
@@ -102,12 +104,20 @@
     .fake-check, .paystub-doc { page-break-inside: avoid; }
 
     @media print {
-      /* Tight margins on purpose -- these get printed, cut apart on a
-         paper cutter, and the check portion perforated to look real, so
-         consistent close-to-full-bleed margins matter more than they
-         would for an on-screen document. */
-      @page { margin: 0.25in; }
+      /* Tight side margins on purpose -- 8.5in paper minus 0.125in on each
+         side is exactly the check's 8.25in. The 0.333in top centers the 3in
+         check in the top third of the page; it ends at 3.33in, the first
+         fold is at 3.67in, and the statement starts below it at 3.75in. */
+      @page { size: letter; margin: 0.3333in 0.125in 0.25in; }
+      .stub-sheet { padding: 0 !important; }
+      .fake-check { width: 8.25in; max-width: none; height: 3in; margin: 0 0 0.4167in; }
+      /* The statement keeps its old 7.5in width, inside every printer's
+         printable area, centered under the full-width check. */
+      .paystub-doc, .missing-block { width: 7.5in; margin-left: auto; margin-right: auto; }
       .no-print { display: none !important; }
+      /* The teacher's "Paystubs ready to print" banner (js/payroll-print-alert.js)
+         sits on top of every page -- it must never print on a paystub. */
+      #payroll-print-alert { display: none !important; }
       /* The sitewide /css/dacPrint.css (loaded above) sets body { margin:
          .5in; width: 90%; } for every printed page on the site. Same bug
          as section.container below: a margin/width on <body> is a single

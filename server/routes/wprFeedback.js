@@ -12,6 +12,7 @@ const path = require('path');
 const crypto = require('crypto');
 const multer = require('multer');
 const { withConnection } = require('../db');
+const { sendMail } = require('../lib/mailer');
 
 const DIR = process.env.WPR_FEEDBACK_DIR || '/var/lib/chs-site/wpr-feedback';
 const PILOT_UNTIL = '2026-12-01';   // the pilot questions (roles, ratings, class survey) end after the 12/1 PLC
@@ -58,11 +59,11 @@ const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/
 const pilotOn = () => today() <= PILOT_UNTIL;
 const ipOf = req => String(req.headers['cf-connecting-ip'] || req.ip || '');
 
-// A whole school shares one internet address, so the limits per address are roomy: 120 sends (a few classes'
-// after-test surveys) and 10 screenshots every 15 minutes. The counts stay in memory for 15 minutes at most,
-// as the privacy policy (wpr-practice/privacy.html) promises.
+// A whole school shares one internet address, so the limits per address are roomy: 500 after-test surveys
+// (15 classes of 25 can finish together), 120 other sends and 10 screenshots every 15 minutes. The counts stay
+// in memory for 15 minutes at most, as the privacy policy (wpr-practice/privacy.html) promises.
 const WINDOW = 15 * 60 * 1000;
-const sends = new Map(), shots = new Map();
+const sends = new Map(), surveys = new Map(), shots = new Map();
 function over(counts, req, max) {
     const ip = ipOf(req), now = Date.now(), list = (counts.get(ip) || []).filter(t => now - t < WINDOW);
     const full = list.length >= max;
@@ -93,13 +94,39 @@ router.get('/wpr/feedback/config', (req, res) => {
 });
 
 // POST /wpr/feedback (multipart form, with an optional "screenshot" image)
+// Bug reports and pilot notes are emailed to the WPR inbox as they arrive (server/lib/mailer.js; nothing is
+// sent until SMTP is set up). A class's after-test surveys are not: a whole class at once would flood it, so
+// they stay on the inbox page.
+const MAIL_TO = process.env.FEEDBACK_EMAIL_TO || 'contact@wprpracticepro.com';
+const INBOX_URL = 'https://chswebdesignndevelopment.com/admin/tools/wpr-feedback.html';
+const TYPE_LABEL = { bug: 'Bug', confusing: 'Confusing', idea: 'Idea', great: 'Something great' };
+const SEVERITY_LABEL = { blocks: 'blocks the test', annoying: 'annoying', minor: 'minor' };
+function emailFeedback([kind, role, type, severity, message, expected, ratingsJson, name, contact, page, device, code, screenshot]) {
+    const what = TYPE_LABEL[type] || (kind === 'pilot' ? 'Pilot feedback' : 'Feedback');
+    const gist = String(message || '').replace(/\s+/g, ' ').slice(0, 60);
+    const text = [
+        `New feedback on WPR Practice Pro${kind === 'pilot' ? ' (pilot form)' : ''}`, '',
+        `Type: ${what}${severity ? ` (${SEVERITY_LABEL[severity] || severity})` : ''}`,
+        `From: ${[name, role ? `(${role})` : '', contact ? `<${contact}>` : ''].filter(Boolean).join(' ') || 'no name given'}`,
+        page && `Page: ${page}`, code && `Class code: ${code}`, device && `Device: ${device}`,
+        ratingsJson && `Ratings: ${Object.entries(JSON.parse(ratingsJson)).map(([k, v]) => typeof v === 'number' ? `${k} ${v}/5` : `${k}: ${v}`).join(', ')}`,
+        '', message ? `What happened:\n${message}` : '', expected ? `\nWhat they expected:\n${expected}` : '',
+        '', screenshot ? 'Their screenshot is attached.' : '', `Inbox: ${INBOX_URL}`
+    ].filter(x => x !== false && x !== null && x !== undefined).join('\n');
+    sendMail({
+        to: MAIL_TO, subject: `WPR feedback: ${what}${gist ? ` - ${gist}` : ''}`, text,
+        ...(/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(contact || '') ? { replyTo: contact } : {}),
+        ...(screenshot ? { attachments: [{ filename: screenshot, path: path.join(DIR, screenshot) }] } : {})
+    }).catch(e => console.error('[wpr-feedback] email', e.message));
+}
+
 router.post('/wpr/feedback', (req, res) => {
     upload.single('screenshot')(req, res, async (err) => {
         if (err) return res.status(400).json({ error: err.code === 'LIMIT_FILE_SIZE' ? 'That picture is too big. Use one under 5 MB.' : 'Could not read that form.' });
         const b = req.body || {};
         if (b.website) return res.json({ success: true });   // a hidden field only bots fill in
-        if (over(sends, req, 120)) return res.status(429).json({ error: 'Thanks! That\'s a lot of feedback all at once. Try again in a few minutes.' });
         const kind = pick(b.kind, KINDS) || 'report';
+        if (kind === 'survey' ? over(surveys, req, 500) : over(sends, req, 120)) return res.status(429).json({ error: 'Thanks! That\'s a lot of feedback all at once. Try again in a few minutes.' });
         const role = kind === 'survey' ? 'class-student' : pick(b.role, ROLES);
         const type = pick(b.type, TYPES);
         const message = clean(b.message, 4000);
@@ -128,6 +155,7 @@ router.post('/wpr/feedback', (req, res) => {
                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, row);
             });
             res.json({ success: true });
+            if (kind !== 'survey') emailFeedback(row);
         } catch (e) {
             console.error('[wpr-feedback] save', e);
             res.status(500).json({ error: 'Could not save your feedback. Please try again.' });

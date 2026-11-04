@@ -412,9 +412,10 @@ async function loadPeriodsTab() {
     const finalStubs = stubData.paystubs || [];
     const finalPeriodKeys = new Set(finalStubs.map(s => s.period_start + '_' + s.period_end));
 
-    // Load timesheets to generate estimated periods
+    // Load timesheets to generate estimated periods -- only shifts payroll actually pays (Web Design
+    // classes), so a dual-enrolled student's CS time doesn't inflate the estimate
     const tsData  = await apiFetch(`/api/payroll/timesheets?student_id=${encodeURIComponent(user.student_id)}`);
-    const shifts  = tsData.timesheets || [];
+    const shifts  = (tsData.timesheets || []).filter(t => t.paid !== false);
 
     // Group timesheets by pay period
     const periodMap = {};

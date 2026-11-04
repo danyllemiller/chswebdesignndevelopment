@@ -42,63 +42,14 @@
     </div>
   </section>
 
-  <script src="/js/wrsLogic.js?v=6"></script>
+  <script src="/js/wrsLogic.js?v=7"></script>
   <script>
   (function () {
 
-    // ── PART 1: TRUE / FALSE (25 items) ──────────────────────────────────────
-    var tfSection = [
-      { q: "Using bright, unusual colors in a workplace presentation is always considered unprofessional.",
-        a: "F", hint: "Thoughtful use of color and design can enhance clarity and memorability—creativity in presentations can make key information stand out." },
-      { q: "A professional should verify a new procedure with their supervisor before implementing it, even if the procedure seems obviously correct.",
-        a: "T", hint: "Verifying new procedures protects against implementation errors and ensures the approach aligns with organizational expectations." },
-      { q: "Independently researching a topic your team is struggling with—and sharing your findings—is an example of self-direction.",
-        a: "T", hint: "Self-directed learning that benefits the whole team is one of the highest forms of professional initiative." },
-      { q: "It is acceptable to bend a company policy slightly if doing so helps you meet an important deadline.",
-        a: "F", hint: "Policies exist for legal, safety, and ethical reasons. Bending them 'just this once' creates risk and sets a precedent for future violations." },
-      { q: "Leaving a task unfinished at the end of the day without notifying your team is acceptable if you plan to finish it tomorrow.",
-        a: "F", hint: "Proactively communicating about unfinished work—so teammates can plan accordingly—is a basic work ethic expectation." },
-      { q: "Mediation involves bringing a neutral third party in to help two conflicting parties reach a voluntary agreement.",
-        a: "T", hint: "Mediation is a structured conflict resolution process—the mediator facilitates, but the parties themselves reach the agreement." },
-      { q: "In professional communication, it is generally better to over-explain than to under-explain.",
-        a: "F", hint: "Clear, concise communication is a professional skill. Over-explaining wastes time and can obscure the key message—know your audience and say what they need." },
-      { q: "It is appropriate to ask a colleague about their national origin to learn more about their cultural background.",
-        a: "F", hint: "Questions about national origin can be uncomfortable and may touch on protected characteristics. Follow the colleague's lead—let them share if they choose." },
-      { q: "A customer service professional should always apologize to an upset customer even if the company was not at fault.",
-        a: "F", hint: "Acknowledging a customer's frustration ('I understand this was difficult') differs from admitting fault. Unnecessary apologies can create legal liability." },
-      { q: "The best team decisions are usually made by the most senior person in the group, regardless of others' input.",
-        a: "F", hint: "The best decisions typically emerge from inclusive processes where diverse perspectives are heard—seniority alone doesn't guarantee the best judgment." },
-      { q: "An employee who routinely fails to connect their work to the organization's broader strategic goals is demonstrating weak big-picture thinking.",
-        a: "T", hint: "Consistently missing how your work connects to organizational strategy signals a need to develop big-picture awareness." },
-      { q: "A professional should negotiate their salary only when first accepting a job, not at annual performance review time.",
-        a: "F", hint: "Performance reviews are appropriate occasions to discuss compensation—professionals who advocate for their value at review time often earn more over their career." },
-      { q: "Reading industry publications and attending professional events on your own time is part of continuous learning.",
-        a: "T", hint: "Continuous learning extends beyond required training. Professionals who voluntarily grow their knowledge advance faster and adapt better to change." },
-      { q: "Multitasking between several complex tasks simultaneously leads to better results than focusing deeply on one task at a time.",
-        a: "F", hint: "Research consistently shows that deep focus on one task produces higher quality results than multitasking, which divides attention and increases errors." },
-      { q: "A source published 10 years ago is always too outdated to be useful in current professional research.",
-        a: "F", hint: "Age matters for some content (regulations, technology) but not others (foundational research, historical context). Evaluate currency based on whether the field has changed, not the date alone." },
-      { q: "If your computer is compromised by malware, you should attempt to clean it yourself before notifying your IT department.",
-        a: "F", hint: "Attempting to fix malware yourself can spread it further or destroy evidence IT needs. Report immediately and follow their instructions." },
-      { q: "When collaborating on a document with teammates, using real-time co-editing tools is more efficient than emailing different versions back and forth.",
-        a: "T", hint: "Real-time collaboration tools eliminate version control problems and email clutter, and allow simultaneous editing—a core modern IT productivity skill." },
-      { q: "Training on a tool that you rarely use is not worth the time since you can look things up when needed.",
-        a: "F", hint: "Baseline training reduces errors and builds confidence. Looking things up mid-task slows you down and increases the chance of mistakes—especially under deadline pressure." },
-      { q: "Time-and-a-half pay means 150% of your regular hourly rate.",
-        a: "T", hint: "Time and a half = regular rate × 1.5. So if you earn $14/hr regularly, your overtime rate is $14 × 1.5 = $21/hr." },
-      { q: "Using humor in a professional setting is always inappropriate and should be avoided completely.",
-        a: "F", hint: "Appropriate, inclusive humor can build rapport in workplace settings—what matters is reading the room and ensuring no one is made uncomfortable or excluded." },
-      { q: "A cover letter should be customized for each specific job application rather than using a single generic version.",
-        a: "T", hint: "Generic cover letters are immediately obvious to employers. Customizing each one to the specific role and company demonstrates genuine interest and attention to detail." },
-      { q: "A fire extinguisher can safely be used on any type of fire in the workplace.",
-        a: "F", hint: "Different fires (electrical, chemical, grease) require different extinguisher types. Using the wrong one can make the fire worse—know the PASS technique and your extinguisher's classification." },
-      { q: "If you are unsure how to handle a new job responsibility, the most professional response is to attempt it alone to avoid appearing incompetent.",
-        a: "F", hint: "Asking for guidance on an unfamiliar task shows good judgment, not weakness. Attempting it blind and making a costly mistake is far worse for your reputation." },
-      { q: "A client budget of $5,000 with a 15% contingency reserve means $750 is set aside for unexpected costs.",
-        a: "T", hint: "$5,000 × 0.15 = $750. Contingency reserves protect projects from unexpected cost overruns—a critical financial planning concept." },
-      { q: "When two solutions seem equally effective, the more ethical choice is always the correct professional selection.",
-        a: "T", hint: "When capability is equal, ethical considerations should guide the final choice—professional decision-making always incorporates values alongside effectiveness." }
-    ];
+    // ── PART 1: TRUE / FALSE: none ───────────────────────────────────────────
+    // The Nevada WPR state test has no true/false questions (2026-11-02), so the 25
+    // statements that were here are multiple choice now, at the end of Part 3.
+    var tfSection = [];
 
     // ── PART 2: MATCHING (5 sets × 5 items = 25 items) ───────────────────────
     var matchSection = [
@@ -219,7 +170,7 @@
       }
     ];
 
-    // ── PART 3: MULTIPLE CHOICE (44 items) ───────────────────────────────────
+    // ── PART 3: MULTIPLE CHOICE (68 items) ───────────────────────────────────
     var mcSection = [
       {
         q: "When a standard approach fails to solve a workplace problem, the most creative professional response is to:",
@@ -482,6 +433,157 @@
         options: ["Assign responsibility for a problem to the correct team member","Identify the underlying cause of a problem rather than just treating its symptoms, so it doesn't recur","Estimate the cost of solving a complex problem before committing resources","Evaluate multiple solutions and select the most cost-effective one"],
         answer: "Identify the underlying cause of a problem rather than just treating its symptoms, so it doesn't recur",
         hint: "Root cause analysis prevents recurring problems—fixing a symptom gives temporary relief; fixing the cause prevents the problem from returning."
+      },
+      // ── Rewritten from Part 1's true/false statements (2026-11-02) ──
+      {
+        q: "How should color be used in a workplace presentation?",
+        options: ["Thoughtfully, to make key information clear and memorable","Never; only black and white are professional","As much as possible, with a new color on every slide","Only in the company logo"],
+        answer: "Thoughtfully, to make key information clear and memorable",
+        hint: "Thoughtful use of color and design can enhance clarity and memorability—creativity in presentations can make key information stand out."
+      },
+      {
+        q: "You come up with a new procedure that seems clearly better than the current one. What should you do before using it?",
+        options: ["Check with your supervisor before putting it into practice","Start using it right away since it is clearly better","Teach it to coworkers before telling your supervisor","Use it only when no one is checking your work"],
+        answer: "Check with your supervisor before putting it into practice",
+        hint: "Verifying new procedures protects against implementation errors and ensures the approach aligns with organizational expectations."
+      },
+      {
+        q: "Your team is stuck on an unfamiliar topic. Which action best shows self-direction?",
+        options: ["Research it on your own and share what you learn","Wait for the supervisor to schedule a training","Tell the team the topic is not your responsibility","Work on something else until someone figures it out"],
+        answer: "Research it on your own and share what you learn",
+        hint: "Self-directed learning that benefits the whole team is one of the highest forms of professional initiative."
+      },
+      {
+        q: "Following a company policy will make you miss an important deadline. What should you do?",
+        options: ["Follow the policy and tell your supervisor about the deadline","Bend the policy just this once to meet the deadline","Ignore the policy if no one is likely to notice","Ask a coworker to break the policy for you"],
+        answer: "Follow the policy and tell your supervisor about the deadline",
+        hint: "Policies exist for legal, safety, and ethical reasons. Bending them 'just this once' creates risk and sets a precedent for future violations."
+      },
+      {
+        q: "At the end of the day, a task your team is counting on is not finished. What should you do?",
+        options: ["Tell your team its status and when it will be done","Finish it tomorrow without saying anything","Mark it complete so the team does not worry","Hand it to a coworker without explaining what is left"],
+        answer: "Tell your team its status and when it will be done",
+        hint: "Proactively communicating about unfinished work—so teammates can plan accordingly—is a basic work ethic expectation."
+      },
+      {
+        q: "Which conflict-resolution process brings in a neutral third party to help two sides reach their own agreement?",
+        options: ["Mediation","Compromise","Avoidance","Competition"],
+        answer: "Mediation",
+        hint: "Mediation is a structured conflict resolution process—the mediator facilitates, but the parties themselves reach the agreement."
+      },
+      {
+        q: "Which approach makes professional communication most effective?",
+        options: ["Being clear and concise and giving the audience what it needs","Over-explaining every detail so nothing is missed","Using as few words as possible, even if it is unclear","Repeating the same point several times"],
+        answer: "Being clear and concise and giving the audience what it needs",
+        hint: "Clear, concise communication is a professional skill. Over-explaining wastes time and can obscure the key message—know your audience and say what they need."
+      },
+      {
+        q: "You are curious about a new coworker's cultural background. What is the most professional approach?",
+        options: ["Let them share about their background if they choose","Ask them directly what country they are from","Ask other coworkers about their background","Guess their background from their name"],
+        answer: "Let them share about their background if they choose",
+        hint: "Questions about national origin can be uncomfortable and may touch on protected characteristics. Follow the colleague's lead—let them share if they choose."
+      },
+      {
+        q: "A customer is upset about a delay that was not your company's fault. What is the best response?",
+        options: ["Acknowledge their frustration and explain how you can help","Apologize and say the company made a mistake","Tell them it was not your fault, so there is nothing to discuss","Transfer them to another department right away"],
+        answer: "Acknowledge their frustration and explain how you can help",
+        hint: "Acknowledging a customer's frustration ('I understand this was difficult') differs from admitting fault. Unnecessary apologies can create legal liability."
+      },
+      {
+        q: "How are the best team decisions usually made?",
+        options: ["By hearing team members' input before deciding","By the most senior person, without asking others","By whoever speaks first in the meeting","By a coin toss to keep it fair"],
+        answer: "By hearing team members' input before deciding",
+        hint: "The best decisions typically emerge from inclusive processes where diverse perspectives are heard—seniority alone doesn't guarantee the best judgment."
+      },
+      {
+        q: "An employee finishes tasks but never thinks about how they connect to the organization's goals. Which skill does this employee most need to develop?",
+        options: ["Big-picture thinking","Typing speed","Phone etiquette","Physical stamina"],
+        answer: "Big-picture thinking",
+        hint: "Consistently missing how your work connects to organizational strategy signals a need to develop big-picture awareness."
+      },
+      {
+        q: "Besides when you first accept a job, when is an appropriate time to discuss your pay?",
+        options: ["At your performance review","Never; pay is only discussed when you are hired","During a busy shift in front of customers","In a group email to your coworkers"],
+        answer: "At your performance review",
+        hint: "Performance reviews are appropriate occasions to discuss compensation—professionals who advocate for their value at review time often earn more over their career."
+      },
+      {
+        q: "Reading industry publications and attending professional events on your own time is an example of:",
+        options: ["Continuous learning","Unpaid overtime","Conflict resolution","Delegation"],
+        answer: "Continuous learning",
+        hint: "Continuous learning extends beyond required training. Professionals who voluntarily grow their knowledge advance faster and adapt better to change."
+      },
+      {
+        q: "You have two complex reports to write. Which approach usually produces the best results?",
+        options: ["Focus on one report at a time","Switch between them every few minutes","Work on both while answering messages","Start both and finish whichever feels easier"],
+        answer: "Focus on one report at a time",
+        hint: "Research consistently shows that deep focus on one task produces higher quality results than multitasking, which divides attention and increases errors."
+      },
+      {
+        q: "How should you decide whether a 10-year-old source is still useful for your research?",
+        options: ["Consider whether the topic has changed much since then","Never use it; anything that old is outdated","Always use it; age does not matter","Use it only if it is long"],
+        answer: "Consider whether the topic has changed much since then",
+        hint: "Age matters for some content (regulations, technology) but not others (foundational research, historical context). Evaluate currency based on whether the field has changed, not the date alone."
+      },
+      {
+        q: "You think your work computer has malware. What should you do first?",
+        options: ["Report it to your IT department right away","Try to remove it yourself before telling anyone","Keep working and watch for more problems","Restart the computer and forget about it"],
+        answer: "Report it to your IT department right away",
+        hint: "Attempting to fix malware yourself can spread it further or destroy evidence IT needs. Report immediately and follow their instructions."
+      },
+      {
+        q: "Your team needs to edit the same document this week. What is the most efficient method?",
+        options: ["A shared document everyone can edit in real time","Emailing a new copy back and forth after each change","Printing it and passing the paper copy around","Each person writing a separate version to combine later"],
+        answer: "A shared document everyone can edit in real time",
+        hint: "Real-time collaboration tools eliminate version control problems and email clutter, and allow simultaneous editing—a core modern IT productivity skill."
+      },
+      {
+        q: "Your employer offers training on a tool you use only a few times a year. What is the best reason to take it?",
+        options: ["It reduces mistakes when you do need the tool","It gives you a break from your regular work","You will never need to ask questions about the tool","It guarantees you a raise"],
+        answer: "It reduces mistakes when you do need the tool",
+        hint: "Baseline training reduces errors and builds confidence. Looking things up mid-task slows you down and increases the chance of mistakes—especially under deadline pressure."
+      },
+      {
+        q: "Your regular pay rate is $14.00 per hour. What is your time-and-a-half overtime rate?",
+        options: ["$21.00 per hour","$15.50 per hour","$28.00 per hour","$18.00 per hour"],
+        answer: "$21.00 per hour",
+        hint: "Time and a half = regular rate × 1.5, so $14.00 × 1.5 = $21.00 per hour."
+      },
+      {
+        q: "Which statement about humor at work is most accurate?",
+        options: ["Inclusive humor can build rapport if you read the room","Any humor at work is unprofessional","Jokes about coworkers are fine if they laugh","Humor is only acceptable with customers"],
+        answer: "Inclusive humor can build rapport if you read the room",
+        hint: "Appropriate, inclusive humor can build rapport in workplace settings—what matters is reading the room and ensuring no one is made uncomfortable or excluded."
+      },
+      {
+        q: "What is the best practice for cover letters?",
+        options: ["Customize each one for the specific job and company","Use one generic letter for every application","Copy a sample letter word for word","Skip it unless the employer demands one"],
+        answer: "Customize each one for the specific job and company",
+        hint: "Generic cover letters are immediately obvious to employers. Customizing each one to the specific role and company demonstrates genuine interest and attention to detail."
+      },
+      {
+        q: "Why is it important to know the type of fire extinguisher before you use it?",
+        options: ["The wrong type can make some fires worse","All extinguishers work the same on every fire","Only firefighters may use an extinguisher","The type only matters for outdoor fires"],
+        answer: "The wrong type can make some fires worse",
+        hint: "Different fires (electrical, chemical, grease) require different extinguisher types. Using the wrong one can make the fire worse—know the PASS technique and your extinguisher's classification."
+      },
+      {
+        q: "You are given a new responsibility and are unsure how to handle it. What is the most professional response?",
+        options: ["Ask your supervisor or an experienced coworker for guidance","Try it alone so you do not look incompetent","Put it off until someone else does it","Say it is not part of your job"],
+        answer: "Ask your supervisor or an experienced coworker for guidance",
+        hint: "Asking for guidance on an unfamiliar task shows good judgment, not weakness. Attempting it blind and making a costly mistake is far worse for your reputation."
+      },
+      {
+        q: "A project budget is $5,000, and 15% is set aside as a contingency reserve for unexpected costs. How much is the reserve?",
+        options: ["$750","$500","$1,500","$4,250"],
+        answer: "$750",
+        hint: "$5,000 × 0.15 = $750. A contingency reserve protects a project from unexpected cost overruns."
+      },
+      {
+        q: "Two solutions to a problem are equally effective. How should a professional choose between them?",
+        options: ["Choose the more ethical option","Choose the cheaper option, even if it cuts ethical corners","Choose the one that benefits them personally","Flip a coin"],
+        answer: "Choose the more ethical option",
+        hint: "When capability is equal, ethical considerations should guide the final choice—professional decision-making always incorporates values alongside effectiveness."
       }
     ];
 

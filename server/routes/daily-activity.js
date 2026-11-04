@@ -118,7 +118,7 @@ router.get('/admin/daily-activity', async (req, res) => {
             // right now, so anyone who's already done the work drops off the
             // list immediately instead of needing to visit the exam page first.
             const [attemptRows] = await connection.execute(
-                `SELECT ea.student_id, ea.exam_id, ea.score, ea.total_points,
+                `SELECT ea.student_id, ea.exam_id, ea.score, ea.total_points, ea.timestamp,
                         s.first_name, s.last_name, s.section_id
                  FROM exam_attempts ea
                  JOIN students s ON s.student_id = ea.student_id

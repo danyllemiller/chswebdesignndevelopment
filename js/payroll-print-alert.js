@@ -16,6 +16,8 @@
 
     const bar = document.createElement('div');
     bar.id = 'payroll-print-alert';
+    // never printed, on any page (Bootstrap's d-print-none works even where dacPrint.css isn't loaded)
+    bar.className = 'no-print d-print-none';
     bar.setAttribute('role', 'alert');
     bar.style.cssText = 'position:sticky;top:0;z-index:2000;';
     bar.innerHTML = runs.map(r => `

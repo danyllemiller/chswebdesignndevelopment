@@ -54,15 +54,18 @@ const WORKLIFE_MC = [
       options: ['Flexibility and dependability', 'Speed of typing', 'Creativity in art', 'Popularity with coworkers'],
       answer: 'Flexibility and dependability',
       hint: TEST + 'these questions are testing flexibility and dependability.' + REAL + 'being flexible does not mean having no limits. Dependable employees also tell their supervisor early when they cannot do something.' },
+    // Rewritten from the true/false statements below them until 2026-11-02 (new sides of the same two facts)
+    { q: 'A coworker says, "Our supervisor asks people to stay late during busy weeks, but I always say no." How would most employers see this attitude?',
+      options: ['As a weak work ethic', 'As good time management', 'As strong teamwork', 'As a professional boundary'],
+      answer: 'As a weak work ethic',
+      hint: TEST + 'employers expect flexibility during busy times, so refusing every time reads as a weak work ethic.' + REAL + 'it is fair to say no sometimes. Share big personal plans with your supervisor ahead of time, so conflicts happen less often.' },
+    { q: 'You cannot stay late today. Why is leaving at your scheduled time without telling anyone a poor choice?',
+      options: ['It looks unreliable to your supervisor', 'It is against federal law', 'Your pay is automatically cut', 'Your coworkers must then stay late too'],
+      answer: 'It looks unreliable to your supervisor',
+      hint: TEST + 'leaving without a word looks unreliable.' + REAL + 'it is okay to say no sometimes, as long as you say it directly and politely and offer another option.' },
 ];
 
-const WORKLIFE_TF = [
-    { q: 'When a supervisor asks you to work late during a busy time, employers generally see agreeing to stay as a sign of a strong work ethic.',
-      answer: 'T',
-      hint: TEST + 'true. Staying when needed shows commitment.' + REAL + 'it also helps to share big personal plans with your supervisor ahead of time, so conflicts happen less often.' },
-    { q: 'If you cannot stay late, it is professional to just leave at your scheduled time without telling anyone.',
-      answer: 'F',
-      hint: TEST + 'false. Leaving without a word looks unreliable.' + REAL + 'it is okay to say no sometimes, as long as you say it directly and politely and offer another option.' },
-];
+// The Nevada WPR state test has no true/false questions (2026-11-02); these are multiple choice above now.
+const WORKLIFE_TF = [];
 
 module.exports = { WORKLIFE_MC, WORKLIFE_TF };

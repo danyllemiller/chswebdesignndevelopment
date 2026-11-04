@@ -606,6 +606,7 @@
     <select id="jumpSelect" class="form-select form-select-sm"></select>
     <button id="nextBtn" class="btn btn-outline-light btn-sm">Next <i class="fas fa-chevron-right"></i></button>
     <button id="todayBtn" class="btn btn-outline-info btn-sm">Today</button>
+    <button id="hookBtn" class="btn btn-warning btn-sm fw-bold d-none" title="Open class with today's Hook, Line &amp; Sinker"><i class="fas fa-fish me-1"></i>Hook</button>
     <span id="trackToggle" class="track-toggle btn-group d-none" role="group"></span>
     <span class="nav-bar-divider"></span>
     <div id="toolBeltBar"></div>
@@ -866,6 +867,7 @@ if (!courseCfg) {
   let schedule = {};  // track -> block_num -> date string
   let days = {};      // track -> date string -> block_num (from Jotability; a block can repeat)
   let alsoDays = {};  // track -> date string -> [more block_nums taught the same day] (a combined day)
+  let jotBlocks = {}; // block_num -> Jotability lesson id: slides made from Jotability's lesson plans
   let shownDate = null; // the date being shown when it came from `days`
   let currentBlock = 1;
   let editing = false;
@@ -1221,6 +1223,10 @@ if (!courseCfg) {
     document.getElementById('jumpSelect').value = onClassDay() ? `${shownDate}|${currentBlock}` : `|${currentBlock}`;
     renderBellSchedule(dateStr);
 
+    const hookBtn = document.getElementById('hookBtn');
+    hookBtn.classList.toggle('d-none', !(c && c.hook));
+    hookBtn.onclick = () => window.openHook && window.openHook(content[currentBlock] || {});
+
     const objList = document.getElementById('objectiveList');
     objList.innerHTML = '';
     (c && c.objective || []).forEach(line => {
@@ -1325,7 +1331,15 @@ if (!courseCfg) {
     if (on) editSnapshot = JSON.parse(JSON.stringify(content[currentBlock] || {}));
     render();
   }
-  document.getElementById('editToggle').addEventListener('click', () => setEditing(true));
+  // Web Design slides come from the Jotability lesson plans (teacher, 2026-10-29):
+  // they're changed there, and an edit here would be replaced by the lesson.
+  document.getElementById('editToggle').addEventListener('click', () => {
+    if (jotBlocks[currentBlock]) {
+      if (confirm('This slide comes from your Jotability lesson plan. Change the lesson in Jotability (Lessons) and this slide updates by itself.\n\nOpen Jotability now?')) window.open('https://jotability.com/teacher/', '_blank', 'noopener');
+      return;
+    }
+    setEditing(true);
+  });
   document.getElementById('cancelBtn').addEventListener('click', () => {
     if (editSnapshot) content[currentBlock] = editSnapshot;
     setEditing(false);
@@ -1475,13 +1489,15 @@ if (!courseCfg) {
       if (!data || !data.content) return;
       const changed = JSON.stringify(data.days || {}) !== JSON.stringify(days)
         || JSON.stringify(data.schedule || {}) !== JSON.stringify(schedule)
-        || JSON.stringify(data.content || {}) !== JSON.stringify(content);
+        || JSON.stringify(data.content || {}) !== JSON.stringify(content)
+        || JSON.stringify(data.jot || {}) !== JSON.stringify(jotBlocks);
       if (!changed || editing) return;
       const t = todayStop(), wasOnToday = t ? t.date === shownDate && t.block === currentBlock : currentBlock === findBlockForToday();
       content = data.content || {};
       schedule = data.schedule || {};
       days = data.days || {};
       alsoDays = data.also || {};
+      jotBlocks = data.jot || {};
       populateJumpSelect();
       if (wasOnToday) currentBlock = findBlockForToday(); else showBlock(currentBlock);
       render();
@@ -1806,6 +1822,11 @@ if (!courseCfg) {
 
       let audioCtx = null, analyser = null, stream = null, raf = null;
       let alarmLevel = 70, alarmEnabled = true, alarmActive = false, alarmAudioPrimed = false, alarmTimer = null;
+      // The alarm's own sound (and its echo) reaches the microphone, so after it stops the meter
+      // ignores the mic briefly; before this it set itself straight off again, over and over, in a
+      // quiet room. And it takes LOUD_FOR_MS of sustained noise to set it off, not one bang or cough.
+      const AFTER_ALARM_DEAF_MS = 2000, LOUD_FOR_MS = 1000;
+      let deafUntil = 0, loudSince = 0;
 
       const fill = body.querySelector('.ss-meter-fill');
       const label = body.querySelector('.ss-meter-label');
@@ -1832,9 +1853,11 @@ if (!courseCfg) {
       function primeAlarmAudio() {
         if (alarmAudioPrimed) return;
         alarmAudioPrimed = true;
+        // muted, not volume 0: iPads and iPhones ignore audio.volume (always full volume), so a "silent"
+        // priming played a burst of alarm that the microphone heard and that set the alarm off
         Object.values(ALARM_SOUNDS).forEach(a => {
-          a.volume = 0;
-          a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = alarmVolume; }).catch(() => { a.volume = alarmVolume; });
+          a.muted = true;
+          a.play().then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => { a.muted = false; });
         });
       }
       function activeAlarmSounds() {
@@ -1855,7 +1878,9 @@ if (!courseCfg) {
         }
       }
       function stopAlarm() {
+        if (alarmActive) deafUntil = performance.now() + AFTER_ALARM_DEAF_MS;
         alarmActive = false;
+        loudSince = 0;
         if (alarmTimer) { clearTimeout(alarmTimer); alarmTimer = null; }
         Object.values(ALARM_SOUNDS).forEach(a => { a.pause(); a.currentTime = 0; });
         widgetEl.classList.remove('alarm-active');
@@ -1898,8 +1923,20 @@ if (!courseCfg) {
           const pct = Math.min(100, Math.max(4, Math.round(rms * 260)));
           fill.style.height = pct + '%';
           label.textContent = pct < 25 ? 'Quiet' : pct < 60 ? 'OK' : 'Too Loud';
-          alarmSmoothPct = alarmSmoothPct * 0.7 + pct * 0.3;
-          if (alarmEnabled && !alarmActive && alarmSmoothPct > alarmLevel) startAlarm();
+          const now = performance.now();
+          if (alarmActive || now < deafUntil) {
+            // hearing the alarm itself: start fresh once it's over
+            alarmSmoothPct = 0; loudSince = 0;
+          } else {
+            // about a 0.3 s average, however fast the screen refreshes
+            const dt = Math.min(100, now - (tick.last || now));
+            alarmSmoothPct += (pct - alarmSmoothPct) * (1 - Math.exp(-dt / 300));
+            if (alarmSmoothPct > alarmLevel) {
+              if (!loudSince) loudSince = now;
+              if (alarmEnabled && now - loudSince >= LOUD_FOR_MS) startAlarm();
+            } else loudSince = 0;
+          }
+          tick.last = now;
           raf = requestAnimationFrame(tick);
         }
         tick();
@@ -1991,6 +2028,7 @@ if (!courseCfg) {
       schedule = data.schedule || {};
       days = data.days || {};
       alsoDays = data.also || {};
+      jotBlocks = data.jot || {};
 
       // CS has two tracks (A meets on A-days, B on B-days); WD doesn't, so
       // this ambiguity is exactly why the no-pass banner only ever worked
@@ -2022,6 +2060,65 @@ if (!courseCfg) {
       console.error(err);
     });
 }
+</script>
+
+<!-- Hook, Line & Sinker: opens class, one part at a time (from the Jotability lesson) -->
+<div id="hookOverlay" class="hook-overlay d-none" role="dialog" aria-modal="true" aria-label="Hook, Line and Sinker">
+  <div class="hook-card">
+    <div class="hook-part" data-part="0"><span class="hook-tag tag-hook">HOOK</span><div id="hookText" class="hook-text"></div></div>
+    <div class="hook-part" data-part="1"><span class="hook-tag tag-line">LINE</span><div id="hookLineText" class="hook-text"></div></div>
+    <div class="hook-part" data-part="2"><span class="hook-tag tag-sinker">SINKER</span><div id="hookSinkerText" class="hook-text"></div></div>
+    <div class="hook-actions"><button type="button" id="hookNext" class="btn btn-warning btn-lg fw-bold">Next</button><button type="button" id="hookClose" class="btn btn-outline-light">Close</button></div>
+  </div>
+</div>
+<style>
+  /* margin: auto centers the card when it fits, and starts it at the top (scrollable) when it doesn't;
+     align-items: center pushed a too-tall card's top off the screen where it couldn't be scrolled to */
+  .hook-overlay { position: fixed; inset: 0; z-index: 3000; background: rgba(8, 10, 40, .94); display: flex; overflow-y: auto; padding: 3vh 4vw; }
+  .hook-card { width: min(1400px, 100%); margin: auto; display: flex; flex-direction: column; gap: 3.5vh; }
+  .hook-part { display: flex; gap: 2vw; align-items: baseline; transition: opacity .35s; }
+  .hook-part.hidden { opacity: 0; }
+  .hook-tag { flex: none; min-width: 9.5rem; text-align: center; font-weight: 900; letter-spacing: .1em; font-size: 1.6rem; color: #fff; border-radius: .6rem; padding: .3rem .8rem; }
+  .tag-hook { background: #c2410c; } .tag-line { background: #2f3fb5; } .tag-sinker { background: #2b7a33; }
+  .hook-text { color: #fff; font-size: var(--hook-size, clamp(1.4rem, 2.6vw, 2.6rem)); line-height: 1.35; font-weight: 600; }
+  .hook-actions { display: flex; gap: 1rem; justify-content: flex-end; }
+</style>
+<script>
+  // The Hook button shows when this slide's lesson has a hook. Next (or Space / Right arrow)
+  // reveals LINE, then SINKER, then closes into the agenda; Esc closes.
+  (function () {
+    const overlay = document.getElementById('hookOverlay'), next = document.getElementById('hookNext');
+    let step = 0;
+    function showStep() {
+      overlay.querySelectorAll('.hook-part').forEach(p => p.classList.toggle('hidden', Number(p.dataset.part) > step));
+      next.textContent = step < 2 ? 'Next' : 'Start class';
+    }
+    // All three parts are laid out from the start (so nothing jumps as they're revealed), so a long
+    // hook made the card taller than the screen. Shrink the text until the whole card fits.
+    function fit() {
+      if (overlay.classList.contains('d-none')) return;
+      const card = overlay.querySelector('.hook-card'), cs = getComputedStyle(overlay);
+      const room = overlay.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      overlay.style.removeProperty('--hook-size');
+      let size = parseFloat(getComputedStyle(document.getElementById('hookText')).fontSize);
+      while (card.offsetHeight > room && size > 14) { size -= 1; overlay.style.setProperty('--hook-size', size + 'px'); }
+    }
+    window.addEventListener('resize', fit);
+    window.openHook = c => {
+      document.getElementById('hookText').textContent = c.hook || '';
+      document.getElementById('hookLineText').textContent = c.hookLine || '';
+      document.getElementById('hookSinkerText').textContent = c.hookSinker || '';
+      step = 0; showStep(); overlay.classList.remove('d-none'); overlay.scrollTop = 0; fit(); next.focus();
+    };
+    const close = () => overlay.classList.add('d-none');
+    next.addEventListener('click', () => { if (step < 2) { step++; showStep(); } else close(); });
+    document.getElementById('hookClose').addEventListener('click', close);
+    document.addEventListener('keydown', e => {
+      if (overlay.classList.contains('d-none')) return;
+      if (e.key === 'Escape') { close(); e.preventDefault(); }
+      else if (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'Enter') { next.click(); e.preventDefault(); e.stopPropagation(); }
+    }, true);
+  })();
 </script>
 </body>
 </html>
