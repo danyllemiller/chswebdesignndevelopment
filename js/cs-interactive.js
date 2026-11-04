@@ -1065,6 +1065,7 @@ let activeNoteId = null;
     // submitted (see saveEvaluationAndAggregate in server/routes/projects.js) --
     // a self-only submission stays 'partial' and does not unlock the exam.
     let projectStatus = {};
+    let projectAfterTest = false;  // may take a unit test before its project (server/lib/projectExemptions.js)
     // chapter_projects rows for CS, cached forever after the first fetch since
     // the spec (chapter_project_id/exam_id per unit) doesn't change at runtime --
     // only projectStatus needs to be re-fetched as evaluations come in.
@@ -1205,6 +1206,7 @@ const checkProgressAndGate = async (isAutoAdvance = false) => {
                         const aggData = await aggRes.json();
                         // Excused students (server/lib/projectExemptions.js) never need the project.
                         projectStatus[activeUnit.unitNum] = aggData.projectExempt ? 'excused' : (aggData.aggregate ? aggData.aggregate.status : null);
+                        projectAfterTest = !!aggData.projectAfterTest;
                     }
                 }
             } catch (e) { console.warn("Project status API unavailable:", e); }
@@ -1371,7 +1373,7 @@ else if (activeTab.type === 'EXAM') {
                 const worksUnlocked   = bypassWorksheets || hasAllChapWork;
                 const scaleUnlocked   = bypassPreScale   || hasPreScale;
                 const diagUnlocked    = bypassDiagnostic || hasPreTest;
-                const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || (projectStatus[activeUnit.unitNum] === 'complete' || projectStatus[activeUnit.unitNum] === 'excused');
+                const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || (projectStatus[activeUnit.unitNum] === 'complete' || projectStatus[activeUnit.unitNum] === 'excused') || projectAfterTest;
                 const examUnlocked    = worksUnlocked && scaleUnlocked && diagUnlocked && projectUnlocked;
 
                 if (!examUnlocked && dom.examOverlay) {
@@ -2462,7 +2464,7 @@ if (chapBtn) {
                     const scaleUnlocked   = bypassPreScale   || _hasPreScale;
                     const diagUnlocked    = bypassDiagnostic || _hasPreTest;
                     const worksUnlocked   = bypassWorksheets || allChaptersDone;
-                    const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || (projectStatus[activeUnit.unitNum] === 'complete' || projectStatus[activeUnit.unitNum] === 'excused');
+                    const projectUnlocked = bypassProject    || PROJECT_EXEMPT_UNITS.includes(activeUnit.unitNum) || (projectStatus[activeUnit.unitNum] === 'complete' || projectStatus[activeUnit.unitNum] === 'excused') || projectAfterTest;
 
                     if (scaleUnlocked && diagUnlocked && worksUnlocked && projectUnlocked) {
                         window.open(`/exams/cs-unit-${activeUnit.unitNum}-exam.html`, '_blank');
