@@ -157,8 +157,10 @@ Answer: False"></textarea>
             <option value="half">50 questions, 40 minutes</option>
             <option value="short">25 questions, 20 minutes</option>
             <option value="sprint">10-minute Sprint: 100 questions, answer as many as you can</option>
-          </select></div>
-        <div><label class="form-label fw-bold" for="src">Questions from</label>
+            <option value="cfa">Baseline CFA: the PLC's 50 questions, untimed</option>
+          </select>
+          <div id="cfaNote" class="small text-muted mt-2 d-none">Every student gets the same 50 questions, each in their own order, with no time limit. These questions never show up on practice tests.</div></div>
+        <div id="srcBox"><label class="form-label fw-bold" for="src">Questions from</label>
           <select id="src" class="form-select">
             <option value="standard">Standard WRS practice questions</option>
             <option value="mixed">Standard questions + question banks (up to half the test)</option>
@@ -177,6 +179,12 @@ Answer: False"></textarea>
     document.getElementById('manageBanks').addEventListener('click', () => {
       if (!passEl.value.trim()) { passEl.focus(); passEl.classList.add('is-invalid'); return; }
       rememberPass(passEl.value); showBanks();
+    });
+    // The Baseline CFA always uses its own questions, so the question source doesn't apply
+    document.getElementById('len').addEventListener('change', e => {
+      const cfa = e.target.value === 'cfa';
+      document.getElementById('srcBox').classList.toggle('d-none', cfa);
+      document.getElementById('cfaNote').classList.toggle('d-none', !cfa);
     });
     document.getElementById('src').addEventListener('change', async (e) => {
       const box = document.getElementById('bankPick');
@@ -271,7 +279,7 @@ Answer: False"></textarea>
     const st = data.students;
     const done = st.filter(s => s.status === 'submitted');
     const sorted = [...st].sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName));
-    const timed = data.timed !== false, cols = timed ? 10 : 9;
+    const timed = data.timed !== false, cols = timed ? 10 : 8;
     const testing = st.filter(s => s.status === 'testing').length;
     screen.innerHTML = `
       ${data.endedAt ? `<div class="alert alert-warning"><i class="fas fa-hourglass-half me-1"></i><strong>Test ended at ${clock(data.endedAt)}.</strong> Students can see their answers and save their report until <strong>${clock(data.expiresAt)}</strong>. Then everything is erased, including this page. Download what you need now.</div>` : ''}
@@ -295,11 +303,11 @@ Answer: False"></textarea>
         ${done.length ? `<div><span class="fs-3 fw-bold">${Math.round(done.reduce((s, x) => s + pct(x.result.correct, x.result.total), 0) / done.length)}%</span> class average</div>` : ''}
       </div>
       <div class="table-responsive mb-3"><table class="table table-sm align-middle mb-0">
-        <thead class="table-light"><tr><th>Student</th><th>ID</th><th class="num">Status</th><th class="num">Time left</th>${timed ? '<th class="num">Time allowed</th>' : ''}<th class="num">Supports</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th></tr></thead>
+        <thead class="table-light"><tr><th>Student</th><th>ID</th><th class="num">Status</th>${timed ? '<th class="num">Time left</th><th class="num">Time allowed</th>' : ''}<th class="num">Supports</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th></tr></thead>
         <tbody>${sorted.length ? sorted.map(s => `<tr>
           <td class="fw-bold">${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td>
           <td class="num"><span class="pill ${s.paused ? 'paused' : s.status}">${s.paused ? 'paused' : s.status}</span></td>
-          <td class="num">${s.status === 'testing' ? fmtLeft(s.secondsLeft) : ''}</td>
+          ${timed ? `<td class="num">${s.status === 'testing' ? fmtLeft(s.secondsLeft) : ''}</td>` : ''}
           ${timed ? `<td class="num">${timeCell(s)}</td>` : ''}
           <td class="num">${supCell(s)}</td>
           <td class="num">${s.result ? s.result.answered : s.answeredSoFar}</td>

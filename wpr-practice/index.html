@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  <script src="/js/wrs-test-ui.js?v=7"></script>
+  <script src="/js/wrs-test-ui.js?v=8"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -51,6 +51,7 @@
     if (!res.ok) { const e = new Error(data.error || 'Something went wrong.'); e.status = res.status; throw e; }
     return data;
   }
+  const untimed = () => me && me.seconds == null;   // the Baseline CFA has no time limit
   const fmtTime = s => {
     const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
     return [h ? `${h} hour${h > 1 ? 's' : ''}` : '', m ? `${m} minutes` : ''].filter(Boolean).join(' ') || '0 minutes';
@@ -93,14 +94,14 @@
       <h1 class="h4 fw-bold mb-1">Ready, ${esc(me.name || '')}?</h1>
       <p class="text-muted">${esc(me.label)}</p>
       <ul class="mb-3">
-        <li><strong>${me.count} questions</strong>, multiple choice like the state test, on Nevada Workplace Readiness Skills, including workplace safety. You have <strong>${fmtTime(me.seconds)}</strong>.</li>
-        <li>Answer as many as you can. The test submits itself when time runs out.</li>
+        <li><strong>${me.count} questions</strong>, multiple choice like the state test, on Nevada Workplace Readiness Skills, including workplace safety. ${untimed() ? '<strong>There is no time limit.</strong> Take your time.' : `You have <strong>${fmtTime(me.seconds)}</strong>.`}</li>
+        <li>${untimed() ? 'Answer every question. Nothing is submitted until you click <strong>Submit test</strong> on the Review screen.' : 'Answer as many as you can. The test submits itself when time runs out.'}</li>
         <li>Like the state test: <strong>Flag</strong> questions to come back to, use the on-screen <strong>Calculator</strong> and <strong>Scratch Paper</strong>, and check the <strong>Review</strong> screen before you submit.</li>
         <li class="text-danger fw-bold">The test runs full screen. Do not leave it. Switching tabs, opening another site, exiting full screen, or translating the page locks the test with a warning and tells your teacher. The second time, your test is submitted.</li>
         <li>The test is in English only, like the state test. Translators are turned off.</li>
         <li>When you finish you'll see your score right away. Your answers and your report unlock when your teacher ends the test.</li>
       </ul>
-      <button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-expand me-2"></i>${started ? 'Resume the test (the clock kept running)' : 'Start the test (full screen)'}</button>`;
+      <button id="startBtn" class="btn btn-primary btn-lg fw-bold w-100"><i class="fas fa-expand me-2"></i>${started ? (untimed() ? 'Resume the test' : 'Resume the test (the clock kept running)') : 'Start the test (full screen)'}</button>`;
     document.getElementById('startBtn').addEventListener('click', start);
   }
 
@@ -123,6 +124,7 @@
         readAloud: !!data.readAloud,
         paused: !!data.paused,
         noTranslate: true,   // the state test can't be translated, so the practice can't either
+        untimed: data.secondsLeft == null,   // the Baseline CFA
         submit: async (answers, reason) => {
           const out = await api('/wpr/submit', { code: me.code, token: me.token, answers, reason });
           me.submitted = true; me.reason = out.endReason || reason;

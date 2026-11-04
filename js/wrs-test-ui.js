@@ -22,7 +22,8 @@
  *                   clockEvery,
  *                   readAloud, paused,                    // supports the teacher turned on (WPR Practice): a Read aloud
  *                                                         // button, and the clock stopped for a break
- *                   noTranslate });                       // true: translating the page counts as leaving
+ *                   noTranslate,                          // true: translating the page counts as leaving
+ *                   untimed });                           // true: no clock and no time-up submit (the Baseline CFA)
  *   WrsTestUI.reviewHtml(result)                // results + every answered question
  *   WrsTestUI.scoreHtml(result)                 // just the score (answers held until the teacher ends the test)
  */
@@ -139,6 +140,7 @@
         const mount = opts.mount;
         const questions = opts.questions;
         const answers = opts.answers || {};
+        const untimed = opts.untimed === true;
         let endAt = Date.now() + opts.secondsLeft * 1000;
         const flagKey = opts.flagKey || 'wt_flags';
         let flags = new Set();
@@ -157,6 +159,7 @@
         document.body.classList.add('wt-locked');
 
         function timerText() {
+            if (untimed) return { s: Infinity, text: 'No limit' };
             const s = paused ? pausedLeft : Math.max(0, Math.round((endAt - Date.now()) / 1000));
             const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
             return { s, text: h ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}` };
@@ -183,7 +186,7 @@
         function bar(title) {
             return `<div class="wt-bar">
                 <div class="d-flex align-items-center gap-3">
-                  <div><div class="small opacity-75 fw-bold">TIME REMAINING</div><div id="wtTimer" class="wt-timer">--:--</div></div>
+                  <div><div class="small opacity-75 fw-bold">${untimed ? 'UNTIMED' : 'TIME REMAINING'}</div><div id="wtTimer" class="wt-timer">--:--</div></div>
                   <div class="fw-bold d-none d-sm-block">${title}</div>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">

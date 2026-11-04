@@ -25,13 +25,16 @@ const router = express.Router();
 const crypto = require('crypto');
 const fs = require('fs');
 const { buildTest } = require('../lib/wrsPool');
+const { loadCfa } = require('../lib/wprCfaQuestions');
 const { loadReadyQuestions } = require('./wprBanks');
 
 const LENGTHS = {
     sprint: { label: '10-minute Sprint (100 questions)', count: 100, seconds: 600 },
     short: { label: '25 questions, 20 minutes', count: 25, seconds: 1200 },
     half: { label: '50 questions, 40 minutes', count: 50, seconds: 2400 },
-    full: { label: 'Full state practice: 100 questions, 1 hour', count: 100, seconds: 3600 }
+    full: { label: 'Full state practice: 100 questions, 1 hour', count: 100, seconds: 3600 },
+    // The PLC's common baseline (wprCfaQuestions.js): the same questions for every student, untimed
+    cfa: { label: 'Baseline CFA (untimed)', count: 50, seconds: 0, untimed: true }
 };
 const SESSION_HOURS = 12;
 const GRACE_SECONDS = 30;
@@ -42,12 +45,14 @@ const RELEASE_MINUTES = 15;   // after the teacher ends the test: students see t
 const sessions = new Map(); // code -> session
 
 // One student's time limit: the session's, or more if the teacher gave them time and a half or double
-// time (POST /wpr/session/:code/time).
-const secondsFor = (session, st) => Math.round(session.seconds * (st.timeX || 1));
+// time (POST /wpr/session/:code/time). An untimed test (the Baseline CFA) never runs out.
+const secondsFor = (session, st) => session.untimed ? Infinity : Math.round(session.seconds * (st.timeX || 1));
 // Seconds of that time a student has used. The clock stops while the teacher has them paused for a break
 // (POST /wpr/session/:code/supports).
 const usedSeconds = (st, now = Date.now()) => (now - st.startedAt - (st.pausedMs || 0) - (st.pausedAt ? now - st.pausedAt : 0)) / 1000;
 const pausedSeconds = (st, now = Date.now()) => Math.round(((st.pausedMs || 0) + (st.pausedAt ? now - st.pausedAt : 0)) / 1000);
+// Seconds a student has left, or null on an untimed test
+const secondsLeft = (session, st, now = Date.now()) => session.untimed ? null : Math.max(0, Math.round(secondsFor(session, st) - usedSeconds(st, now)));
 
 function writeActiveMarker() {
     const now = Date.now();
@@ -153,7 +158,15 @@ function bankItem(x) {
     const options = isTf ? ['True', 'False'] : shuffled(x.options);
     return { kind: isTf ? 'tf' : 'mc', topic: 'bank', prompt: isTf ? 'True or false?' : '', q: x.q, options, correct: options.findIndex(o => o.toLowerCase() === String(x.answer).toLowerCase()), hint: '' };
 }
+// The Baseline CFA: every student gets the same questions, in their own order, with the choices shuffled
+function cfaTest() {
+    return shuffled(loadCfa().items).map(x => {
+        const options = shuffled(x.options);
+        return { kind: 'mc', topic: 'cfa', prompt: x.prompt || '', q: x.q, options, correct: options.indexOf(x.answer), hint: '', indicator: x.indicator };
+    }).filter(q => q.correct >= 0);
+}
 function buildSessionTest(session) {
+    if (session.length === 'cfa') return cfaTest();
     if (session.source === 'standard' || !session.bankQs || !session.bankQs.length) return buildTest(session.count);
     const bank = shuffled(session.bankQs).map(bankItem).filter(q => q.correct >= 0);
     if (session.source === 'bank') return bank.slice(0, session.count);
@@ -176,10 +189,13 @@ router.post('/wpr/session', async (req, res) => {
         return res.status(401).json({ error: 'That teacher passcode isn\'t right.' });
     }
     const length = LENGTHS[body.length] ? body.length : 'full';
+    // The Baseline CFA only runs once the PLC's review is final (never the draft), and only on its own questions
+    const cfa = length === 'cfa' ? loadCfa() : null;
+    if (length === 'cfa' && (!cfa || cfa.draft || !(cfa.items || []).length)) return res.status(409).json({ error: 'The Baseline CFA isn\'t ready yet. Pick another test.' });
     // Where questions come from: the standard WRS pool, the standard pool plus
     // teacher question banks (server/routes/wprBanks.js), or only the banks.
     // Bank questions are loaded once here, not per student.
-    const source = ['mixed', 'bank'].includes(body.source) ? body.source : 'standard';
+    const source = !cfa && ['mixed', 'bank'].includes(body.source) ? body.source : 'standard';
     let bankQs = [];
     if (source !== 'standard') {
         try { bankQs = await loadReadyQuestions(body.banks); } catch (e) { console.error('[wpr] banks', e); }
@@ -191,6 +207,10 @@ router.post('/wpr/session', async (req, res) => {
         code, teacherToken: token(), teacher: clean(body.teacher, 60), length, ...LENGTHS[length], source, bankQs,
         createdAt: now, lastActive: now, expiresAt: now + SESSION_HOURS * 3600 * 1000, students: new Map()
     };
+    if (cfa) {
+        session.count = cfa.items.length;
+        session.label = `Baseline CFA: ${cfa.items.length} questions, untimed`;
+    }
     // Only-bank tests can't be longer than the bank.
     if (source === 'bank' && bankQs.length < session.count) {
         session.count = bankQs.length;
@@ -209,8 +229,8 @@ router.get('/wpr/session/:code', (req, res) => {
     const students = [...s.students.values()].map(st => ({
         firstName: st.firstName, lastName: st.lastName, studentId: st.studentId,
         status: st.submittedAt ? 'submitted' : st.startedAt ? 'testing' : 'joined',
-        secondsLeft: st.startedAt && !st.submittedAt ? Math.max(0, Math.round(secondsFor(s, st) - usedSeconds(st, now))) : null,
-        timeX: st.timeX || 1, secondsAllowed: secondsFor(s, st),
+        secondsLeft: st.startedAt && !st.submittedAt ? secondsLeft(s, st, now) : null,
+        timeX: st.timeX || 1, secondsAllowed: s.untimed ? null : secondsFor(s, st),
         readAloud: !!st.readAloud, paused: !!(st.pausedAt && !st.submittedAt), pausedSeconds: st.startedAt ? pausedSeconds(st, now) : 0,
         answeredSoFar: st.submittedAt ? st.result.answered : Object.keys(st.answers || {}).length,
         violations: st.violations, endReason: st.endReason || '', submittedAt: st.submittedAt || null,
@@ -221,7 +241,7 @@ router.get('/wpr/session/:code', (req, res) => {
             yours: st.answers[i] !== undefined ? q.options[st.answers[i]] : '', right: st.answers[i] !== undefined ? st.answers[i] === q.correct : null
         })) : null
     }));
-    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, endedAt: s.endedAt || null, timed: s.seconds > 0, students });
+    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, endedAt: s.endedAt || null, timed: !s.untimed, students });
 });
 
 // POST /wpr/session/:code/end -- the teacher ends the test. Anyone still testing is scored on their saved
@@ -252,6 +272,7 @@ router.post('/wpr/session/:code/time', (req, res) => {
     if (!s) return res.status(404).json({ error: 'Session not found. It may have ended or expired.' });
     const st = s.students.get(String((req.body || {}).studentId || ''));
     if (!st) return res.status(404).json({ error: 'That student isn\'t in this session.' });
+    if (s.untimed) return res.status(400).json({ error: 'This test has no time limit.' });
     const x = Number(req.body.x);
     if (!TIME_X.includes(x)) return res.status(400).json({ error: 'Pick standard time, time and a half, or double time.' });
     if (st.submittedAt) return res.status(409).json({ error: 'That student already finished.' });
@@ -322,7 +343,7 @@ router.post('/wpr/join', (req, res) => {
     // device), including after the teacher ends the test, when their answers and report unlock.
     // Their key stays the same, so a results page they still have open elsewhere keeps working.
     if (st && st.submittedAt) {
-        return res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: secondsFor(session, st), started: true, submitted: true, endReason: st.endReason });
+        return res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: session.untimed ? null : secondsFor(session, st), started: true, submitted: true, endReason: st.endReason });
     }
     if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
     if (!st && session.students.size >= MAX_STUDENTS) return res.status(409).json({ error: `This class code is full (${MAX_STUDENTS} students). Check with your teacher.` });
@@ -332,7 +353,7 @@ router.post('/wpr/join', (req, res) => {
     } else {
         st.token = token(); // rejoining (e.g. after a refresh) issues a fresh token
     }
-    res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: secondsFor(session, st), started: !!st.startedAt });
+    res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: session.untimed ? null : secondsFor(session, st), started: !!st.startedAt });
 });
 
 // POST /wpr/start -- { code, token } begins (or resumes) the clock
@@ -351,7 +372,7 @@ router.post('/wpr/start', (req, res) => {
         finish(session, st, st.answers, 'time');
         return res.status(409).json({ error: 'Time ran out. Your saved answers were scored.' });
     }
-    res.json({ questions: publicQuestions(st.questions), answers: st.answers, secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - elapsed)),
+    res.json({ questions: publicQuestions(st.questions), answers: st.answers, secondsLeft: secondsLeft(session, st),
         readAloud: !!st.readAloud, paused: !!st.pausedAt });
 });
 
@@ -362,7 +383,7 @@ router.post('/wpr/clock', (req, res) => {
     if (error) return res.status(404).json({ error });
     if (st.submittedAt) return res.json({ secondsLeft: 0 });   // the teacher ended the test: the student's screen wraps up
     if (!st.startedAt) return res.json({ secondsLeft: null, readAloud: !!st.readAloud });
-    res.json({ secondsLeft: Math.max(0, Math.round(secondsFor(session, st) - usedSeconds(st))), readAloud: !!st.readAloud, paused: !!st.pausedAt });
+    res.json({ secondsLeft: secondsLeft(session, st), readAloud: !!st.readAloud, paused: !!st.pausedAt });
 });
 
 // POST /wpr/results -- { code, token } -> 'testing', 'held' (the score only), or 'released' once the teacher
