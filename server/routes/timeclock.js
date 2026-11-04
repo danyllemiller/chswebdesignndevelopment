@@ -3,7 +3,8 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { withConnection } = require('../db');
-const { getCurrentSchoolYear, requireLogin, requireSelfOrStaff } = require('../helpers');
+const { getCurrentSchoolYear, requireLogin, requireSelfOrStaff, isStaffSession } = require('../helpers');
+const { loadClockinDays } = require('../lib/clockinDays');
 const { pickWprQuestion, pickWprMcQuestion, WPR_MC_QUESTIONS } = require('../wprQuestionBank');
 
 // Client-side JS errors on the timeclock widget were failing completely
@@ -157,6 +158,41 @@ function isOnTime(startTimeStr, now = new Date()) {
     return (nowMinutes - startMinutes) <= 5;
 }
 
+// When a period's class ends on a date. A minimum day with no bell rows of
+// its own (B_MIN) uses its full day's, which only ever ends later.
+async function getBellEndTime(connection, dayTypes, dateStr, period) {
+    const key = getBellScheduleKeyForDate(dayTypes, dateStr);
+    if (!key) return null;
+    const full = key.replace(/_MIN$/, '');
+    const p = String(period || '').trim().toUpperCase();
+    const [rows] = await connection.execute('SELECT schedule_type, period_label, end_time FROM bell_schedule WHERE schedule_type IN (?, ?)', [key, full]);
+    const pick = k => rows.find(r => r.schedule_type === k && r.period_label === p) || rows.find(r => r.schedule_type === k && p.includes(r.period_label));
+    const row = pick(key) || pick(full);
+    return row ? row.end_time : null;
+}
+
+// The clock-in happens in class, on a day the class meets, and a missed one
+// can't be made up (teacher 2026-11-04): not after the period has ended, and
+// not on a day that period doesn't meet. The auto-popup and status check in
+// js/student/timeclock.js already closed clock-in at the end of class, but
+// the manual Clock In button never checked, so this is the real gate.
+// Walking in late is still fine (it loses the on-time point). A period with
+// no course (aides) isn't graded, so it isn't held to this. Returns the
+// message to show, or null when clock-in is open.
+async function clockinClosed(connection, period, now = new Date()) {
+    if (!periodToCourseKeyServer(period)) return null;
+    const p = String(period || '').trim().toUpperCase();
+    const today = getLocalDateStr(now);
+    const days = await loadClockinDays(connection);
+    if (!days.meets(p, today)) return `Your class (${p}) doesn't meet today, so there's no clock-in. A missed clock-in can't be made up.`;
+    const end = await getBellEndTime(connection, await getDayTypes(connection), today, p);
+    if (!end) return null;
+    const [eh, em] = String(end).split(':').map(Number);
+    if (now.getHours() * 60 + now.getMinutes() <= eh * 60 + em) return null;
+    const at = `${((eh + 11) % 12) + 1}:${String(em).padStart(2, '0')} ${eh < 12 ? 'AM' : 'PM'}`;
+    return `Clock-in for ${p} closed when class ended at ${at}. A missed clock-in can't be made up.`;
+}
+
 // Deterministic hash so every student in the same course sees the exact
 // same question for the whole pair-group window, without needing to
 // coordinate or store which question was "already picked" anywhere.
@@ -210,7 +246,10 @@ router.get('/timeclock/status', requireSelfOrStaff(), async (req, res) => {
                 : 'SELECT * FROM clockins WHERE student_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC LIMIT 1';
             const params = period ? [student_id, period, today] : [student_id, today];
             const [rows] = await connection.execute(sql, params);
-            if (rows.length === 0) return { mode: 'in' };
+            if (rows.length === 0) {
+                const closed = period ? await clockinClosed(connection, period) : null;
+                return closed ? { mode: 'in', closed } : { mode: 'in' };
+            }
             const type = rows[0].type;
             return { mode: type === 'out' ? 'done' : 'out', ...rows[0] };
         });
@@ -551,6 +590,10 @@ router.post('/timeclock/save', requireSelfOrStaff(), async (req, res) => {
     const today = getLocalDateStr();
     const period = section_id || '';
     try {
+        if (mode === 'in' && !isStaffSession(req)) {
+            const closed = await withConnection(connection => clockinClosed(connection, period));
+            if (closed) return res.status(403).json({ error: closed });
+        }
         await withConnection(async (connection) => {
             const question = prompt ? String(prompt).slice(0, 2000) : null;
             try { await ensureTimesheetQuestionCols(connection); } catch (e) { console.error('[timeclock] question columns:', e.message); }
