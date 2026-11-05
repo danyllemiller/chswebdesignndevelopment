@@ -5,6 +5,7 @@ const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen, requireSelfO
 const { insertQuestionDetails } = require('../lib/missedQuestionsStore');
 const { dailyOverrideCode, isValidDailyCode } = require('../lib/dailyCode');
 const { isCsUnitProject, syncCsProjectGrade } = require('../lib/csProjectGate');
+const { syncAsChapterTest } = require('../lib/asChapterTests');
 const { clockinDate, loadClockinDays } = require('../lib/clockinDays');
 const accommodations = require('../lib/accommodations');
 
@@ -569,6 +570,14 @@ router.post('/submit-exam', async (req, res) => {
                 'INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0) ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0',
                 [student_id, exam_id, score, effectiveTotalPoints]
             );
+        }
+        // An AS student's WD2 chapter test also counts in their own AS
+        // gradebook (server/lib/asChapterTests.js). Like the detail capture
+        // below, it must never fail the real grade save.
+        try {
+            await syncAsChapterTest(connection, student_id, exam_id);
+        } catch (asErr) {
+            console.error('[submit-exam] failed to copy the score into the AS gradebook', asErr);
         }
         // Captures the same per-question detail the PDF report used to be
         // the only record of (server/routes/missed-questions.js), directly
