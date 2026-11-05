@@ -216,13 +216,30 @@ Answer: False"></textarea>
     });
   }
 
+  // A pilot-test recording (server/lib/wprBetaLog.js): while the server says it's recording (data.rec),
+  // what the teacher does here (downloads, ending the test, supports) and any errors go to the server too.
+  const TRec = (() => {
+    let queue = [], on = false;
+    setInterval(() => {
+      if (!on || !queue.length || !sess) return;
+      fetch('/api/wpr/telemetry', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-teacher-token': sess.token },
+        body: JSON.stringify({ code: sess.code, events: queue.splice(0, 100) }), keepalive: true }).catch(() => {});
+    }, 10000);
+    return {
+      check(rec) { if (rec && !on) { on = true; this.ev('device', { ua: navigator.userAgent.slice(0, 200), w: innerWidth, h: innerHeight }); } else if (!rec) on = false; },
+      ev(name, d) { if (on && queue.length < 500) queue.push({ ev: name, t: Date.now(), ...d }); }
+    };
+  })();
+  addEventListener('error', e => TRec.ev('error', { msg: String(e.message || '').slice(0, 200), file: String(e.filename || '').split('/').pop(), line: e.lineno || 0 }));
+
   async function refresh() {
     try {
       const res = await fetch(`/api/wpr/session/${encodeURIComponent(sess.code)}`, { headers: { 'x-teacher-token': sess.token } });
       if (res.status === 404) { stop(); try { localStorage.removeItem(KEY); } catch (x) {} sess = null; return showStart('That session has ended or expired.'); }
       data = await res.json();
+      TRec.check(data.rec);
       render();
-    } catch (e) { /* keep showing the last data; next poll retries */ }
+    } catch (e) { TRec.ev('pollError', { msg: String(e.message || '').slice(0, 200) }); /* keep showing the last data; next poll retries */ }
   }
   function startPolling() { stop(); refresh(); poll = setInterval(refresh, 4000); }
   function stop() { clearInterval(poll); poll = null; }
@@ -496,7 +513,8 @@ Answer: False"></textarea>
         const out = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(out.error || 'Could not change that.');
         supNote = ''; headOk = false;
-      } catch (err) { supNote = err.message; }
+        TRec.ev('support', { act });
+      } catch (err) { supNote = err.message; TRec.ev('supportError', { act, msg: String(err.message).slice(0, 200) }); }
       return refresh();
     }
     const tx = e.target.closest('[data-time]');
@@ -513,6 +531,7 @@ Answer: False"></textarea>
     }
     const d = e.target.closest('[data-dl]');
     if (d && data) {
+      TRec.ev('download', { what: d.dataset.dl, finished: (data.students || []).filter(x => x.status === 'submitted').length });
       if (d.dataset.dl === 'summary') summaryCsv();
       else if (d.dataset.dl === 'items') itemsCsv();
       else if (d.dataset.dl === 'standards') standardsCsv();
@@ -526,6 +545,7 @@ Answer: False"></textarea>
       confirmEnd = false;
       // The first time ends the test (students get 15 minutes with their answers); once ended, it erases everything.
       const erase = !!(data && data.endedAt);
+      TRec.ev(erase ? 'erase' : 'end', { testing: data ? (data.students || []).filter(x => x.status === 'testing').length : 0 });
       let out = {};
       try {
         const res = await fetch(`/api/wpr/session/${encodeURIComponent(sess.code)}${erase ? '' : '/end'}`, { method: erase ? 'DELETE' : 'POST', headers: { 'x-teacher-token': sess.token } });

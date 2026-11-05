@@ -44,6 +44,29 @@ const TIME_X = [1, 1.5, 2];   // standard, time and a half, double time
 const RELEASE_MINUTES = 15;   // after the teacher ends the test: students see their answers and save their report
 const sessions = new Map(); // code -> session
 
+// The pilot-test recording (lib/wprBetaLog.js): off unless a window is set on the server. A student is
+// only their join number in the session (st.n), never their name or student ID.
+const { recording, record, startHealth } = require('../lib/wprBetaLog');
+startHealth(() => {
+    let students = 0, testing = 0;
+    sessions.forEach(s => s.students.forEach(st => { students++; if (st.startedAt && !st.submittedAt) testing++; }));
+    return { sessions: sessions.size, students, testing };
+});
+// Every WPR call while recording: how long it took, its status, and any error message it answered with
+router.use((req, res, next) => {
+    if (!req.path.startsWith('/wpr/') || !recording()) return next();
+    const t0 = process.hrtime.bigint(), json = res.json.bind(res);
+    res.json = body => { if (res.statusCode >= 400 && body && body.error) res.locals.wprError = String(body.error).slice(0, 200); return json(body); };
+    res.on('finish', () => {
+        const body = req.body || {};
+        const code = String(body.code || (req.path.match(/^\/wpr\/session\/([A-Za-z0-9]{6})/) || [])[1] || '').toUpperCase();
+        const s = sessions.get(code), st = s && body.token ? [...s.students.values()].find(x => x.token === body.token) : null;
+        record({ ev: 'api', method: req.method, path: req.path.replace(/^(\/wpr\/session\/)[A-Za-z0-9]{6}/, '$1:code'), status: res.statusCode,
+                 ms: Number((process.hrtime.bigint() - t0) / 1000000n), code: code || undefined, s: st ? st.n : undefined, error: res.locals.wprError });
+    });
+    next();
+});
+
 // One student's time limit: the session's, or more if the teacher gave them time and a half or double
 // time (POST /wpr/session/:code/time). An untimed test (the Baseline CFA) never runs out.
 const secondsFor = (session, st) => session.untimed ? Infinity : Math.round(session.seconds * (st.timeX || 1));
@@ -133,6 +156,10 @@ function finish(session, st, answers, reason) {
     st.endReason = reason;
     st.result = grade(st.questions, answers);
     writeActiveMarker();
+    // Each question as [CFA key or indicator, 1 right / 0 wrong / -1 skipped], in the student's order
+    record({ ev: 'finish', code: session.code, s: st.n, reason, answered: st.result.answered, correct: st.result.correct, total: st.result.total,
+             minutes: Number(((st.submittedAt - st.startedAt) / 60000).toFixed(1)), violations: st.violations,
+             items: st.questions.map((q, i) => [q.key || q.indicator || '', answers[i] === undefined ? -1 : Number(answers[i]) === q.correct ? 1 : 0]) });
 }
 function getStudent(req) {
     const body = req.body || {};
@@ -162,7 +189,7 @@ function bankItem(x) {
 function cfaTest() {
     return shuffled(loadCfa().items).map(x => {
         const options = shuffled(x.options);
-        return { kind: 'mc', topic: 'cfa', prompt: x.prompt || '', q: x.q, options, correct: options.indexOf(x.answer), hint: '', indicator: x.indicator };
+        return { kind: 'mc', topic: 'cfa', key: x.key, prompt: x.prompt || '', q: x.q, options, correct: options.indexOf(x.answer), hint: '', indicator: x.indicator };
     }).filter(q => q.correct >= 0);
 }
 function buildSessionTest(session) {
@@ -205,7 +232,7 @@ router.post('/wpr/session', async (req, res) => {
     const now = Date.now();
     const session = {
         code, teacherToken: token(), teacher: clean(body.teacher, 60), length, ...LENGTHS[length], source, bankQs,
-        createdAt: now, lastActive: now, expiresAt: now + SESSION_HOURS * 3600 * 1000, students: new Map()
+        createdAt: now, lastActive: now, expiresAt: now + SESSION_HOURS * 3600 * 1000, students: new Map(), joined: 0
     };
     if (cfa) {
         session.count = cfa.items.length;
@@ -218,7 +245,8 @@ router.post('/wpr/session', async (req, res) => {
     }
     sessions.set(code, session);
     writeActiveMarker();
-    res.json({ code, teacherToken: session.teacherToken, length, label: session.label, expiresAt: session.expiresAt, bank_questions: bankQs.length });
+    record({ ev: 'session', code, length, source, count: session.count, untimed: !!session.untimed });
+    res.json({ code, teacherToken: session.teacherToken, length, label: session.label, expiresAt: session.expiresAt, bank_questions: bankQs.length, rec: recording() });
 });
 
 // GET /wpr/session/:code -- teacher's live view, with everything needed for the downloads
@@ -241,7 +269,7 @@ router.get('/wpr/session/:code', (req, res) => {
             yours: st.answers[i] !== undefined ? q.options[st.answers[i]] : '', right: st.answers[i] !== undefined ? st.answers[i] === q.correct : null
         })) : null
     }));
-    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, endedAt: s.endedAt || null, timed: !s.untimed, students });
+    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, endedAt: s.endedAt || null, timed: !s.untimed, rec: recording(), students });
 });
 
 // POST /wpr/session/:code/end -- the teacher ends the test. Anyone still testing is scored on their saved
@@ -258,6 +286,7 @@ router.post('/wpr/session/:code/end', (req, res) => {
             return res.json({ erased: true });
         }
         s.endedAt = Date.now();
+        record({ ev: 'end', code: s.code, finished: [...s.students.values()].filter(st => st.submittedAt).length, joined: s.students.size });
         s.expiresAt = Math.min(s.expiresAt, s.endedAt + RELEASE_MINUTES * 60 * 1000);
         writeActiveMarker();
     }
@@ -277,6 +306,7 @@ router.post('/wpr/session/:code/time', (req, res) => {
     if (!TIME_X.includes(x)) return res.status(400).json({ error: 'Pick standard time, time and a half, or double time.' });
     if (st.submittedAt) return res.status(409).json({ error: 'That student already finished.' });
     st.timeX = x;
+    record({ ev: 'support', code: s.code, s: st.n, timeX: x });
     writeActiveMarker();
     res.json({ success: true, secondsAllowed: secondsFor(s, st) });
 });
@@ -308,6 +338,7 @@ router.post('/wpr/session/:code/supports', (req, res) => {
         }
         writeActiveMarker();
     }
+    record({ ev: 'support', code: s.code, s: st.n, readAloud: !!st.readAloud, paused: !!st.pausedAt });
     res.json({ success: true, readAloud: !!st.readAloud, paused: !!st.pausedAt });
 });
 
@@ -317,7 +348,32 @@ router.delete('/wpr/session/:code', (req, res) => {
     if (!s) return res.status(404).json({ error: 'Session not found.' });
     sessions.delete(s.code);
     writeActiveMarker();
+    record({ ev: 'erase', code: s.code });
     res.json({ success: true });
+});
+
+// POST /wpr/telemetry -- { code, token?, events: [{ ev, ... }] } while a pilot test is being recorded: what
+// students and the teacher do on screen (screens, buttons, tools, leaving full screen) and any browser
+// errors. A student is their number in the session; the teacher is sent with their teacher token. Nothing
+// is written outside the recording window, and pages only send when the server says it's recording.
+const plain = v => typeof v === 'number' ? (Number.isFinite(v) ? v : null) : typeof v === 'boolean' ? v : String(v ?? '').slice(0, 300);
+// Fields never written even if a page sent them: who someone is, and what they answered
+const NOT_RECORDED = /^(ev|t|s|ui|role|code|token|first|last|firstname|lastname|name|initials|studentid|sid|id|answers?)$/i;
+router.post('/wpr/telemetry', (req, res) => {
+    if (!recording()) return res.json({ rec: false });
+    const b = req.body || {};
+    const session = sessions.get(String(b.code || '').toUpperCase());
+    const st = session && b.token ? [...session.students.values()].find(x => x.token === b.token) : null;
+    const t = req.get('x-teacher-token') || '';
+    const who = st ? { s: st.n } : session && t && safeEq(t, session.teacherToken) ? { role: 'teacher' } : { role: 'unjoined' };
+    (Array.isArray(b.events) ? b.events : []).slice(0, 100).forEach(e => {
+        if (!e || typeof e !== 'object') return;
+        const out = { ev: 'ui', ui: String(e.ev || '').slice(0, 40), code: session ? session.code : undefined, ...who };
+        Object.entries(e).slice(0, 20).forEach(([k, v]) => { if (/^[a-zA-Z]{1,20}$/.test(k) && !NOT_RECORDED.test(k)) out[k] = plain(v); });
+        if (Number.isFinite(e.t)) out.clientT = e.t;
+        record(out);
+    });
+    res.json({ rec: true });
 });
 
 // ---- Student -------------------------------------------------------------
@@ -348,12 +404,14 @@ router.post('/wpr/join', (req, res) => {
     if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
     if (!st && session.students.size >= MAX_STUDENTS) return res.status(409).json({ error: `This class code is full (${MAX_STUDENTS} students). Check with your teacher.` });
     if (!st) {
-        st = { token: token(), firstName, lastName, studentId, joinedAt: Date.now(), startedAt: null, questions: null, answers: {}, violations: 0, submittedAt: null };
+        st = { token: token(), n: ++session.joined, firstName, lastName, studentId, joinedAt: Date.now(), startedAt: null, questions: null, answers: {}, violations: 0, submittedAt: null };
         session.students.set(studentId, st);
+        record({ ev: 'join', code: session.code, s: st.n });
     } else {
         st.token = token(); // rejoining (e.g. after a refresh) issues a fresh token
+        record({ ev: 'rejoin', code: session.code, s: st.n, started: !!st.startedAt });
     }
-    res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: session.untimed ? null : secondsFor(session, st), started: !!st.startedAt });
+    res.json({ token: st.token, code: session.code, label: session.label, count: session.count, seconds: session.untimed ? null : secondsFor(session, st), started: !!st.startedAt, rec: recording() });
 });
 
 // POST /wpr/start -- { code, token } begins (or resumes) the clock
@@ -364,6 +422,7 @@ router.post('/wpr/start', (req, res) => {
     if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
     if (!st.startedAt) {
         st.questions = buildSessionTest(session);
+        record({ ev: 'start', code: session.code, s: st.n, questions: st.questions.length, waitedSec: Math.round((Date.now() - st.joinedAt) / 1000) });
         st.startedAt = Date.now();
         writeActiveMarker();
     }
@@ -393,6 +452,7 @@ router.post('/wpr/results', (req, res) => {
     if (error) return res.status(404).json({ error });
     if (!st.submittedAt) return res.json({ status: 'testing' });
     if (!session.endedAt) return res.json({ status: 'held', result: scoreOnly(st.result), endReason: st.endReason });
+    if (!st.releasedSeen) { st.releasedSeen = true; record({ ev: 'released', code: session.code, s: st.n, afterEndSec: Math.round((Date.now() - session.endedAt) / 1000) }); }
     res.json({ status: 'released', result: st.result, endReason: st.endReason, report: reportFor(session, st) });
 });
 
@@ -411,6 +471,7 @@ router.post('/wpr/violation', (req, res) => {
     const { st, error } = getStudent(req);
     if (error) return res.status(404).json({ error });
     st.violations = Math.max(st.violations, Math.min(20, parseInt(req.body.count, 10) || 1));
+    record({ ev: 'violation', code: String(req.body.code || '').toUpperCase(), s: st.n, count: st.violations });
     res.json({ success: true });
 });
 
