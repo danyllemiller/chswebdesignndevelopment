@@ -1246,12 +1246,16 @@ const WPR_MC_QUESTIONS = [
       },
 ];
 
+// The Baseline CFA's questions are never the clock-in question (teacher 2026-11-05: no practicing them
+// before the CFA). They stay in this bank; the CFA's list lives on the server (lib/wprCfaQuestions.js).
+const { isCfaQuestion } = require('./lib/wprCfaQuestions');
 function pickWprMcQuestion(dateStr) {
+    const list = WPR_MC_QUESTIONS.filter(x => !isCfaQuestion(x.q));
     const epoch = new Date('2026-01-01T00:00:00');
     const d = new Date(dateStr + 'T00:00:00');
     const daysSinceEpoch = Math.floor((d - epoch) / 86400000);
-    const idx = ((daysSinceEpoch % WPR_MC_QUESTIONS.length) + WPR_MC_QUESTIONS.length) % WPR_MC_QUESTIONS.length;
-    return WPR_MC_QUESTIONS[idx];
+    const idx = ((daysSinceEpoch % list.length) + list.length) % list.length;
+    return list[idx];
 }
 
 module.exports = { WPR_QUESTIONS, pickWprQuestion, WPR_MC_QUESTIONS, pickWprMcQuestion };

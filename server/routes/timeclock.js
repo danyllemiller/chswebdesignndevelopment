@@ -5,6 +5,10 @@ const path = require('path');
 const { withConnection } = require('../db');
 const { getCurrentSchoolYear, requireLogin, requireSelfOrStaff, isStaffSession } = require('../helpers');
 const { loadClockinDays } = require('../lib/clockinDays');
+const { isCfaQuestion } = require('../lib/wprCfaQuestions');
+// A clock-in question that's on the WPR Baseline CFA stays hidden in a student's history and journal, so
+// they can't study it (or its answer) before the CFA (teacher 2026-11-05). Their points still show.
+const CFA_HIDDEN = 'Hidden: this question is on the WPR Baseline CFA.';
 const { pickWprQuestion, pickWprMcQuestion, WPR_MC_QUESTIONS } = require('../wprQuestionBank');
 
 // Client-side JS errors on the timeclock widget were failing completely
@@ -752,7 +756,7 @@ router.get('/student/wd-journal', requireSelfOrStaff(), async (req, res) => {
                  WHERE student_id = ? ORDER BY entry_date DESC, session = 'out' ASC`,
                 [student_id]
             );
-            return rows;
+            return rows.map(r => r.session === 'in' && isCfaQuestion(r.prompt) ? { ...r, prompt: CFA_HIDDEN, content: '' } : r);
         });
         res.json({ entries });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch journal' }); }
@@ -815,16 +819,18 @@ router.get('/student/clockin-history', requireSelfOrStaff(), async (req, res) =>
                     : findIn(WPR_MC_QUESTIONS, s.question, answer);
                 const g = tc.get(`TC-${courseKey}-${s.date}`);
                 const isToday = s.date === today;
+                const hidden = courseKey !== 'CS' && isCfaQuestion(match ? match.q : s.question);
+                const show = match && !isToday && !hidden;
                 out.push({
                     date: s.date,
                     clock_in: s.clock_in,
                     course: courseKey,
-                    question: match ? match.q : (s.question || null),
-                    your_answer: answer || null,
-                    right_answer: match && !isToday ? match.answer : null,
-                    right_answer_tomorrow: !!(match && isToday),
-                    is_right: match && !isToday ? normText(answer) === normText(match.answer) : null,
-                    explanation: match && !isToday ? (match.hint || null) : null,
+                    question: hidden ? CFA_HIDDEN : match ? match.q : (s.question || null),
+                    your_answer: hidden ? null : answer || null,
+                    right_answer: show ? match.answer : null,
+                    right_answer_tomorrow: !!(match && isToday && !hidden),
+                    is_right: show ? normText(answer) === normText(match.answer) : null,
+                    explanation: show ? (match.hint || null) : null,
                     on_time: g && g.on_time !== null && g.on_time !== undefined ? Number(g.on_time) === 1 : null,
                     points: g ? g.score : null,
                     max_points: 3,
