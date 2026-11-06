@@ -28,4 +28,15 @@ function loadCfa() {
 // The pool questions on the CFA (their wprIndicators.json keys), for practice tests to skip
 const cfaKeys = () => new Set((loadCfa() || { items: [] }).items.map(i => i.key));
 
-module.exports = { loadCfa, cfaKeys };
+// Whether a question's text is on the CFA, for the places that show questions without a pool key: the
+// daily clock-in question and a student's clock-in history and journal (teacher 2026-11-05: no practicing
+// the CFA's questions anywhere before the CFA)
+const normText = t => String(t || '').replace(/\s+/g, ' ').trim().toLowerCase();
+let textCache = { cfa: null, set: new Set() };
+function isCfaQuestion(text) {
+    const cfa = loadCfa();
+    if (textCache.cfa !== cfa) textCache = { cfa, set: new Set(((cfa && cfa.items) || []).map(i => normText(i.q))) };
+    return textCache.set.has(normText(text));
+}
+
+module.exports = { loadCfa, cfaKeys, isCfaQuestion };

@@ -22,7 +22,9 @@
  *                   clockEvery,
  *                   readAloud, paused,                    // supports the teacher turned on (WPR Practice): a Read aloud
  *                                                         // button, and the clock stopped for a break
- *                   noTranslate });                       // true: translating the page counts as leaving
+ *                   noTranslate,                          // true: translating the page counts as leaving
+ *                   untimed,                              // true: no clock and no time-up submit (the Baseline CFA)
+ *                   onEvent(name, data) });               // optional: what the student does on screen (a pilot-test recording)
  *   WrsTestUI.reviewHtml(result)                // results + every answered question
  *   WrsTestUI.scoreHtml(result)                 // just the score (answers held until the teacher ends the test)
  */
@@ -139,6 +141,10 @@
         const mount = opts.mount;
         const questions = opts.questions;
         const answers = opts.answers || {};
+        const untimed = opts.untimed === true;
+        // What the student does, for a pilot-test recording (opts.onEvent): never which answer they chose
+        let viewedAt = Date.now();
+        const emit = (name, data) => { try { if (opts.onEvent) opts.onEvent(name, { q: cur + 1, ...data }); } catch (e) {} };
         let endAt = Date.now() + opts.secondsLeft * 1000;
         const flagKey = opts.flagKey || 'wt_flags';
         let flags = new Set();
@@ -157,6 +163,7 @@
         document.body.classList.add('wt-locked');
 
         function timerText() {
+            if (untimed) return { s: Infinity, text: 'No limit' };
             const s = paused ? pausedLeft : Math.max(0, Math.round((endAt - Date.now()) / 1000));
             const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
             return { s, text: h ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}` };
@@ -183,7 +190,7 @@
         function bar(title) {
             return `<div class="wt-bar">
                 <div class="d-flex align-items-center gap-3">
-                  <div><div class="small opacity-75 fw-bold">TIME REMAINING</div><div id="wtTimer" class="wt-timer">--:--</div></div>
+                  <div><div class="small opacity-75 fw-bold">${untimed ? 'UNTIMED' : 'TIME REMAINING'}</div><div id="wtTimer" class="wt-timer">--:--</div></div>
                   <div class="fw-bold d-none d-sm-block">${title}</div>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
@@ -245,8 +252,14 @@
             tickNow();
         }
 
-        const go = i => { if (i >= 0 && i < questions.length) { stopReading(); cur = i; renderQuestion(); } };
-        const toggleFlag = () => { flags.has(cur) ? flags.delete(cur) : flags.add(cur); saveFlags(); renderQuestion(); };
+        const go = (i, via) => {
+            if (i < 0 || i >= questions.length) return;
+            emit('nav', { to: i + 1, via: via || 'grid', secs: Math.round((Date.now() - viewedAt) / 1000), answered: answers[cur] !== undefined });
+            viewedAt = Date.now();
+            stopReading(); cur = i; renderQuestion();
+        };
+        const toggleFlag = () => { flags.has(cur) ? flags.delete(cur) : flags.add(cur); saveFlags(); emit('flag', { on: flags.has(cur) }); renderQuestion(); };
+        const choose = (i, via) => { emit('answer', { via, changed: answers[cur] !== undefined && answers[cur] !== i }); answers[cur] = i; dirty = true; renderQuestion(); };
 
         // ---- Read aloud (a support the teacher turns on): the browser's own text-to-speech reads the question
         // and each answer choice, highlighting the part being read. readId ignores a cancelled reading's events.
@@ -304,6 +317,7 @@
         function setPaused(on, left) {
             if (on === paused) return;
             paused = on;
+            emit('paused', { on });
             if (on) {
                 pausedLeft = Number.isFinite(left) ? left : Math.max(0, Math.round((endAt - Date.now()) / 1000));
                 stopReading();
@@ -320,20 +334,21 @@
 
         function onClick(e) {
             if (submitting || paused) return;
-            const o = e.target.closest('[data-opt]'); if (o) { answers[cur] = Number(o.dataset.opt); dirty = true; return renderQuestion(); }
-            const g = e.target.closest('[data-go]'); if (g) return go(Number(g.dataset.go));
+            const o = e.target.closest('[data-opt]'); if (o) return choose(Number(o.dataset.opt), 'click');
+            const g = e.target.closest('[data-go]'); if (g) return go(Number(g.dataset.go), onReview ? 'review' : 'grid');
             const t = e.target.closest('[data-wt-tool]');
+            if (t) emit('tool', { tool: t.dataset.wtTool });
             if (t && t.dataset.wtTool === 'speak') return speaking ? stopReading() : readQuestion();
             if (t && t.dataset.wtTool === 'slow') { readSlow = !readSlow; return renderQuestion(); }
             if (t) { const p = t.dataset.wtTool === 'calc' ? calcPanel : scratchPanel; p.hidden = !p.hidden; return onReview ? renderReview() : renderQuestion(); }
             const b = e.target.closest('[data-wt]'); if (!b) return;
             const a = b.dataset.wt;
-            if (a === 'prev') go(cur - 1);
-            else if (a === 'next') go(cur + 1);
-            else if (a === 'nav') { showNav = !showNav; renderQuestion(); }
+            if (a === 'prev') go(cur - 1, 'prev');
+            else if (a === 'next') go(cur + 1, 'next');
+            else if (a === 'nav') { showNav = !showNav; emit('navigator', { open: showNav }); renderQuestion(); }
             else if (a === 'flag') toggleFlag();
-            else if (a === 'review') { stopReading(); renderReview(); }
-            else if (a === 'back') renderQuestion();
+            else if (a === 'review') { stopReading(); emit('review', { answered: answered(), flagged: flags.size }); renderReview(); }
+            else if (a === 'back') { emit('back'); viewedAt = Date.now(); renderQuestion(); }
             else if (a === 'submit') finish('student');
         }
         function onKey(e) {
@@ -343,9 +358,9 @@
             const idx = /^[1-6]$/.test(k) ? Number(k) - 1 : LETTERS.indexOf(k);
             if (k === 'R' && readAloud) { e.preventDefault(); speaking ? stopReading() : readQuestion(); }
             else if (k === 'F') toggleFlag();
-            else if (k.length === 1 && idx >= 0 && idx < q.options.length) { e.preventDefault(); answers[cur] = idx; dirty = true; renderQuestion(); }
-            else if (e.key === 'ArrowRight') go(cur + 1);
-            else if (e.key === 'ArrowLeft') go(cur - 1);
+            else if (k.length === 1 && idx >= 0 && idx < q.options.length) { e.preventDefault(); choose(idx, 'key'); }
+            else if (e.key === 'ArrowRight') go(cur + 1, 'key');
+            else if (e.key === 'ArrowLeft') go(cur - 1, 'key');
         }
         mount.addEventListener('click', onClick);
         document.addEventListener('keydown', onKey);
@@ -394,6 +409,7 @@
             if (submitting || away || paused) return;   // stepping away during a break the teacher started is fine
             away = true;
             violations++;
+            emit('left', { kind: kind || (document.visibilityState === 'hidden' ? 'tab' : isFullscreen() ? 'focus' : 'fullscreen'), count: violations });
             Promise.resolve(opts.onViolation && opts.onViolation(violations)).catch(() => {});
             if (violations >= 2) { finish('left-test'); return; }
             showLock(kind === 'translate' ? 'translate' : 'leave');
@@ -420,6 +436,7 @@
         }
         document.getElementById('wtReturn').onclick = () => {
             if (watch && translated()) { showLock('still'); return; }
+            emit('return');
             enterFullscreen(); lock.hidden = true; away = false;
         };
         const onUnload = e => {
@@ -451,6 +468,7 @@
 
         async function finish(reason) {
             if (submitting) return;
+            emit('finish', { reason, answered: answered(), flagged: flags.size, secs: Math.round((Date.now() - viewedAt) / 1000) });
             submitting = true;
             teardown();
             const msg = reason === 'time' ? "Time's up! " : reason === 'left-test' ? 'You left the test a second time, so it was submitted. ' : '';

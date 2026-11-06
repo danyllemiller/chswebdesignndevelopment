@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { isProjectExempt } = require('../lib/projectExemptions');
+const { isProjectExempt, isProjectAfterTest } = require('../lib/projectExemptions');
 const fs = require('fs');
 const path = require('path');
 const { withConnection } = require('../db');
@@ -556,7 +556,7 @@ router.get('/student/project-aggregate', requireSelfOrStaff(), async (req, res) 
                     posted: Number(posted.n) > 0
                 };
             }
-            return { aggregate: aggregateRows[0] || null, evaluations: evalRows, projectExempt: isProjectExempt(student_id), gate };
+            return { aggregate: aggregateRows[0] || null, evaluations: evalRows, projectExempt: isProjectExempt(student_id), projectAfterTest: isProjectAfterTest(student_id), gate };
         });
         res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch project aggregate' }); }

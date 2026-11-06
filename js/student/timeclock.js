@@ -497,12 +497,14 @@ async function checkStatusInner() {
 
         // Clock-in only stays available through the end of that period --
         // once it's over, there's nothing meaningful to clock in for anymore.
-        if (mode === 'in' && bellWindow && Date.now() > bellWindow.endMs) {
+        // The server says so too (statusData.closed), including on a day this
+        // period doesn't meet; a missed clock-in can't be made up.
+        if (mode === 'in' && (statusData.closed || (bellWindow && Date.now() > bellWindow.endMs))) {
             document.getElementById('tc-form').style.display = 'none';
             const successMsg = document.getElementById('tc-success-msg');
             successMsg.classList.remove('d-none', 'alert-success');
             successMsg.classList.add('alert-secondary');
-            successMsg.textContent = "Today's class has ended, so clock-in is closed. See you next class!";
+            successMsg.textContent = statusData.closed || "Today's class has ended, so clock-in is closed. See you next class!";
             return;
         }
 
@@ -664,7 +666,18 @@ async function finalizeTimeclockSubmit(mode, answer, isCorrect) {
         const dow = new Date().getDay(); // 0=Sun..6=Sat
         if (mode === 'out' && (dow === 4 || dow === 5)) { showPulseStep(); return; }
         location.reload();
-    } catch (e) { console.error("Timeclock submit error:", e); logTimeclockError('handleTimeclockSubmit', e); }
+    } catch (e) {
+        console.error("Timeclock submit error:", e); logTimeclockError('handleTimeclockSubmit', e);
+        // Never leave the student on "Saving..." with nothing happening: show
+        // why (the server's own words, e.g. clock-in closed), or that it didn't save.
+        const form = document.getElementById('tc-form'), msg = document.getElementById('tc-success-msg');
+        if (form && msg) {
+            form.style.display = 'none';
+            msg.classList.remove('d-none', 'alert-success');
+            msg.classList.add('alert-warning');
+            msg.textContent = /failed to fetch|status \d+/i.test(e.message || '') ? "That didn't save. Try again, or tell your teacher." : e.message;
+        }
+    }
 }
 
 // Monday of the current week, as a plain YYYY-MM-DD string -- never a
@@ -905,6 +918,16 @@ async function handleManualOpen(forcedMode) {
             successMsg.textContent = forcedMode === 'in'
                 ? "You're already clocked in. Click Clock Out when you're ready to leave."
                 : "You haven't clocked in yet. Click Clock In first.";
+            return;
+        }
+
+        // Closed for today (class ended, or this period doesn't meet today):
+        // the server refuses it, so say so before asking the question.
+        if (mode === 'in' && statusData.closed) {
+            form.style.display = 'none';
+            successMsg.classList.remove('d-none', 'alert-success');
+            successMsg.classList.add('alert-secondary');
+            successMsg.textContent = statusData.closed;
             return;
         }
 

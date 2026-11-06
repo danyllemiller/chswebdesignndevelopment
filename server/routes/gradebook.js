@@ -5,6 +5,7 @@ const { resolveCourseId, getCurrentSchoolYear, isTestingWindowOpen, requireSelfO
 const { insertQuestionDetails } = require('../lib/missedQuestionsStore');
 const { dailyOverrideCode, isValidDailyCode } = require('../lib/dailyCode');
 const { isCsUnitProject, syncCsProjectGrade } = require('../lib/csProjectGate');
+const { syncAsChapterTest } = require('../lib/asChapterTests');
 const { clockinDate, loadClockinDays } = require('../lib/clockinDays');
 const accommodations = require('../lib/accommodations');
 
@@ -142,7 +143,7 @@ async function ensureUnitPrereqOverridesTable(connection) {
 // js/cs-interactive.js's matching client-side gate on the Unit Project tab
 // for the same self+peer requirement, kept in sync with this one.
 const PROJECT_EXEMPT_UNITS = new Set([1, 2]);
-const { isProjectExempt } = require('../lib/projectExemptions');
+const { isProjectExempt, isProjectAfterTest } = require('../lib/projectExemptions');
 
 // WD chapter exams ("Ch3-Exam") get the same pre-work lock (teacher
 // 2026-10-23): the chapter's Pre-Scale AND Pre-Assessment first. WD has no
@@ -287,7 +288,9 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
     );
     // Per the teacher (2026-10-16): Units 1 and 2 never lock the exam over the
     // Unit Project -- only Unit 3+ require the project's self + peer review.
-    const projectRequired = projectRows.length > 0 && !PROJECT_EXEMPT_UNITS.has(unitNum) && !isProjectExempt(studentId);
+    // Students on the project-after-test list take the test first and still
+    // owe the project (the Final checks it).
+    const projectRequired = projectRows.length > 0 && !PROJECT_EXEMPT_UNITS.has(unitNum) && !isProjectExempt(studentId) && !isProjectAfterTest(studentId);
     const projectOk = !projectRequired || projectRows[0].status === 'complete';
 
     return { ok: preScaleOk && preTestOk && scoreOk && projectOk, prevExamId, pct, scoreOk, projectOk, projectRequired, preScaleOk, preTestOk };
@@ -567,6 +570,14 @@ router.post('/submit-exam', async (req, res) => {
                 'INSERT INTO responses (student_id, exam_id, score, total_points, timestamp, entered_in_ic) VALUES (?, ?, ?, ?, NOW(), 0) ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW(), entered_in_ic = 0',
                 [student_id, exam_id, score, effectiveTotalPoints]
             );
+        }
+        // An AS student's WD2 chapter test also counts in their own AS
+        // gradebook (server/lib/asChapterTests.js). Like the detail capture
+        // below, it must never fail the real grade save.
+        try {
+            await syncAsChapterTest(connection, student_id, exam_id);
+        } catch (asErr) {
+            console.error('[submit-exam] failed to copy the score into the AS gradebook', asErr);
         }
         // Captures the same per-question detail the PDF report used to be
         // the only record of (server/routes/missed-questions.js), directly
