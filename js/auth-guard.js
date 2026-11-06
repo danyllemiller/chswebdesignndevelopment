@@ -189,7 +189,9 @@ async function executeAuthCheck() {
 
     const userSection = String(user.section_id || user.section || user.period || user.studentClass || user.class || '').trim().toUpperCase();
     const normalizedSection = userSection;
-    const isTeacher = user.role === 'admin' || user.section_id === 'Teacher' || (user.username && user.username.includes('damiller'));
+    // Same as the server's isStaffSession (server/helpers.js). The old "username contains damiller" shortcut is gone
+    // here too: the server dropped it because a student could register a username like that.
+    const isTeacher = user.role === 'admin' || user.role === 'teacher' || user.section_id === 'Teacher';
     const studentCourse = getCourseGroup(normalizedSection, user.course_name || '');
     const primaryIsCS = studentCourse === 'CS' || user.course === 'CS' || user.isCSStudent === true || /^(CS|COMP)/.test(normalizedSection);
     const primaryIsWD = studentCourse === 'WD' || (!primaryIsCS && /^(WD|AS)/.test(normalizedSection));
@@ -244,9 +246,18 @@ async function executeAuthCheck() {
     const designatedCourse = studentCourse || user.course;
     const pageCourse = getPageCourse(currentPath);
     
+    // Teacher pages (/admin/) are for the teacher's account only (teacher 2026-11-06). The server already refuses
+    // their data to anyone else; a student who opens one now goes back to their own home page instead of seeing an
+    // empty teacher page. The deliberately public ones (publicPages above) still open for everyone.
+    const fallbackHome = isCSStudent ? '/cs-interactive.html' : (isWDStudent ? '/student/notes.html' : '/student/planner.html');
+    if (currentPath.startsWith('/admin/') && !isPublic) {
+        console.log('[auth-guard] Student opened a teacher page; redirecting to', fallbackHome);
+        window.location.replace(fallbackHome);
+        return;
+    }
+
     // Define shared paths - pages accessible to all authenticated students
     const sharedPaths = [
-        '/admin/',
         '/student-grades',
         '/grades',
         '/student-files',
@@ -283,7 +294,6 @@ async function executeAuthCheck() {
     // Otherwise only block a page if the student isn't enrolled in that page's course at all --
     // this is what lets a student in BOTH CS and WD reach both sets of tools.
     else if (!isShared && !isPublic) {
-        const fallbackHome = isCSStudent ? '/cs-interactive.html' : (isWDStudent ? '/student/notes.html' : '/student/planner.html');
         if (pageCourse === 'WD' && !isWDStudent) {
             console.log('[auth-guard] Student not enrolled in WD attempted WD page; redirecting to', fallbackHome);
             window.location.replace(fallbackHome);
