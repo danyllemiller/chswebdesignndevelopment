@@ -582,8 +582,8 @@ Answer: False"></textarea>
       e.seen++; if (!it.right) e.wrong++; qs.set(k, e);
     }));
     const missed = [...qs.values()].filter(e => e.seen >= 2 && e.wrong > 0).sort((a, b) => (b.wrong / b.seen) - (a.wrong / a.seen) || b.seen - a.seen).slice(0, 15);
-    let safetySeen = 0, safetyRight = 0, wrsSeen = 0, wrsRight = 0;
-    st.forEach(s => s.items.forEach(it => { if (it.right === null) return; if (isSafety(it)) { safetySeen++; if (it.right) safetyRight++; } else { wrsSeen++; if (it.right) wrsRight++; } }));
+    // One bar per state standard (1.1, 1.2, 1.3) above the indicator table; safety is indicator 1.2.4, inside 1.2 (teacher 2026-11-06)
+    const byStd = STD.tally(st.flatMap(s => s.items));
     const bar = (label, a, b) => `<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${label}</b><span>${pct(a, b)}% right (${a} of ${b})</span></div><div style="background:#e9ecef;border-radius:6px;height:14px"><div style="width:${pct(a, b)}%;background:#198754;height:14px;border-radius:6px"></div></div></div>`;
     return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>WPR Practice Report ${esc(data.code)}</title>
       <style>body{font-family:Arial,Helvetica,sans-serif;color:#212529;margin:28px;max-width:800px} h1{font-size:22px;margin:0} h2{font-size:16px;margin:24px 0 8px;border-bottom:2px solid #1f2a44;padding-bottom:4px}
@@ -594,8 +594,7 @@ Answer: False"></textarea>
       <div style="color:#6c757d;font-size:13px">${esc(data.teacher || '')}${data.teacher ? ' · ' : ''}${new Date(data.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · ${esc(data.label)} · Class code ${esc(data.code)}</div>
       <div class="stats"><div><b>${st.length}</b>students finished</div><div><b>${avg}%</b>class average</div><div><b>${median}%</b>median</div><div><b>${passing} of ${st.length}</b>scored 75% or higher</div></div>
       <h2>Score distribution</h2>${hist}<div style="font-size:11px;color:#6c757d">${scoreNote()} Green bars are 70% and up.</div>
-      <h2>By state standard</h2>${standardsTable(STD.tally(st.flatMap(s => s.items)))}
-      <h2>By topic</h2>${bar('Workplace Readiness Skills', wrsRight, wrsSeen)}${bar('Workplace safety & ergonomics (state indicator 1.2.4)', safetyRight, safetySeen)}
+      <h2>By state standard</h2>${byStd.filter(x => x.seen).map(x => bar(`${x.id} ${esc(x.name)}`, x.right, x.seen)).join('')}${standardsTable(byStd)}
       <h2>Most-missed questions</h2>${missed.length ? `<table><thead><tr><th>Question</th><th>Correct answer</th><th class="num">Missed</th></tr></thead><tbody>${missed.map(m => `<tr><td>${esc(m.q)}</td><td>${esc(m.answer)}</td><td class="num">${m.wrong} of ${m.seen}</td></tr>`).join('')}</tbody></table>` : '<p style="font-size:13px">Not enough overlap yet. Each student gets a different random set of questions, so this fills in with larger classes.</p>'}
       <h2>Students</h2><table><thead><tr><th>Student</th><th>ID</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th><th>How it ended</th><th class="num">Time allowed</th></tr></thead><tbody>
       ${st.map(s => `<tr><td>${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td><td class="num">${s.result.answered}</td><td class="num">${s.result.correct}</td><td class="num"><b>${scoreOf(s.result)}%</b></td><td class="num">${s.violations}</td><td>${endedBy(s)}</td><td class="num">${allowed(s)}</td></tr>`).join('')}
