@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  <script src="/js/wrs-test-ui.js?v=9"></script>
+  <script src="/js/wrs-test-ui.js?v=10"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -119,17 +119,17 @@
   }
 
   let rulesAt = 0;
-  function showRules(started) {
+  function showRules(started, note) {
     rulesAt = Date.now();
     Rec.ev('rules', { resume: !!started });
-    screen.innerHTML = `
+    screen.innerHTML = `${note ? `<div class="alert alert-success fw-bold">${esc(note)}</div>` : ''}
       <h1 class="h4 fw-bold mb-1">Ready, ${esc(me.name || '')}?</h1>
       <p class="text-muted">${esc(me.label)}</p>
       <ul class="mb-3">
         <li><strong>${me.count} questions</strong>, multiple choice like the state test, on Nevada Workplace Readiness Skills, including workplace safety. ${untimed() ? '<strong>There is no time limit.</strong> Take your time.' : `You have <strong>${fmtTime(me.seconds)}</strong>.`}</li>
         <li>${untimed() ? 'Answer every question. Nothing is submitted until you click <strong>Submit test</strong> on the Review screen.' : 'Answer as many as you can. The test submits itself when time runs out.'}</li>
         <li>Like the state test: <strong>Flag</strong> questions to come back to, use the on-screen <strong>Calculator</strong> and <strong>Scratch Paper</strong>, and check the <strong>Review</strong> screen before you submit.</li>
-        <li class="text-danger fw-bold">The test runs full screen. Do not leave it. Switching tabs, opening another site, exiting full screen, or translating the page locks the test with a warning and tells your teacher. The second time, your test is submitted.</li>
+        <li class="text-danger fw-bold">The test runs full screen. Do not leave it. Switching tabs, opening another site or app, or translating the page locks the test with a warning and tells your teacher. The second time, your test is submitted. If full screen turns off, your test hides until you go back to full screen.</li>
         <li>The test is in English only, like the state test. Translators are turned off.</li>
         <li>When you finish you'll see your score right away. Your answers and your report unlock when your teacher ends the test.</li>
       </ul>
@@ -185,7 +185,7 @@
     Rec.ev('results', { scoreShown: !!score });
     screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>
       <div id="scoreBox">${score ? WrsTestUI.scoreHtml(score, me.reason) : '<p class="text-muted">Loading your score…</p>'}</div>
-      <div class="alert alert-info"><i class="fas fa-lock me-2"></i><strong>Your answers and your report unlock when your teacher ends the test.</strong> Keep this page open. It updates by itself.</div>
+      <div class="alert alert-info"><i class="fas fa-lock me-2"></i><strong>Your answers and your report unlock when your teacher ends the test.</strong> Keep this page open. It updates by itself.${me.reason === 'left-test' ? ' If your teacher lets you back into the test, this page takes you back to it.' : ''}</div>
       <p class="small text-muted mb-0">Your teacher has your score.</p>`;
     if (score) addSurvey();
     checkResults();
@@ -205,6 +205,13 @@
       try { sessionStorage.removeItem('wpr_join'); } catch (x) {}
       screen.innerHTML = '<h1 class="h4 fw-bold mb-3">Your results</h1><div class="alert alert-secondary mb-0">The results for this test have been erased. Ask your teacher if you need your score.</div>';
       return;
+    }
+    // The teacher let them back in ("Let back in"): back to the test, with their answers saved
+    if (out.status === 'testing') {
+      clearInterval(resultsPoll); resultsPoll = null;
+      me.submitted = false; me.reason = ''; remember();
+      Rec.ev('letBackIn');
+      return showRules(true, 'Your teacher let you back into the test. Your answers were saved.');
     }
     if (out.status === 'held' && !screen.querySelector('.wt-big')) { document.getElementById('scoreBox').innerHTML = WrsTestUI.scoreHtml(out.result, out.endReason); addSurvey(); }
     if (out.status === 'released') { clearInterval(resultsPoll); resultsPoll = null; showReleased(out); }

@@ -8,8 +8,9 @@
  * Lockdown: a web page can't truly stop a student from switching tabs (only
  * a kiosk/lockdown browser can), so this runs full screen, hides all site
  * navigation, blocks right-click/copy/paste, and DETECTS leaving: the first
- * time a student leaves the tab or full screen the test locks behind a
- * warning; the second time it submits automatically.
+ * time a student switches to another tab, window or app the test locks behind
+ * a warning; the second time it submits automatically. Leaving full screen on
+ * its own only hides the test until the student goes back to full screen.
  *
  * Usage:
  *   WrsTestUI.enterFullscreen();               // synchronously, inside the Start click
@@ -96,7 +97,7 @@
         <div class="box">
           <div style="font-size:3rem"><i class="fas fa-triangle-exclamation text-warning"></i></div>
           <h2 class="fw-bold" id="wtLockTitle">You left the test</h2>
-          <p class="fs-5" id="wtLockWhy">Leaving the test screen, switching tabs, or exiting full screen is not allowed.</p>
+          <p class="fs-5" id="wtLockWhy">Switching to another tab, window, or app is not allowed during the test.</p>
           <p class="fs-5 fw-bold text-warning" id="wtLockWarn">This is your only warning. If you leave again, your test will be submitted.</p>
           <p class="small opacity-75">Your teacher can see that this happened. The clock is still running.</p>
           <button id="wtReturn" class="btn btn-warning btn-lg fw-bold mt-2">Return to the test</button>
@@ -123,6 +124,8 @@
         document.body.appendChild(div);
     }
 
+    // How long the switch into full screen gets to settle before a lost focus or a full-screen change counts
+    const SETTLE_MS = 3000;
     function fullscreenSupported() { return !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen); }
     function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
     function enterFullscreen() {
@@ -151,6 +154,14 @@
         try { flags = new Set(JSON.parse(sessionStorage.getItem(flagKey) || '[]')); } catch (e) {}
         let cur = 0, showNav = false, submitting = false, dirty = false, onReview = false;
         let violations = 0, away = false;
+        // Going into full screen takes a moment, and on some computers the window loses focus for longer than the
+        // blur check waits while it switches (11-06 pilot: a big Windows monitor, where the switch at Start and again
+        // at "Return to the test" counted as leaving twice, so the test submitted itself on question 1). So for
+        // SETTLE_MS after asking for full screen, a lost focus or a full-screen change is checked once it settles.
+        // Leaving full screen on its own (the page still in front) doesn't count: the test hides behind "Full
+        // screen is off" (fsHidden) until the student goes back, and switching tabs or apps still counts while it's
+        // hidden. A computer that won't stay in full screen after two tries gets the test in the window (fsOff).
+        let settleUntil = Date.now() + SETTLE_MS, settleTimer = null, lostFocus = false, fsHidden = false, fsTries = 0, fsOff = false;
         // Supports the teacher can turn on (WPR Practice): Read aloud, and the clock paused for a break
         let readAloud = !!opts.readAloud, readHint = readAloud, speakError = false, paused = false, pausedLeft = 0;
         const calcPanel = document.getElementById('wtCalc');
@@ -321,13 +332,13 @@
             if (on) {
                 pausedLeft = Number.isFinite(left) ? left : Math.max(0, Math.round((endAt - Date.now()) / 1000));
                 stopReading();
-                lock.hidden = true; away = false;
+                lock.hidden = true; away = false; fsHidden = false;
                 pausePanel.hidden = false;
             } else {
                 if (Number.isFinite(left)) endAt = Date.now() + left * 1000;
                 pausePanel.hidden = true;
                 // A break can mean stepping out of full screen; coming back from one doesn't count as leaving
-                if (fullscreenSupported() && !isFullscreen()) { away = true; showLock('resume'); }
+                if (!fsOff && fullscreenSupported() && !isFullscreen()) { fsHidden = true; showLock('resume'); }
             }
             tickNow();
         }
@@ -393,7 +404,8 @@
         const block = e => { if (!(e.target && e.target.id === 'wtScratchText' && e.type !== 'paste')) e.preventDefault(); };
         ['contextmenu', 'copy', 'cut', 'paste', 'dragstart'].forEach(ev => document.addEventListener(ev, block));
         const LOCK = {
-            leave: ['You left the test', 'Leaving the test screen, switching tabs, or exiting full screen is not allowed.', 'This is your only warning. If you leave again, your test will be submitted.'],
+            leave: ['You left the test', 'Switching to another tab, window, or app is not allowed during the test.', 'This is your only warning. If you leave again, your test will be submitted.'],
+            fullscreen: ['Full screen is off', 'Your test is hidden until you go back to full screen. This does not count as leaving the test.', 'Click Return to the test. Switching to another tab or app still counts as leaving.'],
             translate: ['Translating is not allowed', 'The state test is only in English, so this practice test is too. Turn the translator off and switch the page back to English, then return to the test.', 'This is your only warning. If the test is translated again, it will be submitted.'],
             still: ['The translator is still on', 'Turn the translator off and switch the page back to English first, then return to the test.', 'This is your only warning. If the test is translated again, it will be submitted.'],
             resume: ['Welcome back', 'Your teacher restarted your test, so your clock is running again.', 'Click Return to the test to go back to full screen.']
@@ -407,16 +419,38 @@
         }
         function leftTest(kind) {
             if (submitting || away || paused) return;   // stepping away during a break the teacher started is fine
-            away = true;
+            if (kind !== 'translate' && Date.now() < settleUntil) { if (kind === 'focus') lostFocus = true; return settleLater(); }   // still switching into full screen
+            away = true; fsHidden = false;
             violations++;
-            emit('left', { kind: kind || (document.visibilityState === 'hidden' ? 'tab' : isFullscreen() ? 'focus' : 'fullscreen'), count: violations });
+            emit('left', { kind: kind || (document.visibilityState === 'hidden' ? 'tab' : 'focus'), count: violations });
             Promise.resolve(opts.onViolation && opts.onViolation(violations)).catch(() => {});
             if (violations >= 2) { finish('left-test'); return; }
             showLock(kind === 'translate' ? 'translate' : 'leave');
         }
-        const onVis = () => { if (document.visibilityState === 'hidden') leftTest(); };
-        const onBlur = () => setTimeout(() => { if (!document.hasFocus()) leftTest(); }, 150);
-        const onFs = () => { if (fullscreenSupported() && !isFullscreen()) leftTest(); };
+        function showFs() { if (fsHidden || away || submitting || paused) return; fsHidden = true; emit('fsHidden'); showLock('fullscreen'); }
+        function settleLater() { clearTimeout(settleTimer); settleTimer = setTimeout(settled, Math.max(0, settleUntil - Date.now()) + 50); }
+        function goFullscreen() { settleUntil = Date.now() + SETTLE_MS; enterFullscreen(); settleLater(); }
+        // Once the switch has settled: still away from the page counts as leaving; still not in full screen hides the
+        // test, and a second try that doesn't stick means this computer won't stay in full screen.
+        function settled() {
+            if (submitting || paused || away) return;
+            if (document.visibilityState === 'hidden') return leftTest('tab');
+            if (lostFocus && !document.hasFocus()) { lostFocus = false; return leftTest('focus'); }
+            lostFocus = false;
+            if (fsOff || !fullscreenSupported()) return;
+            if (isFullscreen()) { fsTries = 0; return; }
+            if (++fsTries >= 2) { fsOff = true; emit('fullscreenOff'); if (fsHidden) { fsHidden = false; lock.hidden = true; } return; }
+            showFs();
+        }
+        const onVis = () => { if (document.visibilityState === 'hidden') leftTest('tab'); };
+        const onBlur = () => setTimeout(() => { if (!document.hasFocus()) leftTest('focus'); }, 150);
+        // Out of full screen together with leaving the page (Alt+Tab, another app) is leaving; on its own (Esc, or the
+        // computer dropped it) the test only hides until the student goes back.
+        const onFs = () => {
+            if (fsOff || !fullscreenSupported() || isFullscreen()) return;
+            if (Date.now() < settleUntil) return settleLater();
+            setTimeout(() => { if (document.visibilityState === 'hidden' || !document.hasFocus()) leftTest(); else showFs(); }, 200);
+        };
         document.addEventListener('visibilitychange', onVis);
         window.addEventListener('blur', onBlur);
         document.addEventListener('fullscreenchange', onFs);
@@ -437,8 +471,10 @@
         document.getElementById('wtReturn').onclick = () => {
             if (watch && translated()) { showLock('still'); return; }
             emit('return');
-            enterFullscreen(); lock.hidden = true; away = false;
+            lock.hidden = true; away = false; fsHidden = false;
+            if (!fsOff) goFullscreen();
         };
+        settleLater();   // the Start click asked for full screen: check how it went once it settles
         const onUnload = e => {
             if (submitting) return;
             try { opts.saveBeacon && opts.saveBeacon(answers); } catch (err) {}
@@ -447,7 +483,7 @@
         window.addEventListener('beforeunload', onUnload);
 
         function teardown() {
-            clearInterval(tick); clearInterval(autosave); clearInterval(clockCheck);
+            clearInterval(tick); clearInterval(autosave); clearInterval(clockCheck); clearTimeout(settleTimer);
             mount.removeEventListener('click', onClick);
             document.removeEventListener('keydown', onKey);
             document.getElementById('wtCalcKeys').removeEventListener('click', onCalc);

@@ -11,6 +11,10 @@
 // start, or whenever the server restarts -- so teachers download their
 // results (summary CSV, question-by-question CSV, printable report).
 //
+// A teacher can instead limit a session to a class list they paste in (kept in their own browser, and here
+// only in the session's memory like everything else): students then join only with a student ID and last
+// name on it, and the teacher can set time and Read aloud before anyone joins.
+//
 // Answers are held: when students submit they see only their score. Ending
 // the session releases every student's answers and their report (a PDF made
 // in their browser, wpr-practice/assets/report-pdf.js) for those 15 minutes.
@@ -71,8 +75,9 @@ router.use((req, res, next) => {
 // time (POST /wpr/session/:code/time). An untimed test (the Baseline CFA) never runs out.
 const secondsFor = (session, st) => session.untimed ? Infinity : Math.round(session.seconds * (st.timeX || 1));
 // Seconds of that time a student has used. The clock stops while the teacher has them paused for a break
-// (POST /wpr/session/:code/supports).
-const usedSeconds = (st, now = Date.now()) => (now - st.startedAt - (st.pausedMs || 0) - (st.pausedAt ? now - st.pausedAt : 0)) / 1000;
+// (POST /wpr/session/:code/supports), and the time a test sat closed before the teacher let the student back in
+// (closedMs, POST /wpr/session/:code/reopen) doesn't count either.
+const usedSeconds = (st, now = Date.now()) => (now - st.startedAt - (st.pausedMs || 0) - (st.closedMs || 0) - (st.pausedAt ? now - st.pausedAt : 0)) / 1000;
 const pausedSeconds = (st, now = Date.now()) => Math.round(((st.pausedMs || 0) + (st.pausedAt ? now - st.pausedAt : 0)) / 1000);
 // Seconds a student has left, or null on an untimed test
 const secondsLeft = (session, st, now = Date.now()) => session.untimed ? null : Math.max(0, Math.round(secondsFor(session, st) - usedSeconds(st, now)));
@@ -118,6 +123,27 @@ function newCode() {
     return code;
 }
 const clean = (s, n) => String(s || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n);
+// On a class list, a student joins with a student ID on it and its last name (teacher 2026-11-06: in the pilot a
+// student got a second test by joining with an initial and a different ID). IDs ignore spaces, capitals and
+// leading zeros. A last name ignores capitals, accents, spaces and punctuation ("OBrien" is O'Brien, "Nunez" is
+// Núñez), or matches when every word of one is in the other ("Garcia" matches "Garcia Lopez"); an initial
+// alone never matches.
+const listId = id => { const x = clean(id, 20).replace(/\s+/g, '').toUpperCase(); return /^\d+$/.test(x) ? x.replace(/^0+(?=\d)/, '') : x; };
+const plainName = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/['\u2019`]/g, '');
+const nameWords = n => plainName(n).split(/[^a-z]+/).filter(w => w.length > 1);
+function sameLastName(typed, listed) {
+    const compact = n => plainName(n).replace(/[^a-z]/g, '');
+    if (compact(typed).length > 1 && compact(typed) === compact(listed)) return true;
+    const a = nameWords(typed), b = nameWords(listed);
+    return a.length > 0 && b.length > 0 && (a.every(w => b.includes(w)) || b.every(w => a.includes(w)));
+}
+// A student in the session, or on a class list one who hasn't joined yet (their time and Read aloud can be set early)
+function findStudent(s, id) {
+    const st = s.students.get(String(id || ''));
+    if (st || !s.list) return st;
+    const entry = s.list.get(listId(id));
+    return entry && (s.students.get(entry.studentId) || entry);
+}
 
 const publicQuestions = qs => qs.map((q, i) => ({ n: i + 1, kind: q.kind, topic: q.topic || '', prompt: q.prompt, q: q.q, options: q.options }));
 function grade(questions, answers) {
@@ -228,10 +254,20 @@ router.post('/wpr/session', async (req, res) => {
         try { bankQs = await loadReadyQuestions(body.banks); } catch (e) { console.error('[wpr] banks', e); }
         if (!bankQs.length) return res.status(400).json({ error: 'Those question banks have no questions with answers yet. Add answers, or use the standard questions.' });
     }
+    // Only the students on the teacher's class list: student ID -> { studentId, firstName, lastName, timeX, readAloud }
+    let list = null;
+    if (body.listOnly) {
+        list = new Map();
+        (Array.isArray(body.classList) ? body.classList : []).slice(0, MAX_STUDENTS).forEach(r => {
+            const id = listId(r && r.id), lastName = clean(r && r.last, 40);
+            if (id && lastName && !list.has(id)) list.set(id, { studentId: clean(r.id, 20).replace(/\s+/g, ''), firstName: clean(r.first, 40), lastName, timeX: 1, readAloud: false });
+        });
+        if (!list.size) return res.status(400).json({ error: 'Your class list has no students with a last name and a student ID. Check it and try again.' });
+    }
     const code = newCode();
     const now = Date.now();
     const session = {
-        code, teacherToken: token(), teacher: clean(body.teacher, 60), length, ...LENGTHS[length], source, bankQs,
+        code, teacherToken: token(), teacher: clean(body.teacher, 60), length, ...LENGTHS[length], source, bankQs, list,
         createdAt: now, lastActive: now, expiresAt: now + SESSION_HOURS * 3600 * 1000, students: new Map(), joined: 0
     };
     if (cfa) {
@@ -245,7 +281,7 @@ router.post('/wpr/session', async (req, res) => {
     }
     sessions.set(code, session);
     writeActiveMarker();
-    record({ ev: 'session', code, length, source, count: session.count, untimed: !!session.untimed });
+    record({ ev: 'session', code, length, source, count: session.count, untimed: !!session.untimed, classList: list ? list.size : 0 });
     res.json({ code, teacherToken: session.teacherToken, length, label: session.label, expiresAt: session.expiresAt, bank_questions: bankQs.length, rec: recording() });
 });
 
@@ -261,7 +297,7 @@ router.get('/wpr/session/:code', (req, res) => {
         timeX: st.timeX || 1, secondsAllowed: s.untimed ? null : secondsFor(s, st),
         readAloud: !!st.readAloud, paused: !!(st.pausedAt && !st.submittedAt), pausedSeconds: st.startedAt ? pausedSeconds(st, now) : 0,
         answeredSoFar: st.submittedAt ? st.result.answered : Object.keys(st.answers || {}).length,
-        violations: st.violations, endReason: st.endReason || '', submittedAt: st.submittedAt || null,
+        violations: st.violations, endReason: st.endReason || '', submittedAt: st.submittedAt || null, reopened: st.reopened || 0,
         result: st.submittedAt ? { answered: st.result.answered, correct: st.result.correct, total: st.result.total } : null,
         // Question-by-question detail (only after submitting)
         items: st.submittedAt ? st.questions.map((q, i) => ({
@@ -269,7 +305,13 @@ router.get('/wpr/session/:code', (req, res) => {
             yours: st.answers[i] !== undefined ? q.options[st.answers[i]] : '', right: st.answers[i] !== undefined ? st.answers[i] === q.correct : null
         })) : null
     }));
-    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, endedAt: s.endedAt || null, timed: !s.untimed, rec: recording(), students });
+    // On a class list, everyone who hasn't joined yet, with any time or Read aloud already set for them
+    const notJoined = s.list ? [...s.list.values()].filter(e => !s.students.has(e.studentId)).map(e => ({
+        firstName: e.firstName, lastName: e.lastName, studentId: e.studentId, status: 'waiting',
+        timeX: e.timeX || 1, secondsAllowed: s.untimed ? null : secondsFor(s, e), readAloud: !!e.readAloud, paused: false, pausedSeconds: 0
+    })) : [];
+    res.json({ code: s.code, label: s.label, length: s.length, teacher: s.teacher, createdAt: s.createdAt, expiresAt: s.expiresAt, endedAt: s.endedAt || null, timed: !s.untimed, rec: recording(),
+        classList: s.list ? s.list.size : 0, students, notJoined });
 });
 
 // POST /wpr/session/:code/end -- the teacher ends the test. Anyone still testing is scored on their saved
@@ -299,7 +341,7 @@ router.post('/wpr/session/:code/end', (req, res) => {
 router.post('/wpr/session/:code/time', (req, res) => {
     const s = teacherSession(req);
     if (!s) return res.status(404).json({ error: 'Session not found. It may have ended or expired.' });
-    const st = s.students.get(String((req.body || {}).studentId || ''));
+    const st = findStudent(s, (req.body || {}).studentId);
     if (!st) return res.status(404).json({ error: 'That student isn\'t in this session.' });
     if (s.untimed) return res.status(400).json({ error: 'This test has no time limit.' });
     const x = Number(req.body.x);
@@ -320,7 +362,7 @@ router.post('/wpr/session/:code/supports', (req, res) => {
     const s = teacherSession(req);
     if (!s) return res.status(404).json({ error: 'Session not found. It may have ended or expired.' });
     const b = req.body || {};
-    const st = s.students.get(String(b.studentId || ''));
+    const st = findStudent(s, b.studentId);
     if (!st) return res.status(404).json({ error: 'That student isn\'t in this session.' });
     if (st.submittedAt) return res.status(409).json({ error: 'That student already finished.' });
     if (typeof b.readAloud === 'boolean') {
@@ -340,6 +382,28 @@ router.post('/wpr/session/:code/supports', (req, res) => {
     }
     record({ ev: 'support', code: s.code, s: st.n, readAloud: !!st.readAloud, paused: !!st.pausedAt });
     res.json({ success: true, readAloud: !!st.readAloud, paused: !!st.pausedAt });
+});
+
+// POST /wpr/session/:code/reopen -- { studentId } "Let back in": a student whose test submitted itself because they
+// left it twice gets back in with their answers kept, until the teacher ends the test (teacher 2026-11-06: in the
+// pilot a computer that dropped out of full screen closed a student's test on question 1). On a timed test the
+// time it sat closed doesn't count. Their results page notices within 10 seconds (or they join again), and the
+// leaving rules start over for them; the count of times they left keeps adding up for the teacher.
+router.post('/wpr/session/:code/reopen', (req, res) => {
+    const s = teacherSession(req);
+    if (!s) return res.status(404).json({ error: 'Session not found. It may have ended or expired.' });
+    const st = s.students.get(String((req.body || {}).studentId || ''));
+    if (!st) return res.status(404).json({ error: 'That student isn\'t in this session.' });
+    if (s.endedAt) return res.status(409).json({ error: 'The test has ended, so it can\'t be reopened.' });
+    if (!st.submittedAt) return res.status(409).json({ error: 'That student is still testing.' });
+    if (st.endReason !== 'left-test') return res.status(409).json({ error: 'Only a test that submitted itself because the student left it can be reopened.' });
+    st.closedMs = (st.closedMs || 0) + (Date.now() - st.submittedAt);
+    st.priorLeaves = st.violations;
+    st.submittedAt = null; st.endReason = null; st.result = null;
+    st.reopened = (st.reopened || 0) + 1;
+    writeActiveMarker();
+    record({ ev: 'reopen', code: s.code, s: st.n, answered: Object.keys(st.answers || {}).length });
+    res.json({ success: true });
 });
 
 // DELETE /wpr/session/:code -- the teacher erases everything now (or, on an older page, ends without the 15 minutes)
@@ -391,8 +455,18 @@ router.post('/wpr/join', (req, res) => {
     session.lastActive = Date.now();
     const firstName = clean(body.firstName, 40), lastName = clean(body.lastName, 40), studentId = clean(body.studentId, 20);
     if (!firstName || !lastName || !studentId) return res.status(400).json({ error: 'Enter your first name, last name, and student ID.' });
-    let st = session.students.get(studentId);
-    if (st && (st.firstName.toLowerCase() !== firstName.toLowerCase() || st.lastName.toLowerCase() !== lastName.toLowerCase())) {
+    // On a class list: an ID on it, with its last name. The student then shows under the list's name.
+    const entry = session.list ? session.list.get(listId(studentId)) : null;
+    if (session.list && !entry) {
+        miss(joinKey, JOIN_MISSES);
+        return res.status(403).json({ error: 'That student ID isn\'t on the class list for this test. Check your ID, or ask your teacher.' });
+    }
+    if (entry && !sameLastName(lastName, entry.lastName)) {
+        miss(joinKey, JOIN_MISSES);
+        return res.status(403).json({ error: 'That last name doesn\'t match the class list for this student ID. Check both, or ask your teacher.' });
+    }
+    let st = session.students.get(entry ? entry.studentId : studentId);
+    if (st && !entry && (st.firstName.toLowerCase() !== firstName.toLowerCase() || st.lastName.toLowerCase() !== lastName.toLowerCase())) {
         return res.status(409).json({ error: 'That student ID is already in use in this class. Check your ID or ask your teacher.' });
     }
     // A student who finished can come back to their results (a closed tab, a refresh in a new tab, another
@@ -404,8 +478,11 @@ router.post('/wpr/join', (req, res) => {
     if (session.endedAt) return res.status(409).json({ error: 'This test has ended. Check with your teacher.' });
     if (!st && session.students.size >= MAX_STUDENTS) return res.status(409).json({ error: `This class code is full (${MAX_STUDENTS} students). Check with your teacher.` });
     if (!st) {
-        st = { token: token(), n: ++session.joined, firstName, lastName, studentId, joinedAt: Date.now(), startedAt: null, questions: null, answers: {}, violations: 0, submittedAt: null };
-        session.students.set(studentId, st);
+        st = entry
+            ? { firstName: entry.firstName || firstName, lastName: entry.lastName, studentId: entry.studentId, timeX: entry.timeX, readAloud: entry.readAloud }
+            : { firstName, lastName, studentId };
+        Object.assign(st, { token: token(), n: ++session.joined, joinedAt: Date.now(), startedAt: null, questions: null, answers: {}, violations: 0, submittedAt: null });
+        session.students.set(st.studentId, st);
         record({ ev: 'join', code: session.code, s: st.n });
     } else {
         st.token = token(); // rejoining (e.g. after a refresh) issues a fresh token
@@ -470,7 +547,8 @@ router.post('/wpr/save', (req, res) => {
 router.post('/wpr/violation', (req, res) => {
     const { st, error } = getStudent(req);
     if (error) return res.status(404).json({ error });
-    st.violations = Math.max(st.violations, Math.min(20, parseInt(req.body.count, 10) || 1));
+    // After "Let back in" the page counts from 1 again, so add the times from before
+    st.violations = Math.max(st.violations, (st.priorLeaves || 0) + Math.min(20, parseInt(req.body.count, 10) || 1));
     record({ ev: 'violation', code: String(req.body.code || '').toUpperCase(), s: st.n, count: st.violations });
     res.json({ success: true });
 });
