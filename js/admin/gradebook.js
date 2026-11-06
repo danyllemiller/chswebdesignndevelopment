@@ -11,7 +11,15 @@
 import { COURSE_WEIGHTS, getAssignmentCategory, periodToCourseKey } from '../modules/grade-weights.js?v=5';
 import { dueFor } from '../modules/due-extension.js?v=1';
 // Extra school days on assignments per student, from master-gradebook-data (set on every load)
-let dueExt = { days: {}, off: new Set() };
+let dueExt = { days: {}, off: new Set(), joined: {} };
+// A student's own due date for one column: extra school days from an accommodation plan, and for a late enrollee,
+// none at all for anything that came due before they joined its course (server/lib/lateEnrollment.js), so it's
+// never missing or late for them
+function studentDue(due, key, studentId) {
+    const d = dueFor(due, key, dueExt.days[studentId], dueExt.off);
+    const joined = (dueExt.joined[studentId] || {})[allAssignments[key]?.targetCourse];
+    return joined && d && d < joined ? '' : d;
+}
 
 // Dynamically load Chart.js for the Analytics Graph
 if (!document.getElementById('chartjs-lib')) {
@@ -1196,7 +1204,7 @@ async function loadData(period) {
         const assignmentsRaw = data.assignments;
         const gradesRaw = data.grades;
         // Students whose accommodation plans give extra school days on assignments (admin/accommodations.html)
-        dueExt = { days: data.extensions || {}, off: new Set(data.offDays || []) };
+        dueExt = { days: data.extensions || {}, off: new Set(data.offDays || []), joined: data.joined || {} };
 
         allStudents = studentsRaw.map(d => ({
             ...d,
@@ -1750,7 +1758,7 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
                 // Ungraded — only count it as a missed zero once its due date
                 // has actually passed, so students aren't dinged for work
                 // that isn't due yet. Matches js/student/dashboard.js.
-                const effectiveDueDate = dueFor(studentPeriodDueDate || reg?.dueDate, key, dueExt.days[s.studentId], dueExt.off);
+                const effectiveDueDate = studentDue(studentPeriodDueDate || reg?.dueDate, key, s.studentId);
                 const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
                 if (!isPastDue) return;
             }
@@ -1840,7 +1848,7 @@ let score = "", display = '', bg = "";
                     if (isTcKey) {
                         isLate = g.onTime === 0;
                     } else {
-                        const effectiveDueDate = dueFor(studentPeriodDueDate || reg?.dueDate, key, dueExt.days[s.studentId], dueExt.off);
+                        const effectiveDueDate = studentDue(studentPeriodDueDate || reg?.dueDate, key, s.studentId);
                         const submittedDateStr = g.timestamp ? String(g.timestamp).split('T')[0].split(' ')[0] : null;
                         isLate = !!(effectiveDueDate && submittedDateStr && submittedDateStr > effectiveDueDate);
                     }
@@ -1903,7 +1911,7 @@ let score = "", display = '', bg = "";
                         if (pendingProjects.has(`${s.studentId}::${key}`)) {
                             display = '<span class="badge bg-warning text-dark px-1 shadow-sm" title="Needs an uploaded file AND a confirmed peer review before the grade posts">PENDING</span>';
                         } else if (!unit && !reg?.isProjectMilestone) {
-                            const effectiveDueDate = dueFor(studentPeriodDueDate || reg?.dueDate, key, dueExt.days[s.studentId], dueExt.off);
+                            const effectiveDueDate = studentDue(studentPeriodDueDate || reg?.dueDate, key, s.studentId);
                             const isPastDue = !!effectiveDueDate && new Date(effectiveDueDate + 'T00:00:00') < today;
                             if (isPastDue) {
                                 display = '<span class="text-danger fw-bold" title="Missing">M</span>';

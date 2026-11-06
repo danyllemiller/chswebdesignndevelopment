@@ -7,6 +7,7 @@
 const { resolveCourseId } = require('./helpers');
 const { clockinDate, loadClockinDays } = require('./lib/clockinDays');
 const accommodations = require('./lib/accommodations');
+const lateEnrollment = require('./lib/lateEnrollment');
 
 const COURSE_WEIGHTS = {
     WD1:  { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
@@ -184,6 +185,8 @@ async function computeStudentGrade(connection, studentId, sectionId) {
     rows.forEach(r => { byKey[r.exam_id] = r; });
     const days = await loadClockinDays(connection);
     const { extraDays } = await accommodations.settingsFor(connection, studentId);   // accommodation plan
+    // A late enrollee: nothing that came due before they joined this course is missing (lib/lateEnrollment.js)
+    const joined = ((await lateEnrollment.lateMap(connection)).get(String(studentId)) || {})[courseCode];
 
     rows.forEach(r => {
         const key = r.exam_id;
@@ -236,7 +239,7 @@ async function computeStudentGrade(connection, studentId, sectionId) {
             // to score -- stays excluded until saveEvaluationAndAggregate
             // actually writes one.
             if (projectExamIds.has(key)) return;
-            const dueDate = accommodations.dueFor(formatDbDate(r.due_date), key, extraDays);
+            const dueDate = lateEnrollment.dueAfterJoin(accommodations.dueFor(formatDbDate(r.due_date), key, extraDays), joined);
             const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
             if (!isPastDue) return;
         }

@@ -556,7 +556,9 @@ router.get('/student/project-aggregate', requireSelfOrStaff(), async (req, res) 
                     posted: Number(posted.n) > 0
                 };
             }
-            return { aggregate: aggregateRows[0] || null, evaluations: evalRows, projectExempt: isProjectExempt(student_id), projectAfterTest: isProjectAfterTest(student_id), gate };
+            // Excused from this one project (EX, e.g. a late enrollee's from before they joined) counts as excused too
+            const [[ex]] = await connection.execute("SELECT COUNT(*) AS n FROM responses WHERE student_id = ? AND exam_id = ? AND score = 'EX'", [student_id, exam_id]);
+            return { aggregate: aggregateRows[0] || null, evaluations: evalRows, projectExempt: isProjectExempt(student_id) || !!ex.n, projectAfterTest: isProjectAfterTest(student_id), gate };
         });
         res.json(result);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch project aggregate' }); }
