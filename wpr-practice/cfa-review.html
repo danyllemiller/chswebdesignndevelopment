@@ -28,6 +28,11 @@
     .team { font-size: .85rem; color: #495057; }
     .badge-new { background: #6f42c1; }
     .swap-txt { color: #a85300; }
+    .flagbox { background: #fff3cd; border: 2px solid #ffc107; border-radius: .6rem; padding: .5rem .8rem; margin-bottom: .6rem; font-size: .95rem; }
+    .tag { display: inline-block; font-size: .7rem; font-weight: 800; padding: 1px 7px; border-radius: 999px; margin-left: .3rem; vertical-align: 1px; }
+    .tag.easy { background: #e9ecef; color: #6c757d; } .tag.close { background: #fd7e14; color: #fff; } .tag.new { background: #0d6efd; color: #fff; }
+    .q li.easy { color: #6c757d; text-decoration: line-through; }
+    .q .why { font-size: .85rem; font-weight: 400; color: #6c757d; margin-bottom: .25rem; }
     .bar-sum { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid #dee2e6; margin: 0 -1.5rem 1rem; padding: .6rem 1.5rem; }
   </style>
 </head>
@@ -47,6 +52,7 @@
   const put = (store, k, v) => { try { store.setItem(k, v); } catch (e) {} };
   let pass = get(sessionStorage, PASS_KEY), me = get(localStorage, NAME_KEY);
   let items = [], votes = [], filter = 'all';
+  let round = 1, intro = '', look = '';   // round 2 (11-06): flagged questions with proposed new wrong choices
   const KIND = { tf: 'True or false', mc: 'Multiple choice' };
 
   async function api(method, url, body) {
@@ -80,6 +86,7 @@
     try {
       const out = await api('GET', '/api/wpr/cfa/review');
       items = out.items; votes = out.votes;
+      round = out.round || 1; intro = out.intro || ''; look = out.look || '';
       render();
     } catch (e) { showSignIn(e.message); }
   }
@@ -122,13 +129,58 @@
     const swapItems = items.filter(i => votesFor(i.key).some(v => v.vote === 'swap')).length;
     return `<div class="d-flex flex-wrap gap-3 align-items-center small">
       <span class="fw-bold">You've reviewed ${mine} of ${items.length}.</span>
-      <span class="text-muted">${reviewers.length} reviewer${reviewers.length === 1 ? '' : 's'} so far${reviewers.length ? ': ' + reviewers.map(esc).join(', ') : ''} · ${swapItems} question${swapItems === 1 ? '' : 's'} with a swap vote</span>
+      <span class="text-muted">${reviewers.length} reviewer${reviewers.length === 1 ? '' : 's'} so far${reviewers.length ? ': ' + reviewers.map(esc).join(', ') : ''} · ${swapItems} question${swapItems === 1 ? '' : 's'} with a ${round === 2 ? 'vote for the new choices' : 'swap vote'}</span>
       <span class="ms-auto btn-group btn-group-sm" role="group" aria-label="Show">
-        ${[['all', 'All 50'], ['todo', 'Not reviewed by me'], ['swaps', 'Has swap votes']].map(([k, t]) => `<button class="btn ${filter === k ? 'btn-primary' : 'btn-outline-primary'}" data-filter="${k}">${t}</button>`).join('')}
+        ${[['all', `All ${items.length}`], ['todo', 'Not reviewed by me'], ['swaps', round === 2 ? 'Has votes for the new choices' : 'Has swap votes']].map(([k, t]) => `<button class="btn ${filter === k ? 'btn-primary' : 'btn-outline-primary'}" data-filter="${k}">${t}</button>`).join('')}
       </span></div>`;
   }
 
+  // Round 2: each flagged question shows its choices now and the proposed ones. "Use the new choices" is a swap to the
+  // proposal (the question's one alternate); "Keep the current choices" keeps it.
+  const indName = id => { const S = window.WprStandards; for (const st of (S ? S.standards : [])) { const i = st.indicators.find(x => x.id === id); if (i) return i.name; } return ''; };
+  function card2Html(item) {
+    const mine = myVote(item.key), all = votesFor(item.key), p = item.alternates[0];
+    const keeps = all.filter(v => v.vote === 'keep'), uses = all.filter(v => v.vote === 'swap'), notes = all.filter(v => v.note);
+    const now = item.options.map(o => `<li class="${o === item.answer ? 'right' : item.tooEasy.includes(o) ? 'easy' : ''}">${esc(o)}${o === item.answer ? ' <i class="fas fa-check" aria-label="correct answer"></i>' : ''}${item.tooEasy.includes(o) ? '<span class="tag easy">too easy</span>' : ''}</li>`).join('');
+    const proposed = p.options.map(o => {
+      const w = (p.newOnes || []).find(x => x.text === o), close = o === p.close;
+      return `<li class="${o === p.answer ? 'right' : ''}">${esc(o)}${o === p.answer ? ' <i class="fas fa-check" aria-label="correct answer"></i>' : ''}${close ? '<span class="tag close">CLOSE</span>' : w ? '<span class="tag new">NEW</span>' : ''}
+        ${close ? `<div class="why">Why it's wrong: ${esc(p.closeWhy)}</div>` : w ? `<div class="why">Why it's wrong: ${esc(w.why)}</div>` : ''}</li>`;
+    }).join('');
+    return `<div class="q ${mine ? 'mine-' + mine.vote : ''}" data-key="${esc(item.key)}">
+      <div class="flagbox"><i class="fas fa-flag text-warning me-1"></i><b>Flagged:</b> ${esc(item.flag)}</div>
+      <div class="d-flex flex-wrap justify-content-between gap-2 small fw-bold text-muted mb-2">
+        <span>CFA question ${item.n} · ${esc(item.indicator)} ${esc(indName(item.indicator))}</span>
+        <span>${mine ? (mine.vote === 'keep' ? '<span class="text-success">You: Keep the current choices</span>' : '<span class="swap-txt">You: Use the new choices</span>') : 'Not reviewed by you yet'}</span>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6"><div class="small fw-bold text-uppercase text-muted mb-1">Now</div>${item.prompt ? `<div class="small text-muted fw-bold">${esc(item.prompt)}</div>` : ''}<div class="stem">${esc(item.q)}</div><ol type="A">${now}</ol></div>
+        <div class="col-md-6"><div class="small fw-bold text-uppercase text-muted mb-1">Proposed</div>${p.stemChanged ? '<div class="small fw-bold text-primary">The question\'s wording changes too (it now names the manager).</div>' : ''}<div class="stem">${esc(p.q)}</div><ol type="A">${proposed}</ol></div>
+      </div>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <button class="btn btn-sm ${mine && mine.vote === 'swap' ? 'btn-warning' : 'btn-outline-warning'} fw-bold" data-vote="swap" data-swap-to="${esc(p.key)}"><i class="fas fa-check me-1"></i>Use the new choices</button>
+        <button class="btn btn-sm ${mine && mine.vote === 'keep' ? 'btn-success' : 'btn-outline-success'} fw-bold" data-vote="keep"><i class="fas fa-rotate-left me-1"></i>Keep the current choices</button>
+        ${mine ? '<button class="btn btn-sm btn-link text-muted" data-vote="clear">Clear my vote</button>' : ''}
+        <input class="form-control form-control-sm ms-auto" style="max-width:340px" data-note maxlength="500" placeholder="Suggest a better wording here (saves when you click away)" value="${esc(mine && mine.note || '')}" ${mine ? '' : 'disabled title="Pick one first"'}>
+      </div>
+      ${all.length ? `<div class="team mt-2"><i class="fas fa-users me-1"></i>Team: ${uses.length ? `<span class="swap-txt fw-bold">Use new</span> ${uses.map(v => esc(v.reviewer)).join(', ')}` : ''}${uses.length && keeps.length ? ' · ' : ''}${keeps.length ? `<span class="text-success fw-bold">Keep current</span> ${keeps.map(v => esc(v.reviewer)).join(', ')}` : ''}
+        ${notes.map(v => `<div class="mt-1">“${esc(v.note)}” <span class="text-muted">· ${esc(v.reviewer)}</span></div>`).join('')}</div>` : ''}
+    </div>`;
+  }
+  function render2() {
+    const show = item => filter === 'all' || (filter === 'todo' ? !myVote(item.key) : votesFor(item.key).some(v => v.vote === 'swap'));
+    const list = items.filter(show);
+    screen.innerHTML = `
+      <div class="bar-sum" id="sum">${summary()}</div>
+      <h1 class="h4 fw-bold">Baseline CFA review, round 2: ${items.length} flagged questions</h1>
+      <p class="mb-2">${esc(intro)}</p>
+      <div class="flagbox mb-3"><b>What to look for.</b> ${esc(look)}</div>
+      <p class="mb-2">For each question, click <strong>Use the new choices</strong> or <strong>Keep the current choices</strong>. If a new choice could be better, type your wording in the note. Your choices save as you go, and everyone with the passcode sees everyone's votes. The correct answer is in green; <span class="tag close">CLOSE</span> marks the nearly-right choice, and <span class="tag new">NEW</span> marks the other new ones.</p>
+      ${list.map(card2Html).join('') || '<p class="text-muted">Nothing here. Try "All".</p>'}`;
+  }
+
   function render() {
+    if (round === 2) return render2();
     const S = window.WprStandards;
     const show = item => filter === 'all' || (filter === 'todo' ? !myVote(item.key) : votesFor(item.key).some(v => v.vote === 'swap'));
     let n = 0;
@@ -157,7 +209,7 @@
       votes = votes.filter(v => !(v.item_key === key && v.reviewer === me));
       if (body.vote !== 'clear') votes.push({ item_key: key, reviewer: me, vote: body.vote, swap_to: body.swapTo || null, note: body.note || null });
       const item = items.find(i => i.key === key), n = items.indexOf(item) + 1;
-      card.outerHTML = cardHtml(item, n);
+      card.outerHTML = round === 2 ? card2Html(item) : cardHtml(item, n);
       document.getElementById('sum').innerHTML = summary();
     } catch (e) {
       if (e.status === 401) return showSignIn(e.message);
@@ -171,7 +223,7 @@
     const card = e.target.closest('.q'); if (!card) return;
     const mine = myVote(card.dataset.key);
     const v = e.target.closest('[data-vote]');
-    if (v) return vote(card, { vote: v.dataset.vote, swapTo: v.dataset.vote === 'swap' && mine ? mine.swap_to : null, note: mine ? mine.note : '' });
+    if (v) return vote(card, { vote: v.dataset.vote, swapTo: v.dataset.vote === 'swap' ? v.dataset.swapTo || (mine ? mine.swap_to : null) : null, note: mine ? mine.note : '' });
     const alt = e.target.closest('[data-alt]');
     if (alt) return vote(card, { vote: 'swap', swapTo: alt.dataset.alt, note: mine ? mine.note : '' });
   });

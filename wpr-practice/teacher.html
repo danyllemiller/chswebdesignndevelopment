@@ -10,7 +10,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
   <script src="/wpr-practice/assets/standards.js?v=1"></script>
-  <script src="/wpr-practice/assets/report-pdf.js?v=2"></script>
+  <script src="/wpr-practice/assets/report-pdf.js?v=3"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 1050px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -217,6 +217,7 @@ Answer: False"></textarea>
         <div><div class="form-label fw-bold mb-1">Who can take this test?</div>
           <div class="form-check"><input class="form-check-input" type="radio" name="who" id="whoAny" value="any" checked><label class="form-check-label" for="whoAny">Anyone with the class code</label></div>
           <div class="form-check"><input class="form-check-input" type="radio" name="who" id="whoList" value="list"><label class="form-check-label" for="whoList">Only the students on my class list <span class="text-muted">(and set extra time or Read aloud before the test)</span></label></div>
+          <div class="form-text">Extra time, Read aloud, and breaks are set on each student's row once the session starts (or before anyone joins, with a class list). The session page has a "How to" for each.</div>
           <div id="listBox" class="mt-2 d-none">
             <div class="d-flex gap-2 mb-2"><select id="listPick" class="form-select form-select-sm"></select><button type="button" id="listDel" class="btn btn-sm btn-outline-danger text-nowrap d-none">Remove this list</button></div>
             <input id="listName" class="form-control form-control-sm mb-2" maxlength="40" placeholder="Name this list, for example Period 2">
@@ -337,6 +338,13 @@ Answer: False"></textarea>
 
   const fmtLeft = s => s == null ? '' : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
+  // The score to grade on, from the server (teacher 2026-11-06): the Sprint counts only the questions answered;
+  // every other test counts unanswered questions as wrong
+  const scoreOf = r => r.score ?? pct(r.correct, r.total);
+  const scoreNote = () => data && data.length === 'sprint' ? 'Score = percent right of the questions each student answered (on the Sprint, questions a student didn\'t reach don\'t count against them).'
+    : 'Score = correct out of all questions; unanswered questions count as wrong.';
+  // Safety and ergonomics: the practice tests' safety questions, and any question on state indicator 1.2.4 Health and safety
+  const isSafety = it => it.topic === 'safety' || it.indicator === '1.2.4';
   const mins = sec => `${Math.round(sec / 60)} min`;
   const TIME_LABEL = { 1: 'Standard time', 1.5: 'Time and a half', 2: 'Double time' };
   // A student's time button, and under their row the choices, while it's open (untimed tests have neither)
@@ -405,12 +413,21 @@ Answer: False"></textarea>
         </div>
       </div>
       <hr>
+      ${!data.endedAt && st.length && done.length === st.length ? `<div class="alert alert-success fw-bold"><i class="fas fa-flag-checkered me-1"></i>Everyone who joined has finished${(data.notJoined || []).length ? ` (${data.notJoined.length} on your class list never joined)` : ''}. Download your reports below, then click <u>End the test</u> so students can see their answers and save their own report. Ask them to keep the test page open until then.</div>` : ''}
+      <details class="small mb-2"><summary class="fw-bold text-primary">How to give extra time, Read aloud, or a break</summary>
+        <ul class="mt-2 mb-1">
+          ${timed ? '<li><b>Extra time:</b> click the student\'s time in the <b>Time allowed</b> column, then pick <b>Time and a half</b> or <b>Double time</b>. You can change it before or during the test; their clock updates within 5 seconds.</li>' : '<li><b>Extra time:</b> this test has no time limit, so no one needs extra time.</li>'}
+          <li><b>Read aloud:</b> click <b>Add</b> in the <b>Supports</b> column, check that the student has headphones (or is testing alone), then click <b>Turn on</b>. A Read aloud button appears on their test.</li>
+          ${timed ? '<li><b>A break:</b> in <b>Supports</b>, click <b>Pause their clock for a break</b> and wait until their screen says <b>Your test is paused</b>. Click <b>Restart their clock</b> when they are back.</li>' : ''}
+          <li><b>Before the test:</b> start with <b>Only the students on my class list</b> to set extra time and Read aloud before anyone joins.</li>
+          <li>Downloads show the time allowed and the supports used, never why.</li>
+        </ul></details>
       ${data.classList ? `<div class="small text-muted mb-2"><i class="fas fa-list-check me-1"></i><strong>Class list:</strong> only the ${data.classList} students on your list can join. You can set time or Read aloud on anyone's row before they start.</div>` : ''}
       <div class="d-flex flex-wrap gap-4 mb-3">
         <div><span class="fs-3 fw-bold">${st.length}</span> ${data.classList ? `of ${data.classList} ` : ''}joined</div>
         <div><span class="fs-3 fw-bold">${st.filter(s => s.status === 'testing').length}</span> testing</div>
         <div><span class="fs-3 fw-bold text-success">${done.length}</span> finished</div>
-        ${done.length ? `<div><span class="fs-3 fw-bold">${Math.round(done.reduce((s, x) => s + pct(x.result.correct, x.result.total), 0) / done.length)}%</span> class average</div>` : ''}
+        ${done.length ? `<div><span class="fs-3 fw-bold">${Math.round(done.reduce((s, x) => s + scoreOf(x.result), 0) / done.length)}%</span> class average</div>` : ''}
       </div>
       <div class="table-responsive mb-3"><table class="table table-sm align-middle mb-0">
         <thead class="table-light"><tr><th>Student</th><th>ID</th><th class="num">Status</th>${timed ? '<th class="num">Time left</th><th class="num">Time allowed</th>' : ''}<th class="num">Supports</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th></tr></thead>
@@ -422,7 +439,7 @@ Answer: False"></textarea>
           <td class="num">${supCell(s)}</td>
           <td class="num">${s.result ? s.result.answered : s.status === 'waiting' ? '' : s.answeredSoFar}</td>
           <td class="num">${s.result ? s.result.correct : ''}</td>
-          <td class="num fw-bold">${s.result ? pct(s.result.correct, s.result.total) + '%' : ''}</td>
+          <td class="num fw-bold">${s.result ? scoreOf(s.result) + '%' : ''}</td>
           <td class="num ${s.violations ? 'text-danger fw-bold' : 'text-muted'}">${s.status === 'waiting' ? '' : s.violations ? s.violations + '×' : '0'}${s.endReason === 'left-test' ? ' · auto-submitted' : ''}${s.reopened ? ` · let back in${s.reopened > 1 ? ` ${s.reopened}×` : ''}` : ''}
             ${s.endReason === 'left-test' && !data.endedAt ? `<button class="btn btn-sm btn-outline-primary fw-bold py-0 ms-1" data-reopen="${esc(s.studentId)}" title="Reopens their test with their answers kept. Their results page takes them back within 10 seconds.">Let back in</button>` : ''}</td></tr>${timed ? timeRow(s, cols) : ''}${supRow(s, cols)}`).join('')
           : `<tr><td colspan="${cols}" class="text-center text-muted py-4">Waiting for students to join…</td></tr>`}</tbody>
@@ -457,7 +474,7 @@ Answer: False"></textarea>
 
   function summaryCsv() {
     const rows = [['Last name', 'First name', 'Student ID', 'Answered', 'Correct', 'Total questions', 'Score %', 'Accuracy % (of answered)', 'Times left test', 'How it ended', 'Time allowed', 'Read aloud', 'Break time', 'Let back in']];
-    finished().forEach(s => rows.push([s.lastName, s.firstName, s.studentId, s.result.answered, s.result.correct, s.result.total, pct(s.result.correct, s.result.total), pct(s.result.correct, s.result.answered), s.violations, endedBy(s), allowed(s),
+    finished().forEach(s => rows.push([s.lastName, s.firstName, s.studentId, s.result.answered, s.result.correct, s.result.total, scoreOf(s.result), pct(s.result.correct, s.result.answered), s.violations, endedBy(s), allowed(s),
       s.readAloud ? 'Yes' : 'No', s.pausedSeconds ? fmtLeft(s.pausedSeconds) : '', s.reopened || '']));
     // On a class list, who still needs to take it (makeups)
     [...(data.notJoined || [])].sort((a, b) => (a.lastName + a.firstName).localeCompare(b.lastName + b.firstName))
@@ -466,7 +483,7 @@ Answer: False"></textarea>
   }
   function itemsCsv() {
     const rows = [['Last name', 'First name', 'Student ID', 'Question #', 'Topic', 'Question', 'Student answer', 'Correct answer', 'Result']];
-    finished().forEach(s => s.items.forEach(it => rows.push([s.lastName, s.firstName, s.studentId, it.n, it.topic === 'safety' ? 'Workplace safety' : 'WRS', it.q, it.yours, it.answer, it.right === null ? 'Not answered' : it.right ? 'Right' : 'Wrong'])));
+    finished().forEach(s => s.items.forEach(it => rows.push([s.lastName, s.firstName, s.studentId, it.n, isSafety(it) ? 'Workplace safety' : 'WRS', it.q, it.yours, it.answer, it.right === null ? 'Not answered' : it.right ? 'Right' : 'Wrong'])));
     download(`wpr-practice-questions-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
   }
 
@@ -488,7 +505,7 @@ Answer: False"></textarea>
     const rows = [['Last name', 'First name', 'Student ID', 'Score %', ...cols.map(c => `${c.id} ${c.name} %`)]];
     finished().forEach(s => {
       const by = {}; flat(STD.tally(s.items)).forEach(x => { by[x.id] = x; });
-      rows.push([s.lastName, s.firstName, s.studentId, pct(s.result.correct, s.result.total), ...cols.map(c => (by[c.id].seen ? by[c.id].pct : ''))]);
+      rows.push([s.lastName, s.firstName, s.studentId, scoreOf(s.result), ...cols.map(c => (by[c.id].seen ? by[c.id].pct : ''))]);
     });
     download(`wpr-practice-standards-${data.code}-${stamp()}.csv`, csv(rows), 'text/csv');
   }
@@ -539,7 +556,7 @@ Answer: False"></textarea>
 
   function reportHtml() {
     const st = finished();
-    const scores = st.map(s => pct(s.result.correct, s.result.total));
+    const scores = st.map(s => scoreOf(s.result));
     const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
     const sortedScores = [...scores].sort((a, b) => a - b);
     const median = sortedScores.length ? sortedScores[Math.floor((sortedScores.length - 1) / 2)] : 0;
@@ -566,7 +583,7 @@ Answer: False"></textarea>
     }));
     const missed = [...qs.values()].filter(e => e.seen >= 2 && e.wrong > 0).sort((a, b) => (b.wrong / b.seen) - (a.wrong / a.seen) || b.seen - a.seen).slice(0, 15);
     let safetySeen = 0, safetyRight = 0, wrsSeen = 0, wrsRight = 0;
-    st.forEach(s => s.items.forEach(it => { if (it.right === null) return; if (it.topic === 'safety') { safetySeen++; if (it.right) safetyRight++; } else { wrsSeen++; if (it.right) wrsRight++; } }));
+    st.forEach(s => s.items.forEach(it => { if (it.right === null) return; if (isSafety(it)) { safetySeen++; if (it.right) safetyRight++; } else { wrsSeen++; if (it.right) wrsRight++; } }));
     const bar = (label, a, b) => `<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${label}</b><span>${pct(a, b)}% right (${a} of ${b})</span></div><div style="background:#e9ecef;border-radius:6px;height:14px"><div style="width:${pct(a, b)}%;background:#198754;height:14px;border-radius:6px"></div></div></div>`;
     return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>WPR Practice Report ${esc(data.code)}</title>
       <style>body{font-family:Arial,Helvetica,sans-serif;color:#212529;margin:28px;max-width:800px} h1{font-size:22px;margin:0} h2{font-size:16px;margin:24px 0 8px;border-bottom:2px solid #1f2a44;padding-bottom:4px}
@@ -576,12 +593,12 @@ Answer: False"></textarea>
       <h1>WPR Practice Test: Class Report</h1>
       <div style="color:#6c757d;font-size:13px">${esc(data.teacher || '')}${data.teacher ? ' · ' : ''}${new Date(data.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · ${esc(data.label)} · Class code ${esc(data.code)}</div>
       <div class="stats"><div><b>${st.length}</b>students finished</div><div><b>${avg}%</b>class average</div><div><b>${median}%</b>median</div><div><b>${passing} of ${st.length}</b>scored 75% or higher</div></div>
-      <h2>Score distribution</h2>${hist}<div style="font-size:11px;color:#6c757d">Score = correct out of all questions. Green bars are 70% and up.</div>
+      <h2>Score distribution</h2>${hist}<div style="font-size:11px;color:#6c757d">${scoreNote()} Green bars are 70% and up.</div>
       <h2>By state standard</h2>${standardsTable(STD.tally(st.flatMap(s => s.items)))}
-      <h2>By topic</h2>${bar('Workplace Readiness Skills', wrsRight, wrsSeen)}${bar('Workplace safety & ergonomics', safetyRight, safetySeen)}
+      <h2>By topic</h2>${bar('Workplace Readiness Skills', wrsRight, wrsSeen)}${bar('Workplace safety & ergonomics (state indicator 1.2.4)', safetyRight, safetySeen)}
       <h2>Most-missed questions</h2>${missed.length ? `<table><thead><tr><th>Question</th><th>Correct answer</th><th class="num">Missed</th></tr></thead><tbody>${missed.map(m => `<tr><td>${esc(m.q)}</td><td>${esc(m.answer)}</td><td class="num">${m.wrong} of ${m.seen}</td></tr>`).join('')}</tbody></table>` : '<p style="font-size:13px">Not enough overlap yet. Each student gets a different random set of questions, so this fills in with larger classes.</p>'}
       <h2>Students</h2><table><thead><tr><th>Student</th><th>ID</th><th class="num">Answered</th><th class="num">Correct</th><th class="num">Score</th><th class="num">Left test</th><th>How it ended</th><th class="num">Time allowed</th></tr></thead><tbody>
-      ${st.map(s => `<tr><td>${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td><td class="num">${s.result.answered}</td><td class="num">${s.result.correct}</td><td class="num"><b>${pct(s.result.correct, s.result.total)}%</b></td><td class="num">${s.violations}</td><td>${endedBy(s)}</td><td class="num">${allowed(s)}</td></tr>`).join('')}
+      ${st.map(s => `<tr><td>${esc(s.lastName)}, ${esc(s.firstName)}</td><td>${esc(s.studentId)}</td><td class="num">${s.result.answered}</td><td class="num">${s.result.correct}</td><td class="num"><b>${scoreOf(s.result)}%</b></td><td class="num">${s.violations}</td><td>${endedBy(s)}</td><td class="num">${allowed(s)}</td></tr>`).join('')}
       </tbody></table></body></html>`;
   }
 

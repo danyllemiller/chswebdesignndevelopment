@@ -80,13 +80,15 @@
 
         // Score
         y += 14;
-        const score = pct(result.correct, result.total), b = band(score);
+        // The server's score when it sends one: the Sprint counts only the questions answered (teacher 2026-11-06)
+        const score = result.score ?? pct(result.correct, result.total), b = band(score);
         doc.setFillColor(...b.rgb); doc.roundedRect(M, y, 150, 92, 10, 10, 'F');
         font(38, 'bold', [255, 255, 255]); doc.text(`${score}%`, M + 75, y + 50, { align: 'center' });
         font(11, 'bold', [255, 255, 255]); doc.text(b.label, M + 75, y + 74, { align: 'center' });
         font(14, 'bold', INK); doc.text(`${result.correct} of ${result.total} questions right`, M + 172, y + 30);
         font(11, 'normal', MUTED);
-        doc.text(`You answered ${result.answered} of ${result.total}. Of those, ${pct(result.correct, result.answered)}% were right.`, M + 172, y + 50);
+        doc.text(result.scoring === 'answered' ? `You answered ${result.answered} of ${result.total}. Your score counts only those.`
+            : `You answered ${result.answered} of ${result.total}. Of those, ${pct(result.correct, result.answered)}% were right.`, M + 172, y + 50);
         doc.text('Green: 80% or higher   Yellow: 70-79%   Red: under 70%, review it', M + 172, y + 70);
         y += 118;
 
