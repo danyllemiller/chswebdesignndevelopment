@@ -4,6 +4,14 @@ const { withConnection } = require('../db');
 const bcrypt = require('bcrypt');
 const { getCurrentSchoolYear, requireSelfOrStaff } = require('../helpers');
 const { webDesignSections, pickMain, webDesignFirst } = require('../lib/webDesignFirst');
+const { recordJoins, excuseBeforeJoining } = require('../lib/lateEnrollment');
+
+// Late enrollees' EX marks (lib/lateEnrollment.js): a minute after the server starts and every 6 hours, so
+// assignments added or re-dated since are excused too
+setTimeout(function excuseLateEnrollees() {
+    withConnection(c => excuseBeforeJoining(c)).catch(e => console.error('[late-enrollment]', e));
+    setTimeout(excuseLateEnrollees, 6 * 3600 * 1000).unref();
+}, 60 * 1000).unref();
 const fs = require('fs');
 const path = require('path');
 
@@ -172,6 +180,12 @@ router.post('/admin/set-student-sections', async (req, res) => {
             }
             // A Web Design class added here becomes the student's main class (lib/webDesignFirst.js)
             await webDesignFirst(connection, student_id);
+            // A course added here after its semester's first two weeks is a late enrollment (lib/lateEnrollment.js)
+            try {
+                const [[st]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ?', [student_id]);
+                await recordJoins(connection, [st && st.section_id, ...section_ids].filter(Boolean).map(section_id => ({ student_id, section_id: String(section_id).trim() })), { source: 'roster-page' });
+                await excuseBeforeJoining(connection, student_id);
+            } catch (e) { console.error('[late-enrollment] sections', e); }
         });
         res.json({ success: true, count: section_ids.length });
     } catch (err) {
@@ -528,6 +542,13 @@ router.post('/admin/upload-roster', async (req, res) => {
         }
 
         await connection.commit();
+        // The day each student joined each course (new students, new courses, and students back from archived
+        // count from today), then the EX marks for anything that came due before a late join (lib/lateEnrollment.js)
+        try {
+            const returning = new Set([...byStudent.values()].filter(s => Number(before.get(s.student_id)?.archived) === 1).map(s => String(s.student_id)));
+            await recordJoins(connection, [...byStudent.values()].flatMap(s => s.sections.map(section_id => ({ student_id: s.student_id, section_id }))), { returning, source: 'upload' });
+            await excuseBeforeJoining(connection);
+        } catch (e) { console.error('[late-enrollment] roster upload', e); }
         return { status: 200, body: { success: true, count: cleaned.length, created, updated, archived, multiClass } };
         } catch (txErr) {
             await connection.rollback();

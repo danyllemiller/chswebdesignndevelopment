@@ -8,6 +8,7 @@ const { isCsUnitProject, syncCsProjectGrade } = require('../lib/csProjectGate');
 const { syncAsChapterTest } = require('../lib/asChapterTests');
 const { clockinDate, loadClockinDays } = require('../lib/clockinDays');
 const accommodations = require('../lib/accommodations');
+const lateEnrollment = require('../lib/lateEnrollment');
 
 // mysql2 returns DATE columns as JS Date objects (local-timezone fields set to
 // match the stored date exactly), not strings. Reading those fields directly
@@ -94,6 +95,19 @@ router.get('/student/course-gradebook', requireSelfOrStaff(), async (req, res) =
                     try {
                         const pd = typeof r.period_due_dates === 'string' ? JSON.parse(r.period_due_dates) : r.period_due_dates;
                         Object.keys(pd).forEach(k => { pd[k] = accommodations.shiftDue(formatDbDate(pd[k]), extraDays); });
+                        r.period_due_dates = JSON.stringify(pd);
+                    } catch (e) { /* malformed override: leave it */ }
+                }
+            });
+            // A late enrollee: nothing that came due before they joined this course has a due date for them, so
+            // their grades page never shows it missing (server/lib/lateEnrollment.js)
+            const joined = ((await lateEnrollment.lateMap(connection)).get(String(student_id)) || {})[courseCode];
+            if (joined) rows.forEach(r => {
+                r.due_date = lateEnrollment.dueAfterJoin(r.due_date, joined) || null;
+                if (r.period_due_dates) {
+                    try {
+                        const pd = typeof r.period_due_dates === 'string' ? JSON.parse(r.period_due_dates) : r.period_due_dates;
+                        Object.keys(pd).forEach(k => { if (!lateEnrollment.dueAfterJoin(formatDbDate(pd[k]), joined)) delete pd[k]; });
                         r.period_due_dates = JSON.stringify(pd);
                     } catch (e) { /* malformed override: leave it */ }
                 }
@@ -290,7 +304,10 @@ async function checkUnitPrerequisite(connection, studentId, examId) {
     // Unit Project -- only Unit 3+ require the project's self + peer review.
     // Students on the project-after-test list take the test first and still
     // owe the project (the Final checks it).
-    const projectRequired = projectRows.length > 0 && !PROJECT_EXEMPT_UNITS.has(unitNum) && !isProjectExempt(studentId) && !isProjectAfterTest(studentId);
+    // A project the student is excused from (EX, e.g. a late enrollee's from before they joined) isn't required either.
+    const [[excused]] = await connection.execute(
+        "SELECT COUNT(*) AS n FROM responses WHERE student_id = ? AND exam_id = ? AND score = 'EX'", [studentId, `Unit${unitNum}-Project`]);
+    const projectRequired = projectRows.length > 0 && !PROJECT_EXEMPT_UNITS.has(unitNum) && !isProjectExempt(studentId) && !isProjectAfterTest(studentId) && !excused.n;
     const projectOk = !projectRequired || projectRows[0].status === 'complete';
 
     return { ok: preScaleOk && preTestOk && scoreOk && projectOk, prevExamId, pct, scoreOk, projectOk, projectRequired, preScaleOk, preTestOk };
@@ -828,7 +845,11 @@ router.get('/admin/master-gradebook-data', async (req, res) => {
         const ext = await accommodations.settingsMap(connection);
         const extensions = {};
         scopedStudents.forEach(s => { const e = ext.get(String(s.student_id)); if (e && e.extraDays) extensions[s.student_id] = e.extraDays; });
-        return { students: scopedStudents, assignments: registry, grades, pending, extensions,
+        // Late enrollees: the day each joined each course; the gradebook counts nothing before it as missing
+        const late = await lateEnrollment.lateMap(connection);
+        const joined = {};
+        scopedStudents.forEach(s => { const j = late.get(String(s.student_id)); if (j) joined[s.student_id] = j; });
+        return { students: scopedStudents, assignments: registry, grades, pending, extensions, joined,
             offDays: Object.keys(extensions).length ? [...accommodations.offDays()] : [] };
         });
         res.json(result);

@@ -4,6 +4,7 @@ const { withConnection } = require('../db');
 const { resolveCourseId, getCurrentSchoolYear, requireSelfOrStaff, timeToMinutes } = require('../helpers');
 const { computeStudentGrade } = require('../gradeCalc');
 const accommodations = require('../lib/accommodations');
+const lateEnrollment = require('../lib/lateEnrollment');
 
 const ON_TIME_BONUS = 5.00;
 // Backfill baseline for students.role_history -- safely before any shift
@@ -536,6 +537,7 @@ router.get('/admin/payroll/missing-assignments', async (req, res) => {
 
             const today = new Date(); today.setHours(0, 0, 0, 0);
             const ext = await accommodations.settingsMap(connection);   // extra school days from accommodation plans
+            const late = await lateEnrollment.lateMap(connection);     // late enrollees: nothing before they joined is missing
             const missing = {};
             for (const s of resolved) {
                 missing[s.student_id] = [];
@@ -548,8 +550,9 @@ router.get('/admin/payroll/missing-assignments', async (req, res) => {
                     try { periodDueDates = e.period_due_dates ? JSON.parse(e.period_due_dates) : {}; } catch { /* malformed override, fall back to base due_date */ }
                     const dueDateRaw = periodDueDates[s.section_id] || e.due_date;
                     if (!dueDateRaw) continue;
-                    const dueDate = accommodations.dueFor(formatDbDate(dueDateRaw), e.exam_id, (ext.get(String(s.student_id)) || {}).extraDays);
-                    if (new Date(dueDate + 'T00:00:00') >= today) continue;
+                    const dueDate = lateEnrollment.dueAfterJoin(accommodations.dueFor(formatDbDate(dueDateRaw), e.exam_id, (ext.get(String(s.student_id)) || {}).extraDays),
+                        (late.get(String(s.student_id)) || {})[e.course_id]);
+                    if (!dueDate || new Date(dueDate + 'T00:00:00') >= today) continue;
 
                     missing[s.student_id].push({ exam_id: e.exam_id, title: e.title, due_date: dueDate });
                 }
