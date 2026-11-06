@@ -423,14 +423,21 @@
   #toolBeltBar button i { font-size: .48rem; }
   #toolBeltBar button:hover, #toolBeltBar button.active { opacity: 1; background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.25); }
 
+  /* Still unlabeled in the corner, but readable (teacher 2026-11-06: an 8 and a 0 looked the same): a monospace
+     font, a little bigger, and a slash drawn through every zero (renderPageStamp), since not every font has one */
+  #pageStamp .zero { position: relative; }
+  #pageStamp .zero::after { content: ''; position: absolute; left: 50%; top: 22%; bottom: 22%; border-left: 1.5px solid currentColor; transform: translateX(-50%) rotate(35deg); }
   #pageStamp {
     position: fixed;
     bottom: 4px;
     right: 6px;
-    font-size: 8px;
+    font-family: Consolas, "Cascadia Mono", "SF Mono", Menlo, "DejaVu Sans Mono", monospace;
+    font-variant-numeric: slashed-zero tabular-nums;
+    font-size: 13px;
+    font-weight: 600;
     color: var(--text-muted);
-    opacity: .35;
-    letter-spacing: .05em;
+    opacity: .55;
+    letter-spacing: .12em;
     user-select: none;
     pointer-events: none;
   }
@@ -893,7 +900,7 @@ if (!courseCfg) {
     if (!el) return;
     fetch('/api/admin/daily-code', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d && d.code) el.textContent = d.code; })
+      .then(d => { if (d && /^\d{6}$/.test(d.code)) el.innerHTML = d.code.replace(/0/g, '<span class="zero">0</span>'); })
       .catch(() => {});
   }
 
