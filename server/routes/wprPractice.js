@@ -159,8 +159,13 @@ function grade(questions, answers) {
     });
     return { answered, correct, total: questions.length, review };
 }
+// The score a teacher grades on (teacher 2026-11-06): on the 10-minute Sprint, the percent right of the questions a
+// student answered, since nobody is expected to reach all 100; on every other test, unanswered questions count as wrong.
+const scoreFor = (s, r) => s.length === 'sprint'
+    ? { score: r.answered ? Math.round(100 * r.correct / r.answered) : 0, scoring: 'answered' }
+    : { score: r.total ? Math.round(100 * r.correct / r.total) : 0, scoring: 'all' };
 // What a student sees before the teacher ends the test: the score, not the answers.
-const scoreOnly = r => ({ answered: r.answered, correct: r.correct, total: r.total });
+const scoreOnly = r => ({ answered: r.answered, correct: r.correct, total: r.total, score: r.score, scoring: r.scoring });
 // What the student's report needs, once released. Initials only: the report never shows a name or student ID.
 const initials = st => [st.firstName, st.lastName].map(n => (String(n || '').trim()[0] || '').toUpperCase()).filter(Boolean).map(c => c + '.').join('');
 const reportFor = (s, st) => ({
@@ -181,6 +186,7 @@ function finish(session, st, answers, reason) {
     st.submittedAt = Date.now();
     st.endReason = reason;
     st.result = grade(st.questions, answers);
+    Object.assign(st.result, scoreFor(session, st.result));
     writeActiveMarker();
     // Each question as [CFA key or indicator, 1 right / 0 wrong / -1 skipped], in the student's order
     record({ ev: 'finish', code: session.code, s: st.n, reason, answered: st.result.answered, correct: st.result.correct, total: st.result.total,
@@ -298,7 +304,7 @@ router.get('/wpr/session/:code', (req, res) => {
         readAloud: !!st.readAloud, paused: !!(st.pausedAt && !st.submittedAt), pausedSeconds: st.startedAt ? pausedSeconds(st, now) : 0,
         answeredSoFar: st.submittedAt ? st.result.answered : Object.keys(st.answers || {}).length,
         violations: st.violations, endReason: st.endReason || '', submittedAt: st.submittedAt || null, reopened: st.reopened || 0,
-        result: st.submittedAt ? { answered: st.result.answered, correct: st.result.correct, total: st.result.total } : null,
+        result: st.submittedAt ? scoreOnly(st.result) : null,
         // Question-by-question detail (only after submitting)
         items: st.submittedAt ? st.questions.map((q, i) => ({
             n: i + 1, topic: q.topic, indicator: q.indicator || '', prompt: q.prompt || '', q: q.q, answer: q.options[q.correct],

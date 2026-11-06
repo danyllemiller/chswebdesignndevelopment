@@ -11,6 +11,9 @@ const { withConnection } = require('../db');
 const { passcodeOk } = require('./wprBanks');
 
 const DRAFT = process.env.WPR_CFA_DRAFT || '/var/lib/chs-site/wpr-cfa-draft.json';
+// A later round of review, when there is one (teacher 2026-11-06, round 2: the 12 questions every pilot student got
+// right, with proposed new wrong choices). Its question keys start with "R2-", so its votes never mix with round 1's.
+const REVIEW = process.env.WPR_CFA_REVIEW || '/var/lib/chs-site/wpr-cfa-review.json';
 
 async function ensureTable(c) {
     await c.execute(`
@@ -27,7 +30,10 @@ async function ensureTable(c) {
 }
 const clean = (s, n) => String(s ?? '').replace(/[\u0000-\u0008\u000b-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
 function readDraft() {
-    try { return JSON.parse(fs.readFileSync(DRAFT, 'utf8')); } catch (e) { return null; }
+    for (const file of [REVIEW, DRAFT]) {
+        try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { /* try the next */ }
+    }
+    return null;
 }
 
 // GET /wpr/cfa/review -> the draft and every reviewer's votes
@@ -42,7 +48,8 @@ router.get('/wpr/cfa/review', async (req, res) => {
             return rows;
         });
         res.set('Cache-Control', 'no-store');
-        res.json({ title: draft.title, items: draft.items, votes });
+        res.json({ title: draft.title, round: draft.round || 1, intro: draft.intro || '', look: draft.look || '', items: draft.items,
+                   votes: votes.filter(v => draft.items.some(i => i.key === v.item_key)) });
     } catch (e) { console.error('[wpr-cfa] review', e); res.status(500).json({ error: 'Could not load the review.' }); }
 });
 

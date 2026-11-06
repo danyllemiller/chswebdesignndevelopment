@@ -54,15 +54,19 @@
       .wt-grid button.flag::after { content: ''; position: absolute; top: 0; right: 0; border-top: 9px solid #ffc107; border-left: 9px solid transparent; }
       .wt-key { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; }
       .wt-num { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-      .wt-panel { position: fixed; right: 18px; bottom: 18px; z-index: 1050; width: 250px; background: #fff; border-radius: .8rem; box-shadow: 0 .8rem 2rem rgba(0,0,0,.35); overflow: hidden; }
-      .wt-panel.scratch { width: 320px; right: 284px; }
+      /* Calculator and Scratch Paper: bigger on big screens, dragged by their title bar, Scratch Paper resizable (pilot 11-06) */
+      .wt-panel { position: fixed; right: 18px; bottom: 18px; z-index: 1050; width: clamp(260px, 18vw, 420px); min-width: 220px; background: #fff; border-radius: .8rem; box-shadow: 0 .8rem 2rem rgba(0,0,0,.35); overflow: hidden; resize: horizontal; }
+      .wt-panel.scratch { width: clamp(320px, 26vw, 600px); height: clamp(280px, 34vh, 560px); min-height: 180px; right: calc(36px + clamp(260px, 18vw, 420px)); resize: both; display: flex; flex-direction: column; }
+      .wt-panel.scratch textarea { flex: 1; resize: none; font-size: clamp(1rem, .9vw, 1.3rem); }
       @media (max-width: 700px) { .wt-panel.scratch { right: 18px; bottom: 330px; } }
-      .wt-head { background: #1f2a44; color: #fff; font-weight: 700; padding: .45rem .7rem; display: flex; justify-content: space-between; align-items: center; }
+      .wt-head { background: #1f2a44; color: #fff; font-weight: 700; padding: .45rem .7rem; display: flex; justify-content: space-between; align-items: center; cursor: move; touch-action: none; user-select: none; }
       .wt-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-      .wt-keys button { border: 1px solid #ced4da; background: #f8f9fa; border-radius: .4rem; padding: .5rem 0; font-weight: 700; font-size: 1.05rem; }
+      .wt-keys button { border: 1px solid #ced4da; background: #f8f9fa; border-radius: .4rem; padding: clamp(.5rem, .7vw, .9rem) 0; font-weight: 700; font-size: clamp(1.05rem, 1.1vw, 1.6rem); }
+      .wt-flagged .wt-q { border-left: 6px solid #ffc107; padding-left: .7rem; }
+      .wt-flagbtn { font-size: 1rem; padding: .4rem .9rem; }
       .wt-keys button.op { background: #e7f1ff; color: #0d6efd; }
       .wt-keys button.eq { background: #0d6efd; color: #fff; }
-      #wtCalcDisplay { font-size: 1.4rem; font-family: ui-monospace, Menlo, Consolas, monospace; }
+      #wtCalcDisplay { font-size: clamp(1.4rem, 1.4vw, 2rem); font-family: ui-monospace, Menlo, Consolas, monospace; }
       .wt-lock { position: fixed; inset: 0; z-index: 2000; background: rgba(17,24,39,.97); color: #fff; display: flex; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; }
       .wt-lock .box { max-width: 520px; }
       body.wt-locked #nav-placeholder, body.wt-locked #footer-placeholder, body.wt-locked nav, body.wt-locked footer { display: none !important; }
@@ -77,7 +81,7 @@
     `;
     const PANELS = `
       <div id="wtCalc" class="wt-panel" hidden>
-        <div class="wt-head"><span><i class="fas fa-calculator me-1"></i>Calculator</span><button type="button" class="btn-close btn-close-white" data-wt-close="wtCalc" aria-label="Close calculator"></button></div>
+        <div class="wt-head" title="Drag to move"><span><i class="fas fa-grip-vertical me-2 opacity-50"></i><i class="fas fa-calculator me-1"></i>Calculator</span><button type="button" class="btn-close btn-close-white" data-wt-close="wtCalc" aria-label="Close calculator"></button></div>
         <div class="p-2">
           <input id="wtCalcDisplay" class="form-control text-end fw-bold mb-2" readonly value="0" aria-label="Calculator display">
           <div id="wtCalcKeys" class="wt-keys">
@@ -90,7 +94,7 @@
         </div>
       </div>
       <div id="wtScratch" class="wt-panel scratch" hidden>
-        <div class="wt-head"><span><i class="fas fa-pen-to-square me-1"></i>Scratch Paper</span><button type="button" class="btn-close btn-close-white" data-wt-close="wtScratch" aria-label="Close scratch paper"></button></div>
+        <div class="wt-head" title="Drag to move. Drag the bottom-right corner to resize."><span><i class="fas fa-grip-vertical me-2 opacity-50"></i><i class="fas fa-pen-to-square me-1"></i>Scratch Paper</span><button type="button" class="btn-close btn-close-white" data-wt-close="wtScratch" aria-label="Close scratch paper"></button></div>
         <textarea id="wtScratchText" class="form-control border-0" rows="9" placeholder="Work things out here. This is not graded." aria-label="Scratch paper"></textarea>
       </div>
       <div id="wtLock" class="wt-lock" hidden>
@@ -170,6 +174,24 @@
         const pausePanel = document.getElementById('wtPause');
         const answered = () => Object.keys(answers).length;
         const saveFlags = () => { try { sessionStorage.setItem(flagKey, JSON.stringify([...flags])); } catch (e) {} };
+        // Text size (pilot 11-06: the classroom monitors were 2560 wide, where the test looked small). It starts bigger
+        // on a wide window, the student changes it with A- / A+, and the page's column widens to match.
+        const ZOOMS = [0.9, 1, 1.15, 1.3, 1.5, 1.75];
+        let zoom = Number((() => { try { return sessionStorage.getItem('wt_zoom'); } catch (e) { return 0; } })())
+            || (innerWidth >= 2200 ? 1.5 : innerWidth >= 1700 ? 1.3 : innerWidth >= 1400 ? 1.15 : 1);
+        const column = mount.parentElement, columnMax = column ? column.style.maxWidth : '';
+        const columnBase = column ? parseFloat(getComputedStyle(column).maxWidth) || 0 : 0;
+        function applyZoom() {
+            mount.style.zoom = zoom === 1 ? '' : String(zoom);
+            if (column && columnBase) column.style.maxWidth = zoom > 1 ? `min(96vw, ${Math.round(columnBase * zoom)}px)` : columnMax;
+        }
+        function stepZoom(dir) {
+            const i = ZOOMS.findIndex(z => z >= zoom - 0.001);
+            zoom = ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, (i < 0 ? ZOOMS.length - 1 : i) + dir))];
+            try { sessionStorage.setItem('wt_zoom', String(zoom)); } catch (e) {}
+            applyZoom();
+        }
+        applyZoom();
 
         document.body.classList.add('wt-locked');
 
@@ -209,7 +231,8 @@
                   <button class="btn btn-sm wt-tool ${readSlow ? 'on' : ''}" data-wt-tool="slow" aria-pressed="${readSlow}" title="Read more slowly"><i class="fas fa-gauge-simple me-1"></i>Slower</button>` : ''}
                   <button class="btn btn-sm wt-tool ${calcPanel.hidden ? '' : 'on'}" data-wt-tool="calc"><i class="fas fa-calculator me-1"></i>Calculator</button>
                   <button class="btn btn-sm wt-tool ${scratchPanel.hidden ? '' : 'on'}" data-wt-tool="scratch"><i class="fas fa-pen-to-square me-1"></i>Scratch Paper</button>
-                  ${onReview ? '' : '<button class="btn btn-sm btn-warning fw-bold" data-wt="review"><i class="fas fa-list-check me-1"></i>Review &amp; Submit</button>'}
+                  <span class="btn-group btn-group-sm" role="group" aria-label="Text size"><button class="btn wt-tool" data-wt-tool="smaller" title="Smaller text" aria-label="Smaller text">A−</button><button class="btn wt-tool" data-wt-tool="bigger" title="Bigger text" aria-label="Bigger text">A+</button></span>
+                  ${onReview ? '' : `<button class="btn btn-sm btn-warning fw-bold" data-wt="review"><i class="fas fa-list-check me-1"></i>Review &amp; Submit${flags.size ? ` <span class="badge text-bg-dark ms-1"><i class="fas fa-flag me-1"></i>${flags.size} flagged</span>` : ''}</button>`}
                 </div>
               </div>`;
         }
@@ -220,14 +243,16 @@
             const kind = (q.kind === 'tf' ? 'True or False' : 'Multiple Choice') + (q.topic === 'safety' ? ' · Workplace Safety' : '');
             const flagged = flags.has(cur);
             mount.innerHTML = `${bar(`Question ${cur + 1} of ${questions.length}`)}
+              <div class="${flagged ? 'wt-flagged' : ''}">
               <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="wt-meta">Question ${cur + 1} of ${questions.length} · ${kind}</div>
-                <button class="btn btn-sm ${flagged ? 'btn-warning' : 'btn-outline-warning'} fw-bold" data-wt="flag"><i class="fas fa-flag me-1"></i>${flagged ? 'Flagged for review' : 'Flag for review'}</button>
+                <button class="btn wt-flagbtn ${flagged ? 'btn-warning' : 'btn-outline-dark'} fw-bold" data-wt="flag" aria-pressed="${flagged}"><i class="fas fa-flag me-1 ${flagged ? '' : 'text-warning'}"></i>${flagged ? 'Flagged: come back to this one' : 'Flag this question to come back to it'}</button>
               </div>
               ${readAloud && readHint ? '<div class="alert alert-info py-2 small fw-bold mt-2 mb-0"><i class="fas fa-headphones me-1"></i>Read aloud is on. Put on your headphones, then click <b>Read aloud</b> (or press R) to hear the question and the answers.</div>' : ''}
               ${readAloud && speakError ? '<div class="alert alert-warning py-2 small fw-bold mt-2 mb-0">Read aloud doesn\'t work in this browser. Raise your hand and tell your teacher.</div>' : ''}
               ${q.prompt && q.kind !== 'tf' ? `<div class="wt-prompt small fw-bold text-primary mt-2">${esc(q.prompt)}</div>` : ''}
               <div class="wt-q">${esc(q.q)}</div>
+              </div>
               <div role="radiogroup">${q.options.map((o, i) => `<button class="wt-opt ${answers[cur] === i ? 'sel' : ''}" role="radio" aria-checked="${answers[cur] === i}" data-opt="${i}"><span class="letter">${LETTERS[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>
               <div class="d-flex justify-content-between align-items-center my-3 gap-2">
                 <button class="btn btn-outline-secondary fw-bold" data-wt="prev" ${cur === 0 ? 'disabled' : ''}><i class="fas fa-arrow-left me-1"></i>Previous</button>
@@ -351,6 +376,7 @@
             if (t) emit('tool', { tool: t.dataset.wtTool });
             if (t && t.dataset.wtTool === 'speak') return speaking ? stopReading() : readQuestion();
             if (t && t.dataset.wtTool === 'slow') { readSlow = !readSlow; return renderQuestion(); }
+            if (t && (t.dataset.wtTool === 'bigger' || t.dataset.wtTool === 'smaller')) { stepZoom(t.dataset.wtTool === 'bigger' ? 1 : -1); return onReview ? renderReview() : renderQuestion(); }
             if (t) { const p = t.dataset.wtTool === 'calc' ? calcPanel : scratchPanel; p.hidden = !p.hidden; return onReview ? renderReview() : renderQuestion(); }
             const b = e.target.closest('[data-wt]'); if (!b) return;
             const a = b.dataset.wt;
@@ -399,6 +425,19 @@
         document.getElementById('wtCalcKeys').addEventListener('click', onCalc);
         function onClose(e) { const c = e.target.closest('[data-wt-close]'); if (c) { document.getElementById(c.dataset.wtClose).hidden = true; onReview ? renderReview() : renderQuestion(); } }
         document.addEventListener('click', onClose);
+        // Drag the Calculator or Scratch Paper anywhere by its title bar, staying on the screen
+        function onDrag(e) {
+            const head = e.target.closest('.wt-panel > .wt-head');
+            if (!head || e.target.closest('button')) return;
+            const panel = head.parentElement, r = panel.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+            e.preventDefault();
+            try { head.setPointerCapture(e.pointerId); } catch (x) {}
+            const move = ev => Object.assign(panel.style, {
+                left: Math.min(Math.max(0, ev.clientX - dx), innerWidth - 80) + 'px', top: Math.min(Math.max(0, ev.clientY - dy), innerHeight - 40) + 'px', right: 'auto', bottom: 'auto' });
+            const up = () => { head.removeEventListener('pointermove', move); head.removeEventListener('pointerup', up); head.removeEventListener('pointercancel', up); };
+            head.addEventListener('pointermove', move); head.addEventListener('pointerup', up); head.addEventListener('pointercancel', up);
+        }
+        document.addEventListener('pointerdown', onDrag);
 
         // ---- Lockdown
         const block = e => { if (!(e.target && e.target.id === 'wtScratchText' && e.type !== 'paste')) e.preventDefault(); };
@@ -488,6 +527,9 @@
             document.removeEventListener('keydown', onKey);
             document.getElementById('wtCalcKeys').removeEventListener('click', onCalc);
             document.removeEventListener('click', onClose);
+            document.removeEventListener('pointerdown', onDrag);
+            [calcPanel, scratchPanel].forEach(p => ['left', 'top', 'right', 'bottom', 'width', 'height'].forEach(k => { p.style[k] = ''; }));
+            mount.style.zoom = ''; if (column) column.style.maxWidth = columnMax;
             ['contextmenu', 'copy', 'cut', 'paste', 'dragstart'].forEach(ev => document.removeEventListener(ev, block));
             document.removeEventListener('visibilitychange', onVis);
             window.removeEventListener('blur', onBlur);
@@ -524,6 +566,10 @@
     function scoreHtml(r, reason) {
         install();   // results can show without a test on this page load (a refresh while answers are held)
         const acc = r.answered ? Math.round((r.correct / r.answered) * 100) : 0;
+        // A WPR Practice result says how it's scored (r.scoring): the Sprint by the questions answered, every other
+        // test with unanswered questions counted as wrong. The class-site Sprint shows accuracy, as before.
+        const third = r.score == null ? { n: acc, label: 'accuracy' }
+            : { n: r.score, label: r.scoring === 'answered' ? 'score (of the questions you answered)' : 'score (unanswered count as wrong)' };
         const note = reason === 'time' ? '<div class="alert alert-warning py-2 fw-bold">Time\'s up! Your answers were submitted automatically.</div>'
             : reason === 'left-test' ? '<div class="alert alert-danger py-2 fw-bold">You left the test a second time, so it was submitted automatically.</div>'
             : reason === 'ended' ? '<div class="alert alert-warning py-2 fw-bold">Your teacher ended the test, so your saved answers were scored.</div>' : '';
@@ -531,7 +577,7 @@
           <div class="d-flex flex-wrap gap-4 align-items-end mb-3">
             <div><div class="wt-big text-success">${r.correct}</div><div class="fw-bold text-muted">correct</div></div>
             <div><div class="wt-big">${r.answered}</div><div class="fw-bold text-muted">answered of ${r.total}</div></div>
-            <div><div class="wt-big">${acc}%</div><div class="fw-bold text-muted">accuracy</div></div>
+            <div><div class="wt-big">${third.n}%</div><div class="fw-bold text-muted">${third.label}</div></div>
           </div>`;
     }
     // Score summary + every answered question (right or wrong, with the
@@ -549,7 +595,7 @@
             </div>
           </div>
           <div class="wt-review">${list.map(m => `<div class="${m.right ? 'wt-got' : 'wt-missed'}" data-right="${m.right ? 1 : 0}">
-              <div class="small fw-bold ${m.right ? 'text-success' : 'text-danger'}"><i class="fas ${m.right ? 'fa-circle-check' : 'fa-circle-xmark'} me-1"></i>Question ${m.n} · ${m.right ? 'Right' : 'Wrong'}${m.topic === 'safety' ? ' · Workplace safety' : m.topic === 'worklife' ? ' · Work &amp; personal life' : ''}</div>
+              <div class="small fw-bold ${m.right ? 'text-success' : 'text-danger'}"><i class="fas ${m.right ? 'fa-circle-check' : 'fa-circle-xmark'} me-1"></i>Question ${m.n} · ${m.right ? 'Right' : 'Wrong'}${m.topic === 'safety' || m.indicator === '1.2.4' ? ' · Workplace safety' : m.topic === 'worklife' ? ' · Work &amp; personal life' : ''}</div>
               ${m.prompt && m.prompt !== 'True or false?' ? `<div class="small text-muted fw-bold">${esc(m.prompt)}</div>` : ''}
               <div class="fw-bold">${esc(m.q)}</div>
               <div class="small mt-1"><span class="fw-bold ${m.right ? 'text-success' : 'text-danger'}">Your answer:</span> ${esc(m.yours)}</div>

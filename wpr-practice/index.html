@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/wpr-practice/assets/wpr-practice-pro-favicon-512.png">
   <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/fontawesome.min.css">
-  <script src="/js/wrs-test-ui.js?v=10"></script>
+  <script src="/js/wrs-test-ui.js?v=11"></script>
   <style>
     body { background: #eef1f5; min-height: 100vh; }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -30,7 +30,7 @@
   Independent practice tool. Not affiliated with or endorsed by the Nevada Department of Education. No student information is kept after a session ends.
 </footer>
 <script src="/wpr-practice/assets/standards.js?v=1"></script>
-<script src="/wpr-practice/assets/report-pdf.js?v=2"></script>
+<script src="/wpr-practice/assets/report-pdf.js?v=3"></script>
 <script src="/wpr-practice/assets/feedback.js?v=2"></script>
 <script>
 // Student side of the WPR Practice Test (server/routes/wprPractice.js).
@@ -185,7 +185,7 @@
     Rec.ev('results', { scoreShown: !!score });
     screen.innerHTML = `<h1 class="h4 fw-bold mb-3">Your results</h1>
       <div id="scoreBox">${score ? WrsTestUI.scoreHtml(score, me.reason) : '<p class="text-muted">Loading your score…</p>'}</div>
-      <div class="alert alert-info"><i class="fas fa-lock me-2"></i><strong>Your answers and your report unlock when your teacher ends the test.</strong> Keep this page open. It updates by itself.${me.reason === 'left-test' ? ' If your teacher lets you back into the test, this page takes you back to it.' : ''}</div>
+      <div class="alert alert-primary"><div class="fw-bold fs-5 mb-1"><i class="fas fa-hourglass-half me-2"></i>Keep this page open.</div>When your teacher ends the test, your answers and a <strong>Download my report</strong> button appear right here. This page updates by itself.${me.reason === 'left-test' ? ' If your teacher lets you back into the test, this page takes you back to it.' : ''}</div>
       <p class="small text-muted mb-0">Your teacher has your score.</p>`;
     if (score) addSurvey();
     checkResults();
