@@ -557,6 +557,7 @@
         <h2 id="clockFace" class="clock-face tag-label" data-tag="h2">--:--:--</h2>
         <div id="clockDate" class="clock-date"></div>
         <button type="button" id="autoAdvanceBtn" class="auto-advance-btn" title="Turn off to stay on this class instead of jumping to whichever period is happening now"></button>
+        <button type="button" id="fullscreenBtn" class="auto-advance-btn no-print ms-1" title="Hide the browser's tabs and address bar. Press Esc to get them back."></button>
       </div>
     </div>
 
@@ -1456,6 +1457,26 @@ if (!courseCfg) {
     renderAutoAdvanceBtn();
   });
   renderAutoAdvanceBtn();
+
+  // Full screen (teacher 2026-11-06): hides the browser's tabs and address bar on the projector. Esc or the same
+  // button brings them back. Hidden in a browser that can't do it.
+  const isFullscreen = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  function renderFullscreenBtn() {
+    const btn = document.getElementById('fullscreenBtn');
+    if (!btn) return;
+    const root = document.documentElement;
+    if (!(root.requestFullscreen || root.webkitRequestFullscreen)) { btn.classList.add('d-none'); return; }
+    btn.innerHTML = isFullscreen() ? '<i class="fas fa-compress me-1"></i>Exit full screen' : '<i class="fas fa-expand me-1"></i>Full screen';
+  }
+  document.getElementById('fullscreenBtn')?.addEventListener('click', () => {
+    const root = document.documentElement;
+    try {
+      if (isFullscreen()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      else (root.requestFullscreen || root.webkitRequestFullscreen).call(root)?.catch?.(() => {});
+    } catch (e) { logAgendaError('fullscreen', e); }
+  });
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, renderFullscreenBtn));
+  renderFullscreenBtn();
 
   function checkAutoAdvance() {
     if (editing) return;
