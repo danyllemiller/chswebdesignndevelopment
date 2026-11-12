@@ -210,6 +210,14 @@ async function initPreTest(config) {
         const isCSPath = window.location.pathname.includes('/cs-') || window.location.pathname.includes('cs-unit');
         gradebookExamId = isCSPath ? `Unit${chStr}-Pre` : `Ch${chStr} Pre-Assessment [15 pts]`;
     }
+    // WD pre-test pages give no config.chapter, only a chapterTitle ("Chapter 4 Diagnostic"), so without this
+    // their id stayed empty and the one-attempt check below never ran (teacher 2026-11-12: pre-tests are one
+    // attempt only; WD students could retake freely). Same "Chapter N" reading processResults uses to save.
+    if (!gradebookExamId) {
+        const isCSPath = window.location.pathname.includes('/cs-') || window.location.pathname.includes('cs-unit');
+        const chMatch = String(chapterTitle || '').match(/Chapter\s*(\d+)/i);
+        if (!isCSPath && chMatch) gradebookExamId = `Ch${chMatch[1]} Pre-Assessment [15 pts]`;
+    }
 
     const container = document.getElementById('exam-container');
     if (container) {
@@ -704,8 +712,11 @@ async function processResults() {
                     body: JSON.stringify({
                         student_id: user.student_id,
                         exam_id: preAssmtExamId + '-Score',
-                        score: finalScore,
-                        total_points: finalTotal,
+                        // WD's "-Score" column is worth 10 points, and the server keeps the catalog's 10 as the
+                        // total, so the raw number right (e.g. 22 of 25) showed as 22/10 (teacher 2026-11-12).
+                        // Send points out of 10 instead: 22 of 25 -> 8.8. CS ("Unit{n}-Pre-Score") stays a raw count.
+                        score: /^Ch\d+ /.test(preAssmtExamId) && finalTotal > 0 ? Math.round(finalScore / finalTotal * 100) / 10 : finalScore,
+                        total_points: /^Ch\d+ /.test(preAssmtExamId) ? 10 : finalTotal,
                         course_id: pretestCourseId,
                         chapter_title: chapterTitle,
                         report_type: 'DIAGNOSTIC ASSESSMENT REPORT',

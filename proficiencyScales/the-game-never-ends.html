@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Chapter 15: The Future | CHS Web Design</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+    <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/web-app-manifest-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/web-app-manifest-512x512.png">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400;500;600;700" rel="stylesheet"/>
+
+    <!-- Strict DAC Styles -->
+    <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/student-pages.css">
+    <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+    <script type="module" src="/js/auth-guard.js?v=2"></script>
+    <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/js/loader.js?v=29"></script>
+</head>
+<body style="background-color: var(--site-secondary);">
+
+    <!--Navigation-->
+    <div class="container-fluid sticky-top px-0 no-print">
+        <div id="nav-placeholder"></div>
+    </div>
+
+    <!-- Main Header - Guaranteed White Text & Brand Colors -->
+    <header class="text-center" style="background: linear-gradient(135deg, var(--primary-color), var(--tertiary-color)); border-radius: 0 0 20px 20px; padding: 3rem 2rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0, 0, 153, 0.2);">
+        <div class="container">
+            <span class="badge mb-2 px-3 py-2 fw-bold rounded-pill shadow-sm" style="background-color: var(--code-color); color: #ffffff;">Unit 8</span>
+            <h1 class="display-5 fw-bold mb-0 text-white" style="color: #ffffff !important;">Chapter 15: The "Future"</h1>
+            <p class="lead mt-2 opacity-100 text-white" style="color: #ffffff !important;">(Emerging Tech: AI, AR/VR, IoT)</p>
+        </div>
+    </header>
+
+    <div class="container pb-5" style="max-width: 1100px;">
+
+        <!-- ========================================== -->
+        <!-- INTERACTIVE GATEWAY UI PANEL               -->
+        <!-- ========================================== -->
+        <div class="row g-4 justify-content-center mb-5">
+
+            <!-- 1. System Score (Pre-Test) -->
+            <div class="col-md-4">
+                <div class="p-3 border rounded-3 h-100 position-relative" style="background-color: #ffffff; border-color: var(--quaternary-color) !important;">
+                    <!-- Blur Overlay for 'Pre' Mode -->
+                    <div id="pre-system-overlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded-3" style="background-color: rgba(255,255,255,0.95); z-index: 10;">
+                        <span class="small fw-bold" style="color: var(--tertiary-color);"><i class="fas fa-lock me-1"></i> Waiting for Data</span>
+                    </div>
+
+                    <h6 class="fw-bold mb-3" style="color: var(--tertiary-color);"><i class="fas fa-robot me-2"></i>1. Pre-Assessment</h6>
+                    <div class="progress border" style="height: 25px; background-color: #ffffff;">
+                        <div id="pre-test-bar" class="progress-bar text-end pe-2 fw-bold" role="progressbar" style="width: 0%; background-color: var(--quaternary-color);"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <span id="pre-test-label" class="fst-italic fw-normal" style="color: var(--tertiary-color);">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Student Self-Assessment Status -->
+            <div class="col-md-4">
+                <div class="p-3 border rounded-3 h-100 d-flex flex-column justify-content-center" style="background-color: var(--secondary-color); border-color: var(--primary-color) !important;">
+                    <h6 class="fw-bold mb-2" style="color: var(--primary-color);"><i class="fas fa-user-edit me-2"></i>2. My Self-Assessment</h6>
+                    <p class="small mb-3 lh-sm" style="color: var(--primary-color);">Read the proficiency scale below and click <strong>Select</strong> on the level that best matches your skills.</p>
+                    <div class="progress bg-white border" style="height: 25px; border-color: var(--primary-color) !important;">
+                        <div id="self-assess-bar" class="progress-bar progress-bar-striped progress-bar-animated text-end pe-2 fw-bold" role="progressbar" style="width: 0%; transition: width 0.4s ease; background-color: var(--primary-color);">0.0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Final Teacher Score (Summative/Project) -->
+            <div class="col-md-4">
+                <div class="p-3 border rounded-3 h-100 position-relative" style="background-color: #ffffff; border-color: var(--quaternary-color) !important;">
+                    <!-- Blur Overlay for 'Post' Mode -->
+                    <div id="post-system-overlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded-3" style="background-color: rgba(255,255,255,0.95); z-index: 10;">
+                        <span class="small fw-bold" style="color: var(--tertiary-color);"><i class="fas fa-lock me-1"></i> Unlocks at end of unit</span>
+                    </div>
+
+                    <h6 class="fw-bold mb-3" style="color: var(--tertiary-color);"><i class="fas fa-graduation-cap me-2"></i>3. Final Teacher Score</h6>
+                    <div class="progress border" style="height: 25px; background-color: #ffffff;">
+                        <div id="post-test-bar" class="progress-bar text-end pe-2 fw-bold" role="progressbar" style="width: 0%; background-color: var(--quaternary-color);"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <span id="post-test-label" class="fst-italic fw-normal" style="color: var(--tertiary-color);">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- ========================================== -->
+
+        <!-- Compelling Question Section -->
+        <div class="compelling-question shadow-sm mb-5">
+            <h5 class="fw-bold mb-2" style="color: var(--primary-color);"><i class="fas fa-lightbulb me-2" style="color: var(--file-name-color);"></i>Compelling Question:</h5>
+            "How will the convergence of AI, immersive reality, and ubiquitous connectivity redefine what it means to be a 'Web Developer' in the coming decade?"
+        </div>
+
+        <!-- Learning Targets Section -->
+        <div class="card scale-card mb-5 border-top border-4" style="border-color: var(--primary-color) !important;">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4" style="color: var(--primary-color);"><i class="fas fa-bullseye me-2"></i>Learning Targets</h4>
+                <ul class="target-list list-unstyled">
+                    <li><i class="fas fa-robot me-2" style="color: var(--code-color);"></i> <strong style="color: var(--primary-color);">Technical:</strong> I can define and differentiate between Artificial Intelligence (AI), Augmented Reality (AR), and the Internet of Things (IoT). <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(NV 7.2.1)</span></li>
+                    <li><i class="fas fa-brain me-2" style="color: var(--code-color);"></i> <strong style="color: var(--primary-color);">Technical:</strong> I can analyze the impact of machine learning and large language models (LLMs) on modern web development workflows. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(NV 7.2.1)</span></li>
+                    <li><i class="fas fa-vr-cardboard me-2" style="color: var(--code-color);"></i> <strong style="color: var(--primary-color);">Technical:</strong> I can describe the hardware and software requirements for immersive web experiences (WebXR). <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(NV 7.2.1)</span></li>
+                    <li><i class="fas fa-shield-halved me-2" style="color: var(--code-color);"></i> <strong style="color: var(--primary-color);">Technical:</strong> I can explain the security and privacy risks associated with a hyper-connected IoT ecosystem. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(NV 3.2.8)</span></li>
+                    <li><i class="fas fa-briefcase me-2" style="color: var(--tertiary-color);"></i> <strong style="color: var(--primary-color);">Employability:</strong> I can demonstrate analytical reasoning and cognitive flexibility to predict how emerging technologies will disrupt current labor market trends. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(WRS 1.2.3)</span></li>
+                    <li><i class="fas fa-briefcase me-2" style="color: var(--tertiary-color);"></i> <strong style="color: var(--primary-color);">Employability:</strong> I can demonstrate probity and ethical adherence by evaluating the algorithmic bias and intellectual property concerns in AI-generated content. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(WRS 1.1.2)</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <h3 class="fw-bold mb-4 text-center border-bottom pb-3" style="color: var(--primary-color);">Proficiency Performance Indicators</h3>
+
+        <!-- Level 4.0 -->
+        <div class="card scale-card level-4">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-2" style="color: var(--code-color);">4.0 - Digital Architect <small class="text-muted">(Advanced)</small></h4>
+                        <span class="badge fs-6 px-3 py-2 rounded-pill shadow-sm" style="background-color: var(--code-color); color: #ffffff;"><i class="fas fa-crown me-1"></i> Mastery +</span>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4 py-2" data-val="4" onclick="if(window.setSelfAssessment) window.setSelfAssessment(4);">Select 4.0</button>
+                </div>
+                <p class="fw-bold mb-2" style="color: var(--primary-color);">I can:</p>
+                <ul class="mb-0">
+                    <li class="mb-2">Develop a prototype or detailed technical proposal for a web application that integrates an AI API or WebXR components, demonstrating advanced analytical reasoning and systematic resolution. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(NV 7.2.1, WRS 1.2.3)</span></li>
+                    <li class="mb-2">Critically analyze the ethical implications of "Black Box" algorithms on marginalized communities, demonstrating profound cultural competency and empathy. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(WRS 1.1.2, 1.1.5)</span></li>
+                    <li>Display exceptional cognitive flexibility by successfully adapting a legacy project to incorporate one emerging technology feature. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(WRS 1.2.3)</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Level 3.5 -->
+        <div class="card scale-card level-half">
+            <div class="card-body py-3 px-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-1" style="color: var(--tertiary-color);">3.5</h5>
+                        <p class="mb-0 small text-muted">In addition to score 3.0 performance, partial success at score 4.0 content.</p>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4" data-val="3.5" onclick="if(window.setSelfAssessment) window.setSelfAssessment(3.5);">Select 3.5</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level 3.0 -->
+        <div class="card scale-card level-3">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-2" style="color: var(--tertiary-color);">3.0 - Practitioner <small class="text-muted">(Mastery)</small></h4>
+                        <span class="badge fs-6 px-3 py-2 rounded-pill shadow-sm" style="background-color: var(--tertiary-color); color: #ffffff;"><i class="fas fa-check me-1"></i> Target</span>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4 py-2" data-val="3" onclick="if(window.setSelfAssessment) window.setSelfAssessment(3);">Select 3.0</button>
+                </div>
+                <p class="fw-bold mb-2" style="color: var(--primary-color);">I can:</p>
+                <ul>
+                    <li class="mb-2">Explain the Request/Response cycle of an AI API (like Gemini or OpenAI) and how it differs from a traditional REST API. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(NV 7.2.1)</span></li>
+                    <li class="mb-2">Identify the ethical risks of AI (Hallucinations, Bias, Plagiarism) and apply probity when using AI tools for coding assistance. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(WRS 1.1.2)</span></li>
+                    <li class="mb-2">Describe the practical applications of IoT in smart cities and homes, focusing on the professional decorum required to protect user privacy. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(WRS 1.1.4)</span></li>
+                    <li class="mb-0">Demonstrate intrinsic motivation and punctuality by completing research summaries on emerging tech on schedule. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(WRS 1.1.1)</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Level 2.5 -->
+        <div class="card scale-card level-half">
+            <div class="card-body py-3 px-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-1" style="color: var(--tertiary-color);">2.5</h5>
+                        <p class="mb-0 small text-muted">No major errors or omissions regarding score 2.0 content, and partial success at score 3.0 content.</p>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4" data-val="2.5" onclick="if(window.setSelfAssessment) window.setSelfAssessment(2.5);">Select 2.5</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level 2.0 -->
+        <div class="card scale-card level-2">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-0" style="color: var(--file-name-color);">2.0 - Apprentice <small class="text-muted">(Foundational)</small></h4>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4 py-2" data-val="2" onclick="if(window.setSelfAssessment) window.setSelfAssessment(2);">Select 2.0</button>
+                </div>
+                <p class="fw-bold mb-2 mt-2" style="color: var(--primary-color);">I can define common terminology and identify syntax:</p>
+                <ul class="mb-0">
+                    <li class="mb-2">Artificial Intelligence, Machine Learning, LLM, Prompt Engineering, Augmented Reality (AR), Virtual Reality (VR), WebXR, IoT, Algorithmic Bias, and Edge Computing. <span class="badge border" style="background-color: #f8f9fa; color: #6c757d;">(NV 7.2.1)</span></li>
+                    <li>Identify the importance of punctuality (WRS 1.1.1), probity in AI ethics (WRS 1.1.2), professional decorum (WRS 1.1.4), inclusive collaboration (WRS 1.1.5), and applying analytical reasoning to future tech trends (WRS 1.2.3).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Level 1.5 -->
+        <div class="card scale-card level-half">
+            <div class="card-body py-3 px-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-1" style="color: var(--tertiary-color);">1.5</h5>
+                        <p class="mb-0 small text-muted">Partial success at score 2.0 content, and major errors or omissions at 3.0.</p>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4" data-val="1.5" onclick="if(window.setSelfAssessment) window.setSelfAssessment(1.5);">Select 1.5</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level 1.0 -->
+        <div class="card scale-card level-1">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-0" style="color: var(--primary-color);">1.0 - Novice <small class="text-muted">(Beginner)</small></h4>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4 py-2" data-val="1" onclick="if(window.setSelfAssessment) window.setSelfAssessment(1);">Select 1.0</button>
+                </div>
+                <ul class="mb-0 mt-2">
+                    <li>With help, partial success at score 2.0 content and score 3.0 content.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Level 0.5 -->
+        <div class="card scale-card level-half">
+            <div class="card-body py-3 px-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-1" style="color: var(--tertiary-color);">0.5</h5>
+                        <p class="mb-0 small text-muted">With help, partial success at score 2.0 but not at score 3.0 content.</p>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4" data-val="0.5" onclick="if(window.setSelfAssessment) window.setSelfAssessment(0.5);">Select 0.5</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level 0.0 -->
+        <div class="card scale-card level-half border-0" style="background-color: #ffffff;">
+            <div class="card-body py-3 px-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold text-muted mb-1">0.0</h5>
+                        <p class="mb-0 small text-muted">Even with help, no success or attempt made.</p>
+                    </div>
+                    <button class="btn self-assess-btn bg-white fw-bold shadow-sm px-4" data-val="0" onclick="if(window.setSelfAssessment) window.setSelfAssessment(0);">Select 0.0</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center mt-5 mb-4">
+            <button id="submit-btn" class="btn btn-lg px-5 py-3 fw-bold rounded-pill shadow" style="background-color: var(--primary-color); color: white; border: none; opacity: 0.5;" disabled onclick="if(window.submitToGateway) window.submitToGateway();">
+                Save & Continue <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+            <p class="small text-muted mt-3">Please select a proficiency level above before continuing.</p>
+        </div>
+
+    </div>
+
+    <!-- Scale UI Animation Logic JS -->
+    <script src="/js/prof-scales.js?v=3"></script>
+
+    <div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+</body>
+</html>
