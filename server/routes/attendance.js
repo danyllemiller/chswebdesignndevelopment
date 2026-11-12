@@ -293,6 +293,35 @@ router.post('/admin/attendance/correct', requireStaff, async (req, res) => {
     }
 });
 
+// POST /admin/attendance/clear -- { student_id, section_id, date? } takes ONE student's mark for one day back to
+// "Not marked" (teacher 2026-11-12: undo an accidental Present). Only a deliberate click on the Attendance Report or
+// the Scan Station's name list calls this; a second scan of the same ID still just says "Already marked" (the scan
+// route never clears). A tardy pass the mark created is removed with it, the same as /correct does.
+router.post('/admin/attendance/clear', requireStaff, async (req, res) => {
+    const { student_id, section_id } = req.body || {};
+    const date = req.body && req.body.date ? String(req.body.date) : getLocalDateStr();
+    if (!student_id || !section_id || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return res.status(400).json({ error: 'student_id, section_id, and a valid date are required' });
+    }
+    try {
+        const outcome = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
+            const [[existing]] = await connection.execute(
+                'SELECT id, status, tardy_pass_id FROM attendance WHERE student_id = ? AND section_id = ? AND date = ?',
+                [student_id, section_id, date]
+            );
+            if (!existing) return { status: 200, body: { success: true, unchanged: true } };
+            if (existing.tardy_pass_id) await connection.execute('DELETE FROM tardy_passes WHERE id = ?', [existing.tardy_pass_id]);
+            await connection.execute('DELETE FROM attendance WHERE id = ?', [existing.id]);
+            return { status: 200, body: { success: true, cleared: existing.status } };
+        });
+        res.status(outcome.status).json(outcome.body);
+    } catch (err) {
+        console.error('[attendance] clear error:', err);
+        res.status(500).json({ error: 'Failed to clear attendance.' });
+    }
+});
+
 // GET /admin/attendance/ic-pending -- every tardy/absent row not yet
 // flagged as re-entered in Infinite Campus. Nothing here talks to IC
 // itself (no API access to it exists) -- this just tracks what still

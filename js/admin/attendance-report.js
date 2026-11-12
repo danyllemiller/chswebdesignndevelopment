@@ -23,7 +23,9 @@ async function loadPeriods() {
 function fixButtonsHtml(studentId, currentStatus) {
     return ['present', 'tardy', 'absent'].map(s => {
         const isActive = currentStatus === s;
-        return `<button type="button" class="btn btn-sm btn-outline-secondary fix-btn ${isActive ? `active-${s}` : ''}" data-student-id="${studentId}" data-status="${s}" ${isActive ? 'disabled' : ''}>${s[0].toUpperCase() + s.slice(1)}</button>`;
+        // The highlighted button stays clickable: clicking it again clears this one student back to "Not marked"
+        // (teacher 2026-11-12: undo an accidental Present).
+        return `<button type="button" class="btn btn-sm btn-outline-secondary fix-btn ${isActive ? `active-${s}` : ''}" data-student-id="${studentId}" data-status="${s}" ${isActive ? 'data-clear="1" title="Click again to clear back to Not marked"' : ''}>${s[0].toUpperCase() + s.slice(1)}</button>`;
     }).join(' ');
 }
 
@@ -43,6 +45,19 @@ async function correctStatus(studentId, status) {
         loadReport();
     } catch (e) {
         alert('Failed to update: ' + e.message);
+    }
+}
+
+// Clears one student's mark for the chosen day back to "Not marked".
+async function clearStatus(studentId) {
+    try {
+        await apiFetch('/api/admin/attendance/clear', {
+            method: 'POST',
+            body: JSON.stringify({ student_id: studentId, section_id: periodSelect.value, date: dateInput.value })
+        });
+        loadReport();
+    } catch (e) {
+        alert('Failed to clear: ' + e.message);
     }
 }
 
@@ -111,7 +126,7 @@ async function loadReport() {
             </tr>`;
         }).join('');
         reportBody.querySelectorAll('.fix-btn').forEach(btn => {
-            btn.addEventListener('click', () => correctStatus(btn.dataset.studentId, btn.dataset.status));
+            btn.addEventListener('click', () => btn.dataset.clear ? clearStatus(btn.dataset.studentId) : correctStatus(btn.dataset.studentId, btn.dataset.status));
         });
         reportBody.querySelectorAll('.view-form-btn').forEach(btn => {
             btn.addEventListener('click', () => showFormModal(btn.dataset.studentId));

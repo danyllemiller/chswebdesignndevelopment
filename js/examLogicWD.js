@@ -3,8 +3,9 @@
  * WEB DESIGN CHAPTER EXAM ENGINE (PROCTOR EDITION)
  * Uses MariaDB API + auth-guard.js. Mirrors js/examLogicCS.js's structure
  * (attempt limit, cooldown, tab lockdown, keep-highest grading) but pulls
- * from wd_questions per-chapter, with no cross-chapter question mixing or
- * unit-prerequisite gating (Web Design chapters aren't sequentially gated).
+ * from wd_questions by chapter, with a cumulative review slice from the
+ * course's earlier chapters (same 5%-per-chapter formula as CS; see initExam)
+ * and no unit-prerequisite gating.
  */
 
 const ENABLE_ATTEMPT_LIMIT = true;   // true = limit to 3 attempts, false = unlimited
@@ -488,8 +489,32 @@ async function initExam(config) {
         const matchingPool = (types.matching > 0) ? shuffleArray(await fetchMatchingQuestionsFromAPI(currentChapter)) : [];
         const imageLabelPool = (types.image_label > 0) ? shuffleArray(await fetchImageLabelingQuestionsFromAPI(currentChapter)) : [];
 
+        // Cumulative review (teacher 2026-11-12: "chapter 2 test has some chapter 1 questions, chapter 3 test has
+        // chapter 1 and 2 questions, chapter 4 test has chapter 1-3 questions AND mostly chapter 4 questions").
+        // Same formula as CS's getWeightedQuestions: every earlier chapter of THIS course gets a 5% slice of the
+        // test and the current chapter keeps the rest (Ch2 95/5, Ch3 90/5/5, Ch4 85/5/5/5 ... Ch8 65%). Web Design
+        // 1 is Ch1-8 and Web Design 2 is Ch9-16, so Ch9 starts fresh. Review questions take MC slots, so the T/F,
+        // matching and image-label counts don't change; a chapter with too few questions gives its slot back.
+        const courseStart = currentChapter >= 9 ? 9 : 1;
+        const priorChapters = [];
+        for (let c = courseStart; c < currentChapter; c++) priorChapters.push(c);
+        const testSize = (types.mc || 0) + (types.tf || 0) + (types.matching || 0) + (types.image_label || 0);
+        const perPrior = Math.max(1, Math.round(testSize * 0.05));
+        const priorPools = await Promise.all(priorChapters.map(c => fetchExamQuestionsFromAPI(c)));
+        const reviewQuestions = [];
+        priorPools.forEach(priorPool => {
+            const mc = shuffleArray(priorPool.filter(q => q.type === 'mc' || !q.type));
+            const tf = shuffleArray(priorPool.filter(q => q.type === 'tf'));
+            reviewQuestions.push(...[...mc, ...tf].slice(0, perPrior));
+        });
+        const reviewTaken = reviewQuestions.slice(0, Math.max(0, (types.mc || 0) - 1));
+        const currentMcCount = Math.max(0, (types.mc || 0) - reviewTaken.length);
+
         examQuestions = shuffleArray([
-            ...mcPool.slice(0, types.mc || 0),
+            ...reviewTaken,
+            // pickWithSectionCoverage so a tagged chapter (Ch1, Ch2) always gets at least one MC from every
+            // learning-target section; untagged chapters fall back to plain random, same as before.
+            ...pickWithSectionCoverage(mcPool, currentMcCount),
             ...tfPool.slice(0, types.tf || 0),
             ...matchingPool.slice(0, types.matching || 0),
             ...imageLabelPool.slice(0, types.image_label || 0)

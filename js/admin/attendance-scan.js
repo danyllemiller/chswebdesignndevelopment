@@ -203,9 +203,9 @@ function renderNameList() {
     nameList.innerHTML = filtered.map(r => {
         const statusClass = r.status === 'present' ? 'marked-present' : r.status === 'tardy' ? 'marked-tardy' : '';
         const statusTag = r.status
-            ? `<span class="small"><i class="fas ${r.status === 'present' ? 'fa-check' : 'fa-triangle-exclamation'} me-1"></i>${r.status[0].toUpperCase() + r.status.slice(1)}</span>`
+            ? `<span class="small"><i class="fas ${r.status === 'present' ? 'fa-check' : 'fa-triangle-exclamation'} me-1"></i>${r.status[0].toUpperCase() + r.status.slice(1)} <span class="fw-normal text-muted">(click to clear)</span></span>`
             : '';
-        return `<button type="button" class="list-group-item list-group-item-action name-list-item ${statusClass}" data-student-id="${r.student_id}"><span>${r.last_name}, ${r.first_name}</span>${statusTag}</button>`;
+        return `<button type="button" class="list-group-item list-group-item-action name-list-item ${statusClass}" data-student-id="${r.student_id}"${r.status ? ' data-marked="1"' : ''}><span>${r.last_name}, ${r.first_name}</span>${statusTag}</button>`;
     }).join('');
 }
 
@@ -327,9 +327,32 @@ noIdToggle.addEventListener('click', () => {
 
 nameSearch.addEventListener('input', renderNameList);
 
+// A click on a name that's already marked clears that one student back to "Not marked" (teacher 2026-11-12: undo an
+// accidental Present). Only this click clears -- a second barcode/camera scan goes through handleScan and just says
+// "Already marked". Headcount mode keeps using clicks to check students off.
+async function clearStudent(studentId) {
+    const r = currentRoster.find(x => String(x.student_id) === String(studentId));
+    const name = r ? `${r.first_name} ${r.last_name}` : 'Student';
+    try {
+        const res = await fetch('/api/admin/attendance/clear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: studentId, section_id: currentPeriod })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not clear.');
+        beep(330, 200);
+        showFeedback('already', { iconClass: 'fas fa-rotate-left text-secondary', name, sub: 'Cleared: back to Not marked. Click the name again to mark them.' });
+    } catch (e) {
+        showFeedback('error', { iconClass: 'fas fa-circle-xmark text-danger', name: 'Not cleared', sub: e.message });
+    }
+    refreshTally();
+}
+
 nameList.addEventListener('click', (e) => {
     const btn = e.target.closest('.name-list-item');
     if (!btn) return;
+    if (btn.dataset.marked && !headcount && currentPeriod) { clearStudent(btn.dataset.studentId); return; }
     handleScan(btn.dataset.studentId);
 });
 
