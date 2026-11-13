@@ -16,10 +16,7 @@ const REAL = ' In real life: ';
 
 const WORKLIFE_MC = [
     { q: 'You bought concert tickets with a friend months ago. On the day of the concert, your boss asks you to stay late to finish an important job. What should you do?',
-      options: ['Cancel your plans with your friend and stay late to finish the work',
-                'Leave at your normal time without saying anything',
-                'Agree to stay, then slip out early when your boss is not looking',
-                'Call in sick the next day to make up for the lost concert'],
+      options: ["Cancel your plans with your friend and stay late to finish the work", "Leave at your normal time without saying anything to your boss", "Tell your boss you'll stay, then slip out early when they aren't looking", "Go to the concert and call in sick the next day to make up for it"],
       answer: 'Cancel your plans with your friend and stay late to finish the work',
       hint: TEST + 'the expected answer is to stay. It shows dependability and puts the job first.' + REAL + 'tell your boss about big plans as early as you can (even weeks ahead), so it is less likely to come up. If it still happens, it is okay to ask, "I have tickets tonight. Could I come in early tomorrow instead?" Hourly workers must be paid for the extra time.' },
     { q: 'It is the busiest week of the year, and your supervisor asks everyone to work an extra shift on Saturday. You had planned to sleep in and see a movie. What is the best response?',
@@ -44,14 +41,11 @@ const WORKLIFE_MC = [
       answer: 'Agree to cover the shift to help the team',
       hint: TEST + 'covering for the team shows dependability and teamwork.' + REAL + 'helping when you can is noticed and remembered. Teams work best when covering goes both ways, so someday a coworker may cover for you.' },
     { q: 'If you truly CANNOT stay late when your supervisor asks, what is the most professional thing to do?',
-      options: ['Tell your supervisor right away, explain briefly, and offer another way to help',
-                'Say nothing and leave at your normal time',
-                'Pretend you did not hear the request',
-                'Agree to stay, then leave without telling anyone'],
+      options: ["Tell your supervisor right away, explain briefly, and offer another way to help", "Say nothing about it and just leave at your normal time when your shift ends", "Pretend you did not hear the request so you don't have to say no to your boss", "Agree to stay late, then leave quietly without telling anyone once things calm down"],
       answer: 'Tell your supervisor right away, explain briefly, and offer another way to help',
       hint: TEST + 'honest, early communication is always the professional choice.' + REAL + 'something like "I can\'t tonight because of a family commitment, but I can come in early tomorrow to finish it" keeps trust and still gets the work done.' },
     { q: 'When a supervisor asks employees to stay late during a busy period, which quality are they most hoping to see?',
-      options: ['Flexibility and dependability', 'Speed of typing', 'Creativity in art', 'Popularity with coworkers'],
+      options: ["Flexibility and dependability", "Speed and accuracy of typing", "Creativity and artistic talent", "Popularity with coworkers"],
       answer: 'Flexibility and dependability',
       hint: TEST + 'these questions are testing flexibility and dependability.' + REAL + 'being flexible does not mean having no limits. Dependable employees also tell their supervisor early when they cannot do something.' },
     // Rewritten from the true/false statements below them until 2026-11-02 (new sides of the same two facts)
