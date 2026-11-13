@@ -88,6 +88,72 @@ let statusCheckPromise = null;
 let checkStatusCallId = 0;
 
 // ==============================================================================
+// LOCKED POP-UP (teacher 2026-11-13): students clicked away from the once-a-day
+// pop-up (or moved to another page before answering) and then had to find the
+// button themselves every class. Now, inside the clock-in window (5 min before
+// the bell through the end of class) and the clock-out window (5 min before
+// the end through 10 min after), the pop-up can't be closed and comes back on
+// every page until it's submitted. Never during an open test (checkAutoPopup).
+// If loading or saving fails twice on a page, the student can close it; it
+// locks again on their next page. A real refusal from the server (e.g. clock-in
+// closed) unlocks right away, since there's nothing left to submit.
+// ==============================================================================
+let tcLock = null;               // 'in' | 'out' while the pop-up is locked open
+let tcFailures = 0;              // load/save failures on this page while locked
+let tcUnlockedThisPage = false;  // after 2 failures (or a server refusal), don't re-lock until the next page
+const CLOCKOUT_LOCK_AFTER_MS = 10 * 60 * 1000;
+
+function setLock(mode) {
+    tcLock = mode || null;
+    const locked = !!tcLock;
+    ['tc-close-x', 'tc-not-now'].forEach(id => document.getElementById(id)?.classList.toggle('d-none', locked));
+    const lockNote = document.getElementById('tc-lock-note');
+    if (lockNote) {
+        lockNote.textContent = tcLock === 'out' ? 'Class is almost over. Clock out to keep using the site.' : 'Clock in to start using the site.';
+        lockNote.classList.toggle('d-none', !locked);
+    }
+}
+
+// A load or save failed. Show Try again; after the second failure on a locked pop-up, let them close it.
+function noteFailure() {
+    document.getElementById('tc-retry-btn')?.classList.remove('d-none');
+    if (!tcLock) return;
+    tcFailures++;
+    if (tcFailures >= 2) { tcUnlockedThisPage = true; setLock(null); }
+}
+
+// Done (saved, or the pulse finished): close the pop-up and refresh the buttons in place. This used to
+// reload the page, which is fine for a pop-up a student chose to open but would throw away unsaved work
+// (code in the CS editor, a half-written answer) now that the pop-up opens on its own and can't be skipped.
+// Messages from a failed or closed try used to be cleared by the page reload; put the box back to normal.
+function resetSuccessMsg() {
+    const msg = document.getElementById('tc-success-msg');
+    if (!msg) return;
+    msg.className = 'alert alert-success mt-3 d-none text-center fw-bold';
+    msg.textContent = 'Success!';
+}
+
+function finishTimeclock() {
+    setLock(null);
+    tcFailures = 0;
+    resetSuccessMsg();
+    document.getElementById('tc-retry-btn')?.classList.add('d-none');
+    document.getElementById('tc-submit-btn')?.classList.remove('d-none');
+    document.getElementById('tc-pulse-step')?.classList.add('d-none');
+    const form = document.getElementById('tc-form');
+    if (form) {
+        form.classList.remove('d-none');
+        form.querySelectorAll('input, textarea, button').forEach(el => { el.disabled = false; });
+        form.querySelectorAll('.alert').forEach(el => el.remove()); // the right/wrong panel from the clock-in question
+    }
+    const modalEl = document.getElementById('timeclock-modal');
+    const inst = modalEl && window.bootstrap && bootstrap.Modal.getInstance(modalEl);
+    if (inst) inst.hide();
+    document.dispatchEvent(new CustomEvent('timeclock:changed'));
+    checkStatus();
+}
+
+// ==============================================================================
 // 1. HELPERS & CONFIGURATION
 // ==============================================================================
 
@@ -294,10 +360,21 @@ function waitForBootstrap(timeoutMs = 5000) {
     });
 }
 
-async function openTimeclockModal() {
+async function openTimeclockModal(locked = false) {
     const modalEl = document.getElementById('timeclock-modal');
     if (!modalEl) return;
     await waitForBootstrap();
+    // A locked pop-up needs a static backdrop (no click-outside close) and no Esc. Bootstrap reads those
+    // options only when the instance is created, so swap the instance when the kind changes while hidden.
+    const isShown = modalEl.classList.contains('show');
+    let inst = bootstrap.Modal.getInstance(modalEl);
+    if (inst && inst.__tcLocked !== locked && !isShown) { inst.dispose(); inst = null; }
+    if (!inst) {
+        inst = new bootstrap.Modal(modalEl, locked ? { backdrop: 'static', keyboard: false } : {});
+        inst.__tcLocked = locked;
+    }
+    if (locked) setLock(window.timeclock.currentMode);
+    else if (!isShown) setLock(null);
     // Previously checked our own `.show()` CSS class as a manual "already
     // open" guard -- if that class and Bootstrap's actual internal state
     // ever fell out of sync (e.g. the auto-popup and a manual click both
@@ -318,7 +395,7 @@ async function openTimeclockModal() {
     // flagged here anyway so the exam lockdown never counts it against the
     // student if a browser fires visibilitychange around the modal/backdrop.
     window.__timeclockModalOpen = true;
-    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    inst.show();
 }
 
 // Runs on load and on a 60s interval. Auto-opens the timeclock modal exactly
@@ -371,6 +448,18 @@ function checkAutoPopup() {
     const todayStr = getLocalTodayStr();
     const who = studentData.student_id;
     const wherePeriod = currentPeriod || 'na';
+
+    // Locked windows: comes back on every page until submitted (see setLock above). Not once a day.
+    const lockIn = mode === 'in' && !window.timeclock.closed
+        && now >= (bellWindow.startMs - 5 * 60 * 1000) && now <= bellWindow.endMs;
+    const lockOut = mode === 'out'
+        && now >= (bellWindow.endMs - 5 * 60 * 1000) && now <= bellWindow.endMs + CLOCKOUT_LOCK_AFTER_MS;
+    if ((lockIn || lockOut) && !tcUnlockedThisPage) {
+        const modalEl = document.getElementById('timeclock-modal');
+        if (tcLock && modalEl && modalEl.classList.contains('show')) return; // already locked open
+        openTimeclockModal(true).catch(e => { console.error('Timeclock locked pop-up error:', e); logTimeclockError('checkAutoPopup:lock', e); });
+        return;
+    }
 
     // Clock-in opens 5 min before the bell and closes at the end of class --
     // it doesn't stay open indefinitely like clock-out does, since clocking
@@ -488,6 +577,9 @@ async function checkStatusInner() {
         // Normalize mode: API returns raw 'type' field ('in'/'out') or {mode} if already normalized
         const mode = statusData.mode || (statusData.type === 'out' ? 'done' : statusData.type === 'in' ? 'out' : 'in');
         window.timeclock.currentMode = mode;
+        window.timeclock.closed = !!statusData.closed; // clock-in closed for today: never lock the pop-up over a form they can't submit
+        document.getElementById('tc-retry-btn')?.classList.add('d-none');
+        document.getElementById('tc-submit-btn')?.classList.remove('d-none');
 
         if (mode === 'done') {
             document.getElementById('tc-form').style.display = 'none';
@@ -557,8 +649,10 @@ async function checkStatusInner() {
         // whatever just failed here.
         const label = document.getElementById('tc-question-label');
         const optsContainer = document.getElementById('tc-options-container');
-        if (label) label.innerText = "Something went wrong loading the timeclock. Click the Timeclock button below to try again.";
+        if (label) label.innerText = "Something went wrong loading the timeclock. Click Try again.";
         if (optsContainer) optsContainer.innerHTML = '';
+        document.getElementById('tc-submit-btn')?.classList.add('d-none');
+        noteFailure();
     }
 }
 
@@ -664,19 +758,24 @@ async function finalizeTimeclockSubmit(mode, answer, isCorrect) {
         // same plain getDay() idiom already used for day gating elsewhere
         // (server/routes/timeclock.js, server/helpers.js's testing-window check).
         const dow = new Date().getDay(); // 0=Sun..6=Sat
-        if (mode === 'out' && (dow === 4 || dow === 5)) { showPulseStep(); return; }
-        location.reload();
+        if (mode === 'out' && (dow === 4 || dow === 5)) { setLock(null); showPulseStep(); return; } // saved: the pulse can be skipped
+        finishTimeclock();
     } catch (e) {
         console.error("Timeclock submit error:", e); logTimeclockError('handleTimeclockSubmit', e);
         // Never leave the student on "Saving..." with nothing happening: show
         // why (the server's own words, e.g. clock-in closed), or that it didn't save.
         const form = document.getElementById('tc-form'), msg = document.getElementById('tc-success-msg');
+        // The server's refusals (clockinClosed in server/routes/timeclock.js) all end "can't be made up";
+        // anything else (Wi-Fi, a 500, an expired login) is worth another try.
+        const refused = /can't be made up/i.test(e.message || '');
         if (form && msg) {
             form.style.display = 'none';
             msg.classList.remove('d-none', 'alert-success');
             msg.classList.add('alert-warning');
-            msg.textContent = /failed to fetch|status \d+/i.test(e.message || '') ? "That didn't save. Try again, or tell your teacher." : e.message;
+            msg.textContent = refused ? e.message : "That didn't save. Click Try again, or tell your teacher.";
         }
+        if (refused) { tcUnlockedThisPage = true; setLock(null); } // nothing left to submit today
+        else noteFailure();
     }
 }
 
@@ -699,7 +798,7 @@ function showPulseStep() {
     const form = document.getElementById('tc-form');
     const pulseStep = document.getElementById('tc-pulse-step');
     const successMsg = document.getElementById('tc-success-msg');
-    if (!pulseStep) { location.reload(); return; } // defensive -- never strand a student on a broken step
+    if (!pulseStep) { finishTimeclock(); return; } // defensive -- never strand a student on a broken step
     if (form) form.classList.add('d-none');
     if (successMsg) successMsg.classList.add('d-none');
     pulseStep.classList.remove('d-none');
@@ -721,7 +820,7 @@ function initPulseStep() {
             btn.classList.add('btn-primary', 'text-white');
         });
     });
-    document.getElementById('tc-pulse-skip-btn')?.addEventListener('click', () => location.reload());
+    document.getElementById('tc-pulse-skip-btn')?.addEventListener('click', () => finishTimeclock());
     document.getElementById('tc-pulse-submit-btn')?.addEventListener('click', submitPulseStep);
 }
 
@@ -750,7 +849,8 @@ async function submitPulseStep() {
         console.error('Pulse submit error:', e);
         logTimeclockError('submitPulseStep', e);
     } finally {
-        location.reload();
+        if (submitBtn) submitBtn.disabled = false;
+        finishTimeclock();
     }
 }
 
@@ -766,15 +866,16 @@ function injectTimeclockUI() {
             <div class="modal-content shadow-lg border-0">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Employee Timecard</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" id="tc-close-x" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
                     <div id="tc-status-badge" class="badge bg-secondary mb-3 w-100 py-2">STATUS: IDLE</div>
+                    <p id="tc-lock-note" class="small fw-bold text-primary mb-3 d-none"></p>
                     <form id="tc-form">
                         <h6 id="tc-question-label" class="fw-bold text-dark mb-3"></h6>
                         <div id="tc-options-container" class="mb-4"></div>
                         <button type="submit" id="tc-submit-btn" class="btn btn-primary w-100 fw-bold py-3">Submit</button>
-                        <button type="button" class="btn btn-link w-100 mt-2 text-muted" data-bs-dismiss="modal">Not right now</button>
+                        <button type="button" id="tc-not-now" class="btn btn-link w-100 mt-2 text-muted" data-bs-dismiss="modal">Not right now</button>
                     </form>
                     <div id="tc-pulse-step" class="d-none">
                         <h6 class="fw-bold text-dark mb-1">Friday Pulse</h6>
@@ -805,6 +906,7 @@ function injectTimeclockUI() {
                         <p class="text-muted small mt-3 mb-0">No name is attached to this. Your teacher sees the week's responses together, not who sent which one.</p>
                     </div>
                     <div id="tc-success-msg" class="alert alert-success mt-3 d-none text-center fw-bold">Success!</div>
+                    <button type="button" id="tc-retry-btn" class="btn btn-warning w-100 fw-bold py-2 mt-2 d-none">Try again</button>
                 </div>
             </div>
         </div>
@@ -817,6 +919,11 @@ function injectTimeclockUI() {
     // class period's worth of auto-popups, rechecks, and clicks.
     document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', cleanupStrayModalState);
     document.getElementById('timeclock-modal').addEventListener('hidden.bs.modal', () => { window.__timeclockModalOpen = false; });
+    // While locked, nothing closes it (static backdrop and no Esc cover clicks and keys; this covers anything else).
+    document.getElementById('timeclock-modal').addEventListener('hide.bs.modal', e => { if (tcLock) e.preventDefault(); });
+    document.getElementById('tc-retry-btn').addEventListener('click', () => {
+        handleManualOpen(window.timeclock.currentMode === 'out' ? 'out' : 'in');
+    });
     document.getElementById('tc-clockin-btn').addEventListener('click', () => handleManualOpen('in'));
     document.getElementById('tc-clockout-btn').addEventListener('click', () => handleManualOpen('out'));
     initPulseStep();
@@ -866,9 +973,11 @@ async function handleManualOpen(forcedMode) {
     }
 
     form.style.display = '';
-    successMsg.classList.add('d-none');
+    resetSuccessMsg();
+    document.getElementById('tc-retry-btn')?.classList.add('d-none');
     label.innerText = 'Loading...';
     optsContainer.innerHTML = '';
+    btn.classList.remove('d-none');
     btn.disabled = true;
     btn.innerText = 'Loading...';
     [clockInBtn, clockOutBtn].forEach(b => {
@@ -959,9 +1068,10 @@ async function handleManualOpen(forcedMode) {
     } catch (e) {
         console.error('Timeclock manual open error:', e);
         logTimeclockError('handleManualOpen:fetch', e);
-        label.innerText = "Something went wrong loading the timeclock. Please try again, or tell your teacher if it keeps happening.";
+        label.innerText = "Something went wrong loading the timeclock. Click Try again, or tell your teacher if it keeps happening.";
         optsContainer.innerHTML = '';
-        btn.innerText = 'Retry';
+        btn.classList.add('d-none'); // its old "Retry" label submitted an empty form; Try again below reloads it
+        noteFailure();
     } finally {
         btn.disabled = false;
     }
