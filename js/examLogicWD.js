@@ -6,6 +6,11 @@
  * from wd_questions by chapter, with a cumulative review slice from the
  * course's earlier chapters (same 5%-per-chapter formula as CS; see initExam)
  * and no unit-prerequisite gating.
+ *
+ * Semester finals (exams/wd1-final-exam.html, exams/wd2-final-exam.html) use the
+ * same engine with config.finalMix (questions per chapter), config.examId and
+ * config.timeLimitMinutes: no pre-work lock, one attempt (the teacher's daily
+ * code unlocks another), and a countdown that auto-submits at 0:00.
  */
 
 const ENABLE_ATTEMPT_LIMIT = true;   // true = limit to 3 attempts, false = unlimited
@@ -170,6 +175,11 @@ let chapterTitle = "";
 let examIsActive = false;
 let examProgressId = "";
 let currentChapter = 1;
+let examConfig = {};      // the page's initExam config
+let examKey = "";         // gradebook exam_id: "Ch4-Exam", or the page's examId for a final
+let timerStartedAt = 0;   // timed finals: when this attempt's clock started (ms)
+let timerInterval = null;
+let timerWarned = false;
 
 const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 let attemptCount = 0;
@@ -474,16 +484,41 @@ function pickWithSectionCoverage(pool, count) {
     return shuffleArray(picked.slice(0, count));
 }
 
+// Semester final: finalMix = [{ chapter, mc, tf }, ...] -- that many MC and T/F
+// from each chapter (teacher 2026-11-12: "100 question final", even split by
+// chapter). A chapter short on one type gives its slots to leftovers from the
+// other chapters so the test still reaches its full length.
+async function buildFinalQuestions(finalMix) {
+    const pools = await Promise.all(finalMix.map(m => fetchExamQuestionsFromAPI(m.chapter)));
+    const picked = [];
+    const leftovers = [];
+    finalMix.forEach((m, i) => {
+        const mc = shuffleArray(pools[i].filter(q => q.type === 'mc' || !q.type));
+        const tf = shuffleArray(pools[i].filter(q => q.type === 'tf'));
+        const mcPick = pickWithSectionCoverage(mc, m.mc || 0);
+        const mcIds = new Set(mcPick.map(q => q.id));
+        picked.push(...mcPick, ...tf.slice(0, m.tf || 0));
+        leftovers.push(...mc.filter(q => !mcIds.has(q.id)), ...tf.slice(m.tf || 0));
+    });
+    const target = finalMix.reduce((sum, m) => sum + (m.mc || 0) + (m.tf || 0), 0);
+    if (picked.length < target) picked.push(...shuffleArray(leftovers).slice(0, target - picked.length));
+    return shuffleArray(picked);
+}
+
 async function initExam(config) {
+    examConfig = config || {};
     currentChapter = config.chapter || 1;
+    examKey = config.examId || `Ch${currentChapter}-Exam`;
 
     // questionTypes = {mc, tf, matching, image_label} -- how many of each to
     // draw for this chapter's exam (EOP-style rework). Omitting it keeps the
     // original all-MC behavior for every other chapter untouched.
-    const types = config.questionTypes || null;
-    const pool = await fetchExamQuestionsFromAPI(currentChapter);
+    const types = config.finalMix ? null : (config.questionTypes || null);
+    const pool = config.finalMix ? [] : await fetchExamQuestionsFromAPI(currentChapter);
 
-    if (types) {
+    if (config.finalMix) {
+        examQuestions = await buildFinalQuestions(config.finalMix);
+    } else if (types) {
         const mcPool = shuffleArray(pool.filter(q => q.type === 'mc' || !q.type));
         const tfPool = shuffleArray(pool.filter(q => q.type === 'tf'));
         const matchingPool = (types.matching > 0) ? shuffleArray(await fetchMatchingQuestionsFromAPI(currentChapter)) : [];
@@ -588,13 +623,127 @@ async function initExam(config) {
         return;
     }
 
-    const prework = await checkChapterPrework();
-    if (!prework.ok) {
-        renderPreworkBlock(prework);
-        return;
+    // A final has no chapter pre-work; instead it is one attempt per student.
+    if (examConfig.finalMix) {
+        if (await hasSubmittedFinal()) { renderFinalTakenBlock(); return; }
+    } else {
+        const prework = await checkChapterPrework();
+        if (!prework.ok) {
+            renderPreworkBlock(prework);
+            return;
+        }
     }
 
     renderAuthScreen();
+}
+
+// One attempt on a final: a score already in the gradebook locks the page.
+// Fails open on a network hiccup, same as the other gates.
+async function hasSubmittedFinal() {
+    try {
+        const res = await fetch(`/api/student/grades?student_id=${encodeURIComponent(studentId)}`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        return (data.responses || []).some(r => r.exam_id === examKey);
+    } catch (e) {
+        console.error('[examLogicWD] Final attempt check failed:', e);
+        return false;
+    }
+}
+
+function renderFinalTakenBlock() {
+    const container = document.getElementById('exam-container');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="alert alert-info text-center shadow p-5">
+            <h4 class="fw-bold"><i class="fas fa-check-circle me-2"></i>Final Already Submitted</h4>
+            <p class="mb-4">You have already turned in ${escapeHtml(chapterTitle)}. Your score is in the gradebook.</p>
+            <a href="/student" class="btn btn-primary fw-bold">&laquo; Back to Portal</a>
+            <div class="mt-3">
+                <a href="#" id="override-toggle-link" class="small text-muted">Override</a>
+                <div id="override-box" class="d-none mt-2">
+                    <div class="input-group input-group-sm mx-auto" style="max-width: 220px;">
+                        <input type="text" id="override-code-input" class="form-control text-center" maxlength="6" inputmode="numeric">
+                        <button class="btn btn-outline-secondary" id="override-submit-btn">Go</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    document.getElementById('override-toggle-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('override-box')?.classList.remove('d-none');
+        document.getElementById('override-code-input')?.focus();
+    });
+    document.getElementById('override-submit-btn')?.addEventListener('click', async () => {
+        const input = document.getElementById('override-code-input');
+        if (input && await verifyDailyCode(input.value.trim())) {
+            renderAuthScreen();
+        } else if (input) {
+            input.value = '';
+            input.placeholder = 'Try again';
+        }
+    });
+    document.getElementById('override-code-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('override-submit-btn')?.click(); }
+    });
+}
+
+// ---- Timed finals: countdown pill, 5-minute warning, auto-submit at 0:00 ----
+function getTimerKey() {
+    return `examTimer_${studentId}_${examProgressId}`;
+}
+
+function startExamTimer() {
+    const limitMs = (examConfig.timeLimitMinutes || 0) * 60000;
+    if (!limitMs) return;
+    // The clock keeps running through a refresh or a declined "resume": use
+    // the earliest start on record from today's attempt (server save or this browser).
+    let saved = 0;
+    try { saved = Number(localStorage.getItem(getTimerKey())) || 0; } catch (e) {}
+    const starts = [timerStartedAt, saved].filter(t => t > 0 && Date.now() - t < 12 * 3600000);
+    timerStartedAt = starts.length ? Math.min(...starts) : Date.now();
+    try { localStorage.setItem(getTimerKey(), String(timerStartedAt)); } catch (e) {}
+
+    let el = document.getElementById('exam-timer');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'exam-timer';
+        el.className = 'no-print';
+        el.setAttribute('role', 'timer');
+        el.style.cssText = 'position:fixed; top:12px; right:12px; z-index:9999; padding:8px 18px; border-radius:999px; font-weight:700; font-size:1.3rem; background:#fff; border:3px solid var(--primary-color); color:var(--primary-color); box-shadow:0 4px 14px rgba(0,0,0,.25);';
+        document.body.appendChild(el);
+    }
+
+    const tick = () => {
+        const left = timerStartedAt + limitMs - Date.now();
+        if (left <= 0) { el.textContent = '⏱ 0:00'; timeUp(); return; }
+        const mins = Math.floor(left / 60000);
+        const secs = Math.floor((left % 60000) / 1000);
+        el.textContent = `⏱ ${mins}:${String(secs).padStart(2, '0')} left`;
+        if (left <= 5 * 60000) {
+            el.style.background = '#dc3545'; el.style.color = '#fff'; el.style.borderColor = '#dc3545';
+            if (!timerWarned) {
+                timerWarned = true;
+                showDacAlert("5 Minutes Left", "You have 5 minutes left. When the timer hits 0:00, your test turns in automatically with the answers you have.", { urgent: true });
+            }
+        }
+    };
+    tick();
+    if (examIsActive) timerInterval = setInterval(tick, 1000); // not if that first tick already ran out the clock
+}
+
+function stopExamTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    document.getElementById('exam-timer')?.remove();
+}
+
+async function timeUp() {
+    stopExamTimer();
+    if (!examIsActive) return;
+    const overlay = document.getElementById('dac-modal-overlay');
+    if (overlay) overlay.style.display = 'none';
+    await processSubmission();
+    showDacAlert("Time's Up", `The ${examConfig.timeLimitMinutes} minutes ran out, so your test was turned in automatically with the answers you had.`);
 }
 
 // The chapter's Pre-Scale AND Pre-Assessment come before its exam (teacher
@@ -713,7 +862,8 @@ function renderAuthScreen() {
     }
 
     loadAttemptData();
-    const examPermission = canTakeExam();
+    // Finals have their own one-attempt lock (hasSubmittedFinal), not the chapter tests' 3-try/45-min cooldown.
+    const examPermission = examConfig.finalMix ? { allowed: true } : canTakeExam();
     if (!examPermission.allowed) {
         if (examPermission.reason === 'attempts') { showAttemptLimitMessage(); return; }
         if (examPermission.reason === 'cooldown') { showCooldownMessage(examPermission.remainingMs); return; }
@@ -725,10 +875,16 @@ function renderAuthScreen() {
     container.innerHTML = `
         <div class="card shadow border-primary mx-auto" style="max-width: 550px;">
             <div class="card-header bg-primary text-center py-3">
-                <h4 class="mb-0 text-white gochi">Chapter Exam</h4>
+                <h4 class="mb-0 text-white gochi">${examConfig.finalMix ? 'Semester Final' : 'Chapter Exam'}</h4>
             </div>
             <div class="card-body p-4 text-center">
                 <h5 class="text-primary mb-3">${chapterTitle}</h5>
+                ${examConfig.timeLimitMinutes ? `
+                <div class="p-3 rounded border border-primary mb-4 text-center">
+                    <i class="fas fa-stopwatch text-primary fs-3 mb-2"></i>
+                    <p class="small fw-bold text-dark mb-1">${examQuestions.length} questions · ${examConfig.timeLimitMinutes} minutes · one attempt</p>
+                    <p class="x-small text-muted mb-0">The timer starts when you click Begin and keeps running if you refresh. When it reaches 0:00, your test turns in automatically.</p>
+                </div>` : ''}
                 <div class="alert alert-info py-3 mb-4 text-start border-info bg-light shadow-sm">
                     <div class="row align-items-center">
                         <div class="col-8">
@@ -763,6 +919,8 @@ async function checkResume() {
             const data = await res.json();
             if (data.found) {
                 const hoursSinceSave = (Date.now() - (data.timestamp || 0)) / (1000 * 60 * 60);
+                // A timed final's clock carries over even if the student starts fresh.
+                if (hoursSinceSave < 12 && data.timerStartedAt) timerStartedAt = data.timerStartedAt;
                 if (hoursSinceSave < 12) {
                     if (confirm(`We found an unfinished session from ${new Date(data.timestamp || 0).toLocaleTimeString()}. Resume where you left off?`)) {
                         userAnswers = data.userAnswers || {};
@@ -844,6 +1002,7 @@ function startExam() {
         }
     }
 
+    startExamTimer(); // before renderQuestion so the first progress save carries the start time
     renderQuestion();
     setupTabLockdown();
 }
@@ -854,7 +1013,7 @@ async function syncProgress() {
         await fetch('/api/student/exam-progress', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ student_id: studentId, exam_id: examProgressId, currentIndex, userAnswers, flaggedQuestions, examQuestions, timestamp: Date.now() })
+            body: JSON.stringify({ student_id: studentId, exam_id: examProgressId, currentIndex, userAnswers, flaggedQuestions, examQuestions, timerStartedAt, timestamp: Date.now() })
         });
     } catch (err) {
         console.error("Failed to sync progress:", err);
@@ -1206,7 +1365,7 @@ function confirmSubmit() {
     }
 
     showDacConfirm(
-        "Submit Chapter Exam?",
+        examConfig.finalMix ? "Submit Final Exam?" : "Submit Chapter Exam?",
         "You have reached the end of the exam. Please review your answers if needed.\n\nAre you sure you are ready to submit your final answers for official grading?",
         processSubmission
     );
@@ -1225,7 +1384,7 @@ async function downloadPDFReport(event) {
         const doc = new jsPDF();
         let y = 20;
         doc.setFontSize(22); doc.setTextColor(0, 51, 153); doc.setFont("helvetica", "bold");
-        doc.text("CHAPTER EXAM REPORT", 105, y, { align: "center" });
+        doc.text(examConfig.finalMix ? "FINAL EXAM REPORT" : "CHAPTER EXAM REPORT", 105, y, { align: "center" });
         y += 10;
         doc.setFontSize(14); doc.setTextColor(100); doc.setFont("helvetica", "italic");
         doc.text(chapterTitle, 105, y, { align: "center" });
@@ -1290,6 +1449,8 @@ async function downloadPDFReport(event) {
 async function processSubmission() {
     examIsActive = false;
     window.examIsActive = false;
+    stopExamTimer();
+    try { localStorage.removeItem(getTimerKey()); } catch (e) {}
 
     const lockdownStyle = document.getElementById('exam-lockdown-css');
     if (lockdownStyle) lockdownStyle.remove();
@@ -1348,7 +1509,7 @@ async function processSubmission() {
     lastSubmissionTime = Date.now();
     saveAttemptData();
 
-    const finalAssignmentKey = `Ch${currentChapter}-Exam`;
+    const finalAssignmentKey = examKey;
 
     // A failed save here used to be silent -- caught, logged to the console
     // only, and the student still saw a normal "Assessment Submitted!"
@@ -1377,7 +1538,7 @@ async function processSubmission() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 student_id: studentId, exam_id: finalAssignmentKey, score: finalScore, total_points: finalTotal,
-                chapter_title: chapterTitle, report_type: 'CHAPTER EXAM REPORT', question_details: questionDetails
+                chapter_title: chapterTitle, report_type: examConfig.finalMix ? 'FINAL EXAM REPORT' : 'CHAPTER EXAM REPORT', question_details: questionDetails
             })
         });
         if (!saveRes.ok) {
@@ -1437,7 +1598,7 @@ async function processSubmission() {
             </div>`;
     }).join('');
 
-    let isRetake = finalPercentage < 80;
+    let isRetake = !examConfig.finalMix && finalPercentage < 80; // a final is one attempt, no retake message
     let boxStyle = isRetake ? "background-color: #FFF2CC; border: 2px solid #ffc107;" : "background-color: var(--site-secondary); border: 2px solid var(--primary-color);";
     let titleText = isRetake ? "Assessment Submitted - Retake Required" : "Assessment Submitted!";
     let titleColor = isRetake ? "text-warning" : "text-success";
