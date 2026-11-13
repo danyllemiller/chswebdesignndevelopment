@@ -1,10 +1,8 @@
 // wpr-practice/assets/feedback.js
-// Feedback for WPR Practice Pro, loaded on every page of the site. The "Report a bug / Request a feature" link
-// in each footer (data-wfb-open) opens the form. While the pilot runs (through the 12/1/2026 PLC; the date is
-// in server/routes/wprFeedback.js) a "Give feedback" button also floats in the corner, hidden during a test,
-// and the form asks who you are and for 1-5 ratings. WprFeedback.survey() puts three quick questions on a
-// student's results screen (wpr-practice/index.html). A student who took the test in class is never asked for
-// a name and can't attach a screenshot, since a screenshot of the test could show their name.
+// Feedback for WPR Practice Pro, loaded on every page of the site. The "Feedback / Report a bug / Request a
+// feature" link in each footer (data-wfb-open) opens the form: send feedback, report a bug, or request a feature,
+// with an optional screenshot. (The pilot's extra questions, floating button, and results-screen survey ended
+// 2026-11-13; WprFeedback.survey() is kept as a no-op so an old cached page can still call it.)
 (function () {
     const script = document.currentScript;
     const startRole = (script && script.dataset.role) || '';   // teacher.html starts the form on "I'm a teacher"
@@ -19,7 +17,6 @@
         <span class="wfb-nums">${[1, 2, 3, 4, 5].map(n => `<label class="wfb-chip"><input type="radio" name="${name}" value="${n}"><span>${n}</span></label>`).join('')}</span>
         <span class="wfb-ends">5 = ${esc(hi)}</span></div>`;
 
-    const ROLES = [['tester', 'I\'m a student helping test the site'], ['teacher', 'I\'m a teacher'], ['class-student', 'I\'m a student who took a test in class'], ['other', 'Someone else']];
     const TYPES = [['bug', 'Something broke'], ['confusing', 'Something was confusing'], ['idea', 'An idea or a feature request'], ['great', 'Something worked really well']];
     const SEVERITY = [['blocks', 'It stopped me'], ['annoying', 'Annoying, but I got past it'], ['minor', 'Just a small thing']];
     const ASK = { bug: 'What happened? What were you doing right before it broke?', confusing: 'What was confusing?', idea: 'What\'s your idea?', great: 'What worked well? (optional)' };
@@ -122,11 +119,9 @@
     // ---- The form (a pop-up window) ----
     let back = null, opener = null;
     function formHtml() {
-        const pilot = cfg.pilot;
-        return `<h2 id="wfbTitle">${pilot ? 'Give feedback' : 'Report a bug or request a feature'}</h2>
-          <p class="wfb-sub">${pilot ? 'We\'re trying out WPR Practice Pro before more classes use it. Tell us what broke, what confused you, or what would make it better.' : 'Tell us what went wrong, or what you wish the site could do.'}</p>
+        return `<h2 id="wfbTitle">Send feedback</h2>
+          <p class="wfb-sub">Report a bug, tell us what was confusing, request a feature, or tell us what worked well.</p>
           <form novalidate>
-            ${pilot ? `<div class="wfb-step" data-step="role"><div class="wfb-q" id="wfbQRole"><span class="wfb-n"></span>Who are you?</div>${chips('role', ROLES, 'wfbQRole')}</div>` : ''}
             <div class="wfb-step" data-step="type"><div class="wfb-q" id="wfbQType"><span class="wfb-n"></span>What do you want to tell us?</div>${chips('type', TYPES, 'wfbQType')}</div>
             <div class="wfb-step" data-step="severity" hidden><div class="wfb-q" id="wfbQSev"><span class="wfb-n"></span>How much did it get in your way?</div>${chips('severity', SEVERITY, 'wfbQSev')}</div>
             <div class="wfb-step" data-step="message"><label class="wfb-q" for="wfbMsg"><span class="wfb-n"></span><span class="wfb-ask">Tell us more</span></label>
@@ -134,10 +129,6 @@
               <p class="wfb-hint" data-noname hidden>Don't type your name or student ID.</p></div>
             <div class="wfb-step" data-step="expected" hidden><label class="wfb-q" for="wfbExp"><span class="wfb-n"></span>What did you expect to happen? (optional)</label>
               <textarea id="wfbExp" name="expected" maxlength="2000"></textarea></div>
-            ${pilot ? `<div class="wfb-step" data-step="ratings"><div class="wfb-q"><span class="wfb-n"></span>Rate the site so far (optional)</div>
-              <div class="wfb-rq" id="wfbQEasy">How easy is it to use?</div>${scale('easy', 'very hard', 'very easy', 'wfbQEasy')}
-              <div class="wfb-rq" id="wfbQClear">How clear are the directions?</div>${scale('clear', 'very confusing', 'very clear', 'wfbQClear')}
-              <div data-teacher hidden><div class="wfb-rq" id="wfbQRep">How useful are the results and downloads?</div>${scale('reports', 'not useful', 'very useful', 'wfbQRep')}</div></div>` : ''}
             <div class="wfb-step" data-step="shot"><label class="wfb-q" for="wfbShot"><span class="wfb-n"></span>Add a screenshot (optional)</label>
               <input type="file" id="wfbShot" accept="image/png,image/jpeg,image/webp,image/gif">
               <p class="wfb-warn">Cover or crop out any student names and ID numbers first.</p></div>
@@ -160,7 +151,7 @@
         show('expected', type === 'bug');
         show('shot', !kid);
         show('name', !kid);
-        show('contact', !cfg.pilot || role === 'teacher' || role === 'other');
+        show('contact', true);
         form.querySelector('[data-noname]').hidden = !kid;
         const t = form.querySelector('[data-teacher]'); if (t) t.hidden = role !== 'teacher';
         form.querySelector('.wfb-ask').textContent = ASK[type] || 'Tell us more';
@@ -179,23 +170,19 @@
             if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); (el.querySelector('input, textarea') || el).focus({ preventScroll: true }); }
         };
         err.textContent = '';
-        if (cfg.pilot && !role) return fail(`Pick who you are (step ${stepNo('role')}).`, 'role');
         if (!type) return fail(`Pick what you want to tell us (step ${stepNo('type')}).`, 'type');
         const message = field('wfbMsg');
         if (NEED[type] && message.length < 3) return fail(`${NEED[type]} in step ${stepNo('message')}. A sentence is plenty.`, 'message');
         let file = null;
         const shot = !kid && form.querySelector('#wfbShot').files[0];
         if (shot && !(file = await shrink(shot))) return fail('We couldn\'t use that picture. Try a PNG or JPG screenshot.', 'shot');
-        const ratings = {};
-        ['easy', 'clear'].concat(role === 'teacher' ? ['reports'] : []).forEach(k => { const n = picked(form, k); if (n) ratings[k] = Number(n); });
         const btn = form.querySelector('.wfb-send');
         btn.disabled = true; btn.textContent = 'Sending…';
         try {
             await send({
-                kind: cfg.pilot ? 'pilot' : 'report', role, type,
+                kind: 'report', role, type,
                 severity: type === 'bug' || type === 'confusing' ? picked(form, 'severity') : '',
                 message, expected: type === 'bug' ? field('wfbExp') : '',
-                ratings: Object.keys(ratings).length ? JSON.stringify(ratings) : '',
                 name: kid ? '' : field('wfbName'), contact: form.querySelector('[data-step="contact"]').hidden ? '' : field('wfbContact'),
                 website: form.querySelector('.wfb-hp').value
             }, file);
@@ -269,56 +256,8 @@
         open(a);
     });
 
-    ready.then(() => {
-        if (!cfg.pilot) return;
-        const b = document.createElement('button');
-        b.type = 'button'; b.className = 'wfb-fab'; b.setAttribute('data-wfb-open', '');
-        b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></svg><span>Give feedback</span>';
-        const pad = document.createElement('div'); pad.className = 'wfb-pad';   // so the button never covers the bottom of the page
-        document.body.append(pad, b);
-    });
-
-    // ---- Three quick questions on a student's results screen, during the pilot ----
-    async function survey(after, opts) {
-        await ready;
-        if (!cfg.pilot || !after) return;
-        const card = document.createElement('section');
-        card.className = 'wfb-survey';
-        card.setAttribute('aria-labelledby', 'wfbSvTitle');
-        card.innerHTML = `<h2 id="wfbSvTitle">Help us make this test better</h2>
-          <p class="wfb-sub">3 quick questions. Don't write your name.</p>
-          <div class="wfb-step"><div class="wfb-q" id="wfbSvQ1">1. How clear were the directions?</div>${scale('sv_clear', 'very confusing', 'very clear', 'wfbSvQ1')}</div>
-          <div class="wfb-step"><div class="wfb-q" id="wfbSvQ2">2. Did anything break or not work right?</div>${chips('sv_broke', [['no', 'No'], ['yes', 'Yes']], 'wfbSvQ2')}
-            <div data-what hidden><label class="wfb-hint" for="wfbSvWhat">What happened?</label><textarea id="wfbSvWhat" maxlength="2000"></textarea></div></div>
-          <div class="wfb-step"><div class="wfb-q" id="wfbSvQ3">3. How did taking the test feel?</div>${chips('sv_felt', [['smooth', 'Smooth'], ['okay', 'Okay'], ['frustrating', 'Frustrating']], 'wfbSvQ3')}</div>
-          <input type="text" class="wfb-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <p class="wfb-err" role="alert"></p>
-          <div class="wfb-row"><button type="button" class="wfb-send" data-sv-send>Send</button><button type="button" class="wfb-ghost" data-sv-skip>No thanks</button></div>`;
-        after.insertAdjacentElement('afterend', card);
-        document.body.classList.add('wfb-surveying');   // the survey stands in for the floating button
-        const finished = () => { document.body.classList.remove('wfb-surveying'); if (opts && opts.onDone) opts.onDone(); };
-        card.addEventListener('change', () => { card.querySelector('[data-what]').hidden = picked(card, 'sv_broke') !== 'yes'; });
-        card.querySelector('[data-sv-skip]').addEventListener('click', () => { card.remove(); finished(); });
-        card.querySelector('[data-sv-send]').addEventListener('click', async (e) => {
-            const btn = e.currentTarget, err = card.querySelector('.wfb-err');
-            const clear = picked(card, 'sv_clear'), broke = picked(card, 'sv_broke'), felt = picked(card, 'sv_felt');
-            if (!clear && !broke && !felt) { err.textContent = 'Answer at least one question, or tap No thanks.'; return; }
-            btn.disabled = true; btn.textContent = 'Sending…'; err.textContent = '';
-            try {
-                await send({
-                    kind: 'survey', role: 'class-student', type: broke === 'yes' ? 'bug' : '',
-                    message: broke === 'yes' ? card.querySelector('#wfbSvWhat').value.trim() : '',
-                    ratings: JSON.stringify({ clear: clear ? Number(clear) : undefined, broke: broke || undefined, felt: felt || undefined }),
-                    code: (opts && opts.code) || '', website: card.querySelector('.wfb-hp').value
-                });
-                card.innerHTML = '<p class="wfb-thanks">Thanks! Your answers were sent.</p>';
-                finished();
-            } catch (x) {
-                btn.disabled = false; btn.textContent = 'Send';
-                err.textContent = x.message;
-            }
-        });
-    }
+    // The pilot's three results-screen questions ended 2026-11-13; kept as a no-op for any page that still calls it.
+    function survey() {}
 
     window.WprFeedback = { open, survey };
 })();
