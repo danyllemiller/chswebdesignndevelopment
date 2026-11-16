@@ -411,6 +411,16 @@ git commit -m "Resolve rebrand conflicts"</code></pre>
                 <p class="mb-2">Click <strong>Start</strong>, type <strong>Git Bash</strong>, and press <strong>Enter</strong>. Use Git Bash, not Command Prompt. Commands like <code>touch</code> and <code>ls</code> only work in Git Bash.</p>
                 <p class="mb-2">Type each line below exactly as shown and press <strong>Enter</strong> after each one. Many commands print nothing when they work. That's normal.</p>
 
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">💾 Keeping your work on a thumb drive? (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>Use the drive's letter instead of the Desktop.</strong> Open File Explorer and look under <strong>This PC</strong> for your drive's letter, like <strong>(E:)</strong>. In Git Bash, <strong>E:</strong> is written <code>/e</code>. Everywhere these steps say <code>~/Desktop</code>, type <code>/e</code> instead, for example <code>cd /e/portfolio-repo</code>. The letter can change on a different laptop, so check it each time.</li>
+                        <li class="mb-1"><strong>"detected dubious ownership":</strong> thumb drives don't record who owns a file, so Git stops to ask. Run this once on that laptop, then try again: <code>git config --global --add safe.directory '*'</code>. This is the one time <code>--global</code> is OK. It doesn't put your name on anything.</li>
+                        <li class="mb-1"><strong>Your name travels with you.</strong> The <code>git config user.name</code> and <code>user.email</code> lines in Milestone 2 save inside your repo on the drive, so you only run them once.</li>
+                        <li class="mb-1"><strong>Eject before you pull it out:</strong> click the <strong>^</strong> arrow at the bottom right of the screen → the USB icon → <strong>Eject</strong>. Pulling it out while Git is saving can break your repo.</li>
+                        <li class="mb-1"><strong>Still sign out of GitHub</strong> before the laptop goes back. Your GitHub login saves to the laptop, not the drive.</li>
+                    </ul>
+                </details>
+
                 <h6 class="fw-bold mt-3">Step 2 · Get the starter folder</h6>
                 <p class="mb-2">Go to your Desktop and download the class repo. <em>Already have a <code>web2-agency-starter</code> folder on this laptop's Desktop from class? Skip the <code>git clone</code> line.</em></p>
                 <pre class="p-3 rounded no-copy mb-2"><code>cd ~/Desktop

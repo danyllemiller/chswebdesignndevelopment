@@ -845,13 +845,99 @@
             </div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Synthesize your knowledge of CMS architecture to deliver a professional product for Local Legends Coffee.</p>
+                <p class="mb-3"><strong>Time:</strong> one class · <strong>You need:</strong> your CoffeeShopCMS site with Milestones 1–4 done, plus the paper <strong>Hand-Off Guide</strong> (P3) and <strong>Peer Test</strong> (P4) sheets from Mr. Miller · <strong>Turn in:</strong> 1 PDF, plus your P3 and P4 sheets</p>
+                <p class="mb-2"><strong>Open your site:</strong> playground.wordpress.net → <strong>Your Playgrounds</strong> → <strong>CoffeeShopCMS</strong> (or Local → <strong>WP Admin</strong>). Missing? Start a new Playground and <strong>Import</strong> your .zip backup from Drive.</p>
+
+                <h5 class="fw-bold mt-4 text-primary">Part A · Assemble the site</h5>
+
+                <h6 class="fw-bold mt-3">Step 1 · Back up first</h6>
+                <p class="mb-2"><strong>Export → Download as .zip</strong> (Local: right-click the site → Export) → upload it to your Drive folder <strong>CoffeeShopCMS backups</strong>.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Make a News page and a static homepage</h6>
                 <ol>
-                    <li class="mb-2"><strong>Assemble:</strong> Finish your Coffee Shop site using the milestones from Blocks 1-4. Ensure your Menu Navigation links correctly to Home, Menu, About, and Contact. Set your "Settings &gt; Reading" so your Homepage is static, and your Posts show up on a separate "News" page.</li>
-                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Install a Child Theme. Add custom CSS in the customizer to alter layout elements beyond default theme options (demonstrating Cognitive Flexibility).</li>
-                    <li class="mb-2"><strong>QA Check &amp; Handoff:</strong> Perform a final review. Creating a clean site structure that is easy for a client to navigate demonstrates <strong>Professional Decorum</strong>! Check for mobile responsiveness, ensure your Contact form submits correctly, and verify all dummy text (Lorem Ipsum) has been replaced with relevant Coffee Shop copy.</li>
-                    <li class="mb-2">Share your LocalWP live link with an agency peer for a 10-minute review.</li>
+                    <li class="mb-1"><strong>Pages → Add New Page.</strong> Title: <strong>News</strong>. Leave it empty. Publish, then Publish again. (WordPress fills it with your posts by itself.)</li>
+                    <li class="mb-1"><strong>Settings → Reading.</strong> Your homepage displays: <strong>A static page</strong>. Homepage: <strong>Home</strong>. Posts page: <strong>News</strong>. Click <strong>Save Changes</strong>.</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Export your LocalWP site or take screenshots of your final 4 pages, and upload to the Dropbox below.</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · Finish the menu</h6>
+                <p class="mb-2"><strong>Appearance → Menus</strong> → Primary Menu. On the left, check <strong>News</strong> → <strong>Add to Menu</strong>. Drag the items into this order: <strong>Home, Menu, About Us, News, Contact</strong> → <strong>Save Menu</strong>. Then visit your site and click every menu link.</p>
+
+                <h6 class="fw-bold mt-3">Step 4 · Replace every bit of placeholder text</h6>
+                <p class="mb-2">No "Lorem Ipsum," nothing that says "Sample," and no empty pages (except News). Each page needs:</p>
+                <div class="table-responsive mb-2"><table class="table table-sm table-bordered bg-white mb-0">
+                    <thead class="table-light"><tr><th style="width:18%">Page</th><th>What it needs</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Home</strong></td><td>A welcome headline, 2–3 sentences about Local Legends, the tagline, and a button or link to the Menu page</td></tr>
+                        <tr><td><strong>Menu</strong></td><td>The drinks and food with prices you built in the Block Editor lesson</td></tr>
+                        <tr><td><strong>About Us</strong></td><td>3–4 sentences about Mike and the shop (you can make up the details)</td></tr>
+                        <tr><td><strong>Contact</strong></td><td>Your WPForms form, the shop's hours, and a Carson City address</td></tr>
+                        <tr><td><strong>Your 2 posts</strong></td><td>Real text, a category, and a featured image (in the post editor's right panel: <strong>Featured image → Set featured image</strong> → upload a picture)</td></tr>
+                    </tbody>
+                </table></div>
+
+                <h5 class="fw-bold mt-4 text-primary">Part B · Check it (QA)</h5>
+                <ol>
+                    <li class="mb-1"><strong>Phone check:</strong> on your site, press <strong>Ctrl + Shift + I</strong>, then <strong>Ctrl + Shift + M</strong>. At the top, pick a phone (like iPhone 12 Pro). Visit all 5 pages. Is anything cut off? Does the menu open (☰)? Fix what's broken. Press <strong>Ctrl + Shift + I</strong> again to close it.</li>
+                    <li class="mb-1"><strong>Form check:</strong> on the Contact page, fill in the form and click <strong>Submit</strong>. You should see a thank-you message.</li>
+                    <li class="mb-1"><strong>Screenshots:</strong> visit Home, Menu, About Us, and Contact. On each one, press <strong>Windows + PrtScn</strong> (saves to Pictures → Screenshots).</li>
+                    <li class="mb-1">Make a Google Doc named <strong>Ch12 Project</strong>. Click <strong>Insert → Image → Upload from computer</strong> → Pictures → Screenshots → hold <strong>Ctrl</strong> and pick all 4 → <strong>Open</strong>. Don't turn it in yet.</li>
+                </ol>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>The homepage still shows a list of posts:</strong> Settings → Reading wasn't saved, or Homepage isn't set to Home. Do Step 2 again.</li>
+                        <li class="mb-1"><strong>The News page is empty in the editor:</strong> that's right. WordPress fills it with your posts on the live site. Leave it empty.</li>
+                        <li class="mb-1"><strong>A menu link is missing:</strong> Appearance → Menus → add the page → <strong>Save Menu</strong>.</li>
+                        <li class="mb-1"><strong>The menu disappears on the phone view:</strong> most themes fold it into a ☰ button. Tap it.</li>
+                        <li class="mb-1"><strong>No thank-you message:</strong> check the shortcode on your Contact page (Milestone 4, Step 4).</li>
+                    </ul>
+                </details>
+
+                <h5 class="fw-bold mt-4 text-primary">Part C · Hand it off to Mike</h5>
+
+                <h6 class="fw-bold mt-3">Step 5 · Write the Hand-Off Guide (on your paper P3)</h6>
+                <p class="mb-2">Mike has to run his site without calling you. Write 3 tasks: <strong>Task 1, how to add a new post</strong> · <strong>Task 2, how to change a price on the menu</strong> · <strong>Task 3, how to change the hours or reset his password</strong>.</p>
+                <ul class="mb-2">
+                    <li class="mb-1">One task per section, with numbered steps.</li>
+                    <li class="mb-1">No jargon: write "Click Posts," not "navigate to the post-type admin screen."</li>
+                    <li class="mb-1">Use the <strong>exact words on the screen</strong>. Keep your site open and copy the button names.</li>
+                    <li class="mb-1">Put a ⭐ next to any step that's easy to miss.</li>
+                </ul>
+                <p class="mb-2">See <strong>The One-Page Hand-Off Guide</strong> section on this page for an example.</p>
+
+                <h6 class="fw-bold mt-3">Step 6 · Peer Hand-Off Test (on your paper P4)</h6>
+                <ol>
+                    <li class="mb-1">Leave your laptop open on <strong>your</strong> site with your guide next to it. Go to your partner's seat. (Your partner is from a different agency team.)</li>
+                    <li class="mb-1"><strong>Tester:</strong> you are Manager Mike. Follow their guide <strong>exactly</strong>, on their site. Every time you get stuck, write the task #, step #, and why on P4 Part A. Then do the P4 Part B checklist on their site and sign it.</li>
+                    <li class="mb-1"><strong>Owner:</strong> stand behind the tester and say <strong>nothing</strong>. No pointing.</li>
+                </ol>
+
+                <h6 class="fw-bold mt-3">Step 7 · Fix it and turn it in</h6>
+                <ol>
+                    <li class="mb-1">Fix every stuck point in your guide (cross out and rewrite on P3) and every ✖ on your site.</li>
+                    <li class="mb-1">Add a photo of your fixed guide to your <strong>Ch12 Project</strong> doc. On your phone, open the <strong>Google Docs</strong> app → Ch12 Project → <strong>✏️ edit</strong> → <strong>+</strong> → <strong>Image</strong> → <strong>From camera</strong>.</li>
+                    <li class="mb-1">On the laptop: <strong>File → Download → PDF Document (.pdf)</strong>. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Downloads → your PDF → <strong>Upload to Teacher Server</strong>.</li>
+                    <li class="mb-1">Hand your P3 guide and P4 test sheet to Mr. Miller.</li>
+                    <li class="mb-1">Final backup: <strong>Export → Download as .zip</strong> → your Drive folder <strong>CoffeeShopCMS backups</strong>.</li>
+                </ol>
+                <p class="mb-2"><strong>✋ Sign out before the laptop goes back:</strong></p>
+                <ol class="mb-3">
+                    <li class="mb-1">Sign out of the class website and your Google account (click your picture → <strong>Sign out</strong>). If you used GitHub: your picture → <strong>Sign out</strong>.</li>
+                    <li class="mb-1">Close every Chrome window. (Your Playground site stays saved in this laptop's browser.)</li>
+                    <li class="mb-1">Click Start, type <strong>Credential Manager</strong>, open it, and click <strong>Windows Credentials</strong>. If you see anything that starts with <code>git:https://github.com</code>, click it → <strong>Remove</strong> → <strong>Yes</strong>.</li>
+                </ol>
+
+                <div class="border border-primary rounded p-3 mb-3 bg-light">
+                    <p class="fw-bold mb-2">🚀 Level 4.0 Challenge (after you turn in): a child theme + custom CSS</p>
+                    <ol class="mb-2">
+                        <li class="mb-1">Go to <strong>wpastra.com/child-theme-generator</strong>. Name it <strong>Local Legends Child</strong> and download the .zip.</li>
+                        <li class="mb-1">In WordPress: <strong>Appearance → Themes → Add New Theme → Upload Theme</strong> → choose the .zip → <strong>Install Now</strong> → <strong>Activate</strong>. (You may need to set your Customizer colors and logo again on the child theme.)</li>
+                        <li class="mb-1"><strong>Appearance → Customize → Additional CSS.</strong> Change a layout element the theme's settings can't, for example <code>.site-header { border-bottom: 6px solid #6B4226; }</code> or <code>.entry-content img { border-radius: 16px; }</code> → <strong>Publish</strong>.</li>
+                        <li class="mb-1">Screenshot it, add it to your Ch12 Project doc with one sentence (what you changed, and why a child theme protects it), download the PDF again, and upload it to the same dropbox.</li>
+                    </ol>
+                </div>
+
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ every menu link works: Home, Menu, About Us, News, Contact · ☐ static homepage, with posts on the News page · ☐ your Milestone 1–4 work still shows (logo and colors, categories and posts, contact form, SEO plugin) · ☐ looks right on a phone · ☐ the form shows a thank-you message · ☐ real Local Legends text on every page · ☐ the Hand-Off Guide has 3 tasks with numbered steps and exact screen words, with stuck points fixed · ☐ your P4 peer check is signed and every ✖ is fixed · ☐ the 4 page screenshots are in your PDF</p>
+                <p class="mb-3 text-danger fw-bold mt-4">Turn In: One PDF with screenshots of Home, Menu, About Us, and Contact, plus a photo of your fixed Hand-Off Guide. Hand your P3 and P4 sheets to Mr. Miller.</p>
                 <a href="/student/notes.html?chapter=12&amp;day=7&amp;turnin=Project%3A%20Client%20Site%20Assembly%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 7</a>
             </div>
         </div>
