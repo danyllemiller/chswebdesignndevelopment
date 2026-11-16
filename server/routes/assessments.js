@@ -133,7 +133,7 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
         // The shared CS Final (CFA given with the other CS teacher): one fixed
         // 100-question bank, tagged with each question's real chapter so the
         // study guide still works. exams/cs-final-exam.html shuffles it.
-        examIds = ['CS-Final-CFA'];
+        examIds = ['Final-Exam'];
         unitNum = 9;
     } else {
         const parsed = parseInt(unit, 10);
@@ -176,7 +176,7 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
                 `SELECT question_id AS id, question_text AS question,
                         option_a, option_b, option_c, option_d,
                         correct_answer AS answer, study_hint AS hint, chapter_number AS chapter
-                 FROM questions WHERE chapter_number = ? AND (exam_id IS NULL OR exam_id <> 'CS-Final-CFA')
+                 FROM questions WHERE chapter_number = ? AND (exam_id IS NULL OR exam_id <> 'Final-Exam')
                  ORDER BY RAND()`,
                 [unitNum]
             );
