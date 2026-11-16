@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Specificity Puzzle</title>
+    <style>
+        /* Chapter 6, Milestone 3: three agency developers edited this file.
+           BEFORE you open it in Chrome, predict the color of lines 1-5.
+           Score each selector: id = 100, class = 10, tag = 1.
+           Highest score wins. If two scores tie, the rule written later wins. */
+        body { font-family: Arial, sans-serif; font-size: 1.4rem; padding: 2rem; }
+        p { color: black; }
+        .note { color: green; }
+        #first { color: purple; }
+        p.note { color: orange; }
+        .box p { color: blue; }
+        .box .note { color: red; }
+        #main .note { color: teal; }
+        p { color: gray; }
+        .alert { color: brown; }
+        .alert { color: navy; }
+    </style>
+</head>
+<body>
+    <div id="main" class="box">
+        <p id="first" class="note">1. What color am I?</p>
+        <p class="note">2. What color am I?</p>
+        <p>3. What color am I?</p>
+    </div>
+    <p class="note">4. What color am I?</p>
+    <p class="alert">5. What color am I?</p>
+</body>
+</html>
