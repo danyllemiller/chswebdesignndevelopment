@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Final Exam: Web Design 1 Semester Final (Chapters 1–4)</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/web-app-manifest-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon/web-app-manifest-512x512.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation:wght@400..700" rel="stylesheet"/>
+
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+  <link href="/css/dacPrint.css" media="print" rel="stylesheet" type="text/css"/>
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=29"></script>
+
+  <script type="module" src="/js/auth-guard.js?v=2"></script>
+</head>
+<body>
+  <div class="container-fluid sticky-top px-0 no-print">
+    <div id="nav-placeholder"></div>
+  </div>
+
+  <section class="container-ultrawide my-5">
+    <div class="row">
+      <div class="col-lg-9">
+        <div id="exam-container" class="mt-4">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 fw-bold">Loading Secure Environment...</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+<script>
+    // Semester final (teacher 2026-11-12): 100 questions split evenly by chapter,
+    // 75-minute timer that auto-submits, one attempt, posts to the Final category.
+    window.onload = () => {
+        initAdaptiveExam({
+            chapterTitle: "Web Design 1 Semester Final (Chapters 1–4)",
+            examId: "WD1-Final-Exam",
+            finalMix: [{ chapter: 1, mc: 20, tf: 5 }, { chapter: 2, mc: 20, tf: 5 }, { chapter: 3, mc: 20, tf: 5 }, { chapter: 4, mc: 20, tf: 5 }],
+            timeLimitMinutes: 75
+        });
+    };
+  </script>
+
+<div id="footer-placeholder"></div>
+
+<a href="#" class="back-to-top text-decoration-none" title="Back to Top">🚀</a>
+<script src="/js/examLogicWD.js?v=21"></script>
+</body>
+</html>

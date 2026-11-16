@@ -1,7 +1,7 @@
 // server/routes/wprFeedback.js
-// Feedback for WPR Practice Pro (wpr-practice/assets/feedback.js). During the pilot, testers, teachers, and
-// students in a pilot class send bug reports, ideas, 1-5 ratings and an optional screenshot; after it, anyone
-// can still report a bug or request a feature. Nothing here identifies a student: there is no student ID
+// Feedback for WPR Practice Pro (wpr-practice/assets/feedback.js): anyone can send feedback, report a bug, or
+// request a feature, with an optional screenshot. (The pilot's extra questions -- who are you, 1-5 ratings, the
+// results-screen survey -- ended 2026-11-13 when the Baseline CFA was finalized; old pilot rows stay readable.) Nothing here identifies a student: there is no student ID
 // field, and a student taking the test in class is never asked for a name. Screenshots are kept outside the
 // website (WPR_FEEDBACK_DIR) and open only from the teacher's inbox on the class site
 // (admin/tools/wpr-feedback.html), whose /api/admin/* routes need a staff login (server/api.js).
@@ -15,7 +15,7 @@ const { withConnection } = require('../db');
 const { sendMail } = require('../lib/mailer');
 
 const DIR = process.env.WPR_FEEDBACK_DIR || '/var/lib/chs-site/wpr-feedback';
-const PILOT_UNTIL = '2026-12-01';   // the pilot questions (roles, ratings, class survey) end after the 12/1 PLC
+const PILOT_UNTIL = '2026-11-13';   // the pilot ended 2026-11-13 (teacher: CFA final, no more beta-testing wording)
 const KINDS = ['pilot', 'report', 'survey'];
 const ROLES = ['tester', 'teacher', 'class-student', 'other'];
 const TYPES = ['bug', 'confusing', 'idea', 'great'];
@@ -56,7 +56,7 @@ async function ensureTable(c) {
 const clean = (s, n) => String(s ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').trim().slice(0, n);
 const pick = (v, list) => (list.includes(v) ? v : null);
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
-const pilotOn = () => today() <= PILOT_UNTIL;
+const pilotOn = () => false;   // the pilot is over (see PILOT_UNTIL)
 const ipOf = req => String(req.headers['cf-connecting-ip'] || req.ip || '');
 
 // A whole school shares one internet address, so the limits per address are roomy: 500 after-test surveys

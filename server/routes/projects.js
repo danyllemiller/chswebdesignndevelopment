@@ -29,23 +29,34 @@ router.get('/student/section-classmates', requireLogin, async (req, res) => {
     // requested section.
     const sessionUser = req.session?.user;
     const isStaff = sessionUser && (sessionUser.role === 'admin' || sessionUser.section_id === 'Teacher');
-    if (!isStaff) {
-        const callerSection = String(sessionUser?.section_id || '').toUpperCase();
-        const requested = String(section_id).toUpperCase();
-        const related = callerSection === requested
-            || (callerSection.startsWith('AS-') && callerSection.slice(3) === requested)
-            || (requested.startsWith('AS-') && requested.slice(3) === callerSection);
-        if (!related) return res.status(401).json({ error: 'Not authorized.' });
-    }
+    // An "AS-<section>" aide section (e.g. AS-B2) sits alongside the
+    // section it aides -- those aides can review that section's students'
+    // projects, and that section's students can be reviewed by those
+    // aides, so pull both rosters no matter which side is asking.
+    const withAides = (sec) => sec.startsWith('AS-') ? [sec, sec.slice(3)] : [sec, `AS-${sec}`];
+    const uploadedOnly = isCsUnitProject(uploaded_for);
     try {
-        const rows = await withConnection((connection) => {
-            // An "AS-<section>" aide section (e.g. AS-B2) sits alongside the
-            // section it aides -- those aides can review that section's students'
-            // projects, and that section's students can be reviewed by those
-            // aides, so pull both rosters no matter which side is asking.
-            const sections = section_id.startsWith('AS-') ? [section_id, section_id.slice(3)] : [section_id, `AS-${section_id}`];
+        const rows = await withConnection(async (connection) => {
+            const requested = String(section_id).toUpperCase();
+            let sections = withAides(requested);
+            if (!isStaff) {
+                // Every class the caller is in: their main section AND any additional one. The page sends the
+                // main section, but a dual-enrolled student's Comp Sci class is usually the additional one
+                // (Triston Hopper: main A1 Web Design, CS in B4), so the CS peer list came back empty --
+                // "no one has turned in" -- while his B4 classmates had (teacher 2026-11-13). Same rule the
+                // evaluation save already used (project-evaluation below).
+                const callerId = String(sessionUser?.student_id || '');
+                const [mine] = await connection.execute(
+                    `SELECT section_id FROM students WHERE student_id = ?
+                     UNION SELECT section_id FROM student_additional_sections WHERE student_id = ?`, [callerId, callerId]);
+                const myOwn = mine.map(r => String(r.section_id || '').toUpperCase()).filter(Boolean);
+                if (sessionUser?.section_id) myOwn.push(String(sessionUser.section_id).toUpperCase());
+                const mySections = [...new Set(myOwn.flatMap(withAides))];
+                if (!mySections.includes(requested)) return null;
+                // A CS unit project's reviewers come from every class the caller shares with them.
+                if (uploadedOnly) sections = mySections;
+            }
             const placeholders = sections.map(() => '?').join(', ');
-            const uploadedOnly = isCsUnitProject(uploaded_for);
             // Students enrolled through an additional section count too.
             return connection.execute(
                 `SELECT s.student_id, s.first_name, s.last_name FROM students s
@@ -57,6 +68,7 @@ router.get('/student/section-classmates', requireLogin, async (req, res) => {
                 [...sections, ...sections, exclude_student_id || '', ...(uploadedOnly ? [uploaded_for] : [])]
             ).then(([rows]) => rows);
         });
+        if (rows === null) return res.status(401).json({ error: 'Not authorized.' });
         res.json(rows);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch classmates' }); }
 });

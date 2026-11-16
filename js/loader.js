@@ -144,7 +144,7 @@
   const script = document.createElement('script');
   script.id = 'timeclock-script';
   script.type = 'module';
-  script.src = '/js/student/timeclock.js?v=35';
+  script.src = '/js/student/timeclock.js?v=36';
   // Repeated fixes aimed at guessed causes (stale cache, modal races, load
   // ordering) each failed for some students with zero visible symptom --
   // this catches the case none of those could see at all: the module
