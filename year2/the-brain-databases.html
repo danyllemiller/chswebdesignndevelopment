@@ -482,13 +482,40 @@ if (savedScore !== null) {
             <div class="card-header bg-success text-white fw-bold">Milestone 1: The CRUD App Audit [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Define the four pillars of data using real-world platform analysis — then apply the same four actions to the Library Database system your labs build across this chapter.</p>
-                <ol>
-                    <li class="mb-2">Open a Google Doc. Choose a popular application (e.g., Spotify, TikTok, Netflix).</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Describe exactly what action a user takes to trigger each part of the CRUD cycle for that app.</li>
-                    <li class="mb-2">For example: <strong>Create</strong> = Posting a new video. <strong>Read</strong> = Scrolling the "For You" feed. <strong>Update</strong> = Changing the caption on an existing video. <strong>Delete</strong> = Trashing an old video.</li>
-                    <li class="mb-2">Now do the same mapping for a Library system — this is the exact domain your Project builds: <strong>Create</strong> = a librarian adding a new book to the catalog. <strong>Read</strong> = a patron searching for a title. <strong>Update</strong> = updating a book's availability when it's checked out. <strong>Delete</strong> = removing a book that's been retired from the collection.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your Google Doc or PDF (both CRUD mappings).</p>
+                <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> a Google Doc · <strong>Turn in:</strong> 1 PDF</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Make the doc</h6>
+                <p class="mb-2">Go to <strong>docs.google.com</strong> → <strong>Blank document</strong>. Name it <strong>Milestone 1 CRUD Audit</strong>.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 1:</strong> audit an app you use</h6>
+                <p class="mb-2">Pick a popular app (Spotify, TikTok, Netflix, Instagram, a game). Click <strong>Insert → Table → 3 × 5</strong> and fill it in. Each "what the user does" must be a real action a user takes in that app.</p>
+                <div class="table-responsive mb-2"><table class="table table-sm table-bordered bg-white mb-0">
+                    <thead class="table-light"><tr><th>CRUD action</th><th>What the user does in the app</th><th>What changes in the database</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Create</strong></td><td><em>Example (TikTok): posts a new video</em></td><td><em>a new video row is added</em></td></tr>
+                        <tr><td><strong>Read</strong></td><td></td><td></td></tr>
+                        <tr><td><strong>Update</strong></td><td></td><td></td></tr>
+                        <tr><td><strong>Delete</strong></td><td></td><td></td></tr>
+                    </tbody>
+                </table></div>
+                <p class="mb-2">Use your own app. If you picked TikTok, write a different Create than the example.</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · Map the Library system</h6>
+                <p class="mb-2">Make a second table for the <strong>Library</strong> your Project builds. For each action, write <strong>who</strong> does it (a librarian or a patron) and <strong>what</strong> they do. The first row is done for you.</p>
+                <div class="table-responsive mb-2"><table class="table table-sm table-bordered bg-white mb-0">
+                    <thead class="table-light"><tr><th>CRUD action</th><th>Who</th><th>What they do</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Create</strong></td><td>Librarian</td><td>adds a new book to the catalog</td></tr>
+                        <tr><td><strong>Read</strong></td><td></td><td></td></tr>
+                        <tr><td><strong>Update</strong></td><td></td><td></td></tr>
+                        <tr><td><strong>Delete</strong></td><td></td><td></td></tr>
+                    </tbody>
+                </table></div>
+
+                <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                <p class="mb-2">In your doc: <strong>File → Download → PDF Document (.pdf)</strong>. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Downloads → your PDF → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ all 4 CRUD rows filled in for your app, each a real user action · ☐ all 4 rows filled in for the Library, with who and what · ☐ every action matches the right letter (Create adds, Read looks, Update changes, Delete removes)</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your Google Doc as a PDF (both CRUD tables).</p>
                 <a href="/student/notes.html?chapter=14&amp;day=2&amp;turnin=Milestone%201%3A%20The%20CRUD%20App%20Audit%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 2</a>
             </div>
         </div>
@@ -713,13 +740,57 @@ WHERE id = 101;
             <div class="card-header bg-success text-white fw-bold">Milestone 2: The Schema Architect Lab [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Design a database schema with proper relational connections for an agency client — this is the real schema your Project's Library Database is built from, not a practice draft.</p>
+                <p class="mb-3"><strong>Time:</strong> about 30 minutes · <strong>You need:</strong> Notepad and Chrome · <strong>Turn in:</strong> your <code>library.sql</code> file</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Start your library.sql file</h6>
                 <ol>
-                    <li class="mb-2">Design a database schema for the Library your Project will build: two tables, <code>Books</code> and <code>Authors</code>.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Write the actual <code>CREATE TABLE Books (...)</code> and <code>CREATE TABLE Authors (...)</code> SQL statements — 4 real columns for each (e.g. Books: <code>book_id</code>, <code>title</code>, <code>year_published</code>, <code>author_id</code>; Authors: <code>author_id</code>, <code>name</code>, <code>birth_year</code>, <code>nationality</code>).</li>
-                    <li class="mb-2">Explicitly mark the <code>PRIMARY KEY</code> in both <code>CREATE TABLE</code> statements.</li>
-                    <li class="mb-2">Add the <code>FOREIGN KEY</code> constraint linking <code>Books.author_id</code> to <code>Authors.author_id</code>.</li>
+                    <li class="mb-1">Click Start, type <strong>Notepad</strong>, and open it.</li>
+                    <li class="mb-1">Click <strong>File → Save as</strong>. Pick the <strong>Desktop</strong>. Change <strong>Save as type</strong> to <strong>All files (*.*)</strong>. File name: <code>library.sql</code> → <strong>Save</strong>. (If you skip "All files," it saves as <code>library.sql.txt</code>.)</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>.sql</code> file with both CREATE TABLE statements. Save this file — Labs 3 and 4 run their queries against this exact schema.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 2:</strong> write both CREATE TABLE statements</h6>
+                <p class="mb-2">The <strong>Authors</strong> table is done for you as a model. Type it, then write the <strong>Books</strong> table yourself with 4 columns: <code>book_id</code>, <code>title</code>, <code>year_published</code>, <code>author_id</code>.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>-- Milestone 2: The Schema Architect Lab
+CREATE TABLE Authors (
+    author_id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    birth_year INTEGER,
+    nationality TEXT
+);
+
+CREATE TABLE Books (
+    -- your 4 columns go here, one per line, with a comma after each
+    -- mark book_id as the PRIMARY KEY (like author_id above)
+    -- last line links the tables:
+    FOREIGN KEY (author_id) REFERENCES Authors(author_id)
+);</code></pre>
+                <ul class="mb-2">
+                    <li class="mb-1">Authors comes <strong>first</strong>. Books points to Authors, so Authors has to exist before Books.</li>
+                    <li class="mb-1">Use <code>INTEGER</code> for numbers and <code>TEXT</code> for words.</li>
+                    <li class="mb-1">The <strong>primary key</strong> is each row's unique ID. The <strong>foreign key</strong> is a column that holds another table's primary key; that's how a book knows its author.</li>
+                </ul>
+                <p class="mb-2">Save (<strong>Ctrl + S</strong>).</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · Test it in DB Fiddle</h6>
+                <ol>
+                    <li class="mb-1">In Chrome, go to <strong>db-fiddle.com</strong>. In the database menu at the top left, pick <strong>SQLite</strong>.</li>
+                    <li class="mb-1">Copy everything in your <code>library.sql</code> (<strong>Ctrl + A</strong>, <strong>Ctrl + C</strong>) and paste it into the <strong>Schema SQL</strong> box on the left.</li>
+                    <li class="mb-1">Click <strong>Run</strong>.</li>
+                </ol>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> no red error. (The results area may be empty; there's no data yet. That's fine.)</div>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>"syntax error near ...":</strong> look at the word it names. Usually a comma is missing between two columns, or there's an extra comma before the <code>)</code>.</li>
+                        <li class="mb-1"><strong>"unknown column author_id in foreign key":</strong> the Books table needs its own <code>author_id</code> column before the FOREIGN KEY line.</li>
+                        <li class="mb-1"><strong>Your file is named <code>library.sql.txt</code>:</strong> in Notepad, File → Save as → All files → <code>library.sql</code>.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 4 · Keep it and turn it in</h6>
+                <p class="mb-2">You'll add to this file in Milestones 3 and 4 and the Project. Save a copy in Google Drive: <strong>drive.google.com → New → File upload → Desktop → library.sql</strong>.</p>
+                <p class="mb-2">Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Desktop → <code>library.sql</code> → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ CREATE TABLE for both Authors and Books · ☐ 4 columns in each · ☐ a PRIMARY KEY in both · ☐ a FOREIGN KEY linking <code>Books.author_id</code> to <code>Authors.author_id</code> · ☐ it runs in DB Fiddle with no error</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your library.sql file with both CREATE TABLE statements. Keep it: Milestones 3 and 4 run against this exact schema.</p>
                 <a href="/student/notes.html?chapter=14&amp;day=3&amp;turnin=Milestone%202%3A%20The%20Schema%20Architect%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 3</a>
             </div>
         </div>
@@ -729,14 +800,55 @@ WHERE id = 101;
             <div class="card-header bg-success text-white fw-bold">Milestone 3: The Data Detective Lab [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Execute filtering read operations using standard SQL query language — against your own Milestone 2 schema, not a generic practice database.</p>
+                <p class="mb-3"><strong>Time:</strong> about 30 minutes · <strong>You need:</strong> your <code>library.sql</code> from Milestone 2 (Desktop or Google Drive) · <strong>Turn in:</strong> your <code>library.sql</code> file</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Open your file</h6>
+                <p class="mb-2">Open <strong>Notepad</strong> → <strong>File → Open</strong> → change the file type to <strong>All files</strong> → <code>library.sql</code>. (Not on this computer? Download it from Google Drive first.)</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Add sample data</h6>
+                <p class="mb-2">At the bottom of the file, add at least <strong>3 authors</strong> and <strong>5 books</strong>. Use real books or make them up. Each book's <code>author_id</code> must match an author's ID.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>-- Sample data
+INSERT INTO Authors VALUES (1, 'J.K. Rowling', 1965, 'British');
+INSERT INTO Authors VALUES (2, 'Rick Riordan', 1964, 'American');
+INSERT INTO Authors VALUES (3, '__________', ____, '__________');
+
+INSERT INTO Books VALUES (1, 'The Lightning Thief', 2005, 2);
+INSERT INTO Books VALUES (2, '__________', ____, _);
+-- ...at least 5 books in all</code></pre>
+                <p class="mb-2">Text goes in <strong>single quotes</strong>. Numbers don't. Save.</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · <strong>MILESTONE STEP 3:</strong> write 3 SELECT queries</h6>
+                <p class="mb-2">Here's how each kind looks on a <em>different</em> table (a Games table). Write yours for <strong>your</strong> Books and Authors tables:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>SELECT * FROM Games WHERE price &gt; 50;            -- filter with WHERE
+SELECT * FROM Players WHERE city = 'London';      -- match text exactly
+SELECT * FROM Games ORDER BY release_year DESC;   -- sort, newest first</code></pre>
+                <p class="mb-2">Add your 3 queries at the bottom of <code>library.sql</code> under <code>-- Milestone 3 queries</code>:</p>
                 <ol>
-                    <li class="mb-2">Open an online SQL Sandbox (like SQLite Online or DB Fiddle), and paste in your <code>Books</code>/<code>Authors</code> <code>CREATE TABLE</code> statements from Lab 2, plus a few <code>INSERT</code> rows of sample data so you have something to query.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Write 3 <code>SELECT</code> queries against your own tables.</li>
-                    <li class="mb-2">Query 1: Find all books published after a chosen year, using a <code>WHERE</code> clause.</li>
-                    <li class="mb-2">Query 2: Find all authors from a specific nationality.</li>
-                    <li class="mb-2">Query 3: List all books sorted by publication year (newest to oldest) using <code>ORDER BY DESC</code>.</li>
+                    <li class="mb-1"><strong>Query 1:</strong> all books published after a year you choose (WHERE).</li>
+                    <li class="mb-1"><strong>Query 2:</strong> all authors from one nationality (WHERE with text).</li>
+                    <li class="mb-1"><strong>Query 3:</strong> all books sorted by year published, newest first (ORDER BY ... DESC).</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Copy your three successful queries into a text file and upload it, along with the sample data you inserted.</p>
+
+                <h6 class="fw-bold mt-3">Step 4 · Run them in DB Fiddle</h6>
+                <ol>
+                    <li class="mb-1"><strong>db-fiddle.com</strong> → pick <strong>SQLite</strong>.</li>
+                    <li class="mb-1">Paste your CREATE TABLE and INSERT lines into the <strong>Schema SQL</strong> box (left).</li>
+                    <li class="mb-1">Paste your 3 SELECT queries into the <strong>Query SQL</strong> box (right) → <strong>Run</strong>.</li>
+                </ol>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> 3 result tables, one per query. Check each one: does Query 1 only show books after your year? Is Query 3 newest first?</div>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>A query returns no rows:</strong> text must match exactly, including capitals: <code>'British'</code> is not <code>'british'</code>.</li>
+                        <li class="mb-1"><strong>"no such column":</strong> check the spelling against your CREATE TABLE.</li>
+                        <li class="mb-1"><strong>"FOREIGN KEY constraint failed" or a missing author:</strong> a book's <code>author_id</code> doesn't match any author.</li>
+                        <li class="mb-1"><strong>An error on an INSERT:</strong> each INSERT needs one value per column, in the same order as the table.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 5 · Save and turn in</h6>
+                <p class="mb-2">Save <code>library.sql</code> and upload the new copy to Google Drive. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Desktop → <code>library.sql</code> → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ 3+ authors and 5+ books inserted · ☐ Query 1 filters by year with WHERE · ☐ Query 2 filters authors by nationality · ☐ Query 3 sorts newest first with ORDER BY ... DESC · ☐ all 3 run with no errors</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your library.sql with your sample data and your three working queries.</p>
                 <a href="/student/notes.html?chapter=14&amp;day=5&amp;turnin=Milestone%203%3A%20The%20Data%20Detective%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 5</a>
             </div>
         </div>
@@ -803,13 +915,41 @@ WHERE id = 101;
             <div class="card-header bg-success text-white fw-bold">Milestone 4: Secure Data Entry Lab [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Safely manipulate database records using conditional constraints — on the same Books/Authors tables you've been building all chapter.</p>
-                <ol>
-                    <li class="mb-2">Using the same sandbox and schema from Lab 3, write an <code>INSERT</code> statement to add one new book to your <code>Books</code> table.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Write an <code>UPDATE</code> statement to change that book's title, and a <code>DELETE</code> statement to remove one specific book by its <code>book_id</code>.</li>
-                    <li class="mb-2"><strong>Security Check:</strong> Ensure your UPDATE and DELETE statements have explicit <code>WHERE</code> clauses.</li>
-                    <li class="mb-2">Write a 2-sentence reflection on why forgetting the <code>WHERE</code> clause is dangerous.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your queries and reflection in a document. These four labs together are the .sql master file your Project assembles.</p>
+                <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your <code>library.sql</code> from Milestone 3 · <strong>Turn in:</strong> your <code>library.sql</code> file</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Open your file and DB Fiddle</h6>
+                <p class="mb-2">Open <code>library.sql</code> in Notepad (File → Open → All files). In Chrome, open <strong>db-fiddle.com</strong> → <strong>SQLite</strong>, and paste your CREATE TABLE and INSERT lines into the <strong>Schema SQL</strong> box.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 4:</strong> INSERT, UPDATE, DELETE</h6>
+                <p class="mb-2">Add these at the bottom of <code>library.sql</code> under <code>-- Milestone 4</code>. Fill in the blanks with your own data. Pick a <code>book_id</code> no other book has.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>-- Milestone 4: Secure Data Entry Lab
+INSERT INTO Books VALUES (__, '__________', ____, _);
+
+UPDATE Books SET title = '__________' WHERE book_id = __;
+
+DELETE FROM Books WHERE book_id = __;
+
+SELECT * FROM Books;</code></pre>
+                <ul class="mb-2">
+                    <li class="mb-1">The UPDATE changes the title of the book you just added (use its <code>book_id</code>).</li>
+                    <li class="mb-1">The DELETE removes one different book by its <code>book_id</code>.</li>
+                    <li class="mb-1">The last line shows the table so you can check your changes.</li>
+                </ul>
+                <p class="mb-2"><strong>Security check:</strong> every UPDATE and DELETE must end with a <code>WHERE</code>. Without it, UPDATE changes <em>every</em> row and DELETE erases <em>every</em> row.</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · Run it</h6>
+                <p class="mb-2">Paste your Milestone 4 lines into the <strong>Query SQL</strong> box (right) → <strong>Run</strong>.</p>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> in the last result table, your new book with its <em>new</em> title, and the book you deleted is gone. Every other book is unchanged.</div>
+
+                <h6 class="fw-bold mt-3">Step 4 · Reflection</h6>
+                <p class="mb-2">At the very bottom of the file, write 2 sentences: why is forgetting the WHERE clause dangerous? Start each line with <code>--</code> so SQL skips it:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>-- Reflection: Forgetting WHERE is dangerous because ...
+-- ...</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 5 · Save and turn in</h6>
+                <p class="mb-2">Save, upload the new copy to Google Drive, then click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Desktop → <code>library.sql</code> → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ an INSERT adds a new book · ☐ an UPDATE changes that book's title with a WHERE · ☐ a DELETE removes one book by <code>book_id</code> with a WHERE · ☐ it all runs with no errors · ☐ a 2-sentence reflection on the missing WHERE</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your library.sql with your queries and reflection. Milestones 2–4 together become the master file your Project assembles.</p>
                 <a href="/student/notes.html?chapter=14&amp;day=6&amp;turnin=Milestone%204%3A%20Secure%20Data%20Entry%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 6</a>
             </div>
         </div>
@@ -1033,14 +1173,34 @@ WHERE id = 101;
             </div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Synthesize all database skills to architect and query a professional relational system — by assembling the exact same Books/Authors schema you've been building across Labs 1-4.</p>
-                <ol>
-                    <li class="mb-2"><strong>Assemble:</strong> Compile your SQL scripts from Milestones 1-4 into a single <code>.sql</code> master file — your Lab 2 CREATE TABLE statements, your Lab 3 SELECT queries, and your Lab 4 INSERT/UPDATE/DELETE statements, all against the same tables.</li>
-                    <li class="mb-2"><strong>Schema:</strong> Your script must build a valid schema containing your two tables, <code>Books</code> and <code>Authors</code>, linked properly by Primary and Foreign Keys.</li>
-                    <li class="mb-2"><strong>Execution:</strong> Your script must populate the tables with data using <code>INSERT</code>, and execute your <code>SELECT</code>, <code>UPDATE</code>, and <code>DELETE</code> queries securely.</li>
-                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Write a complex SQL <code>JOIN</code> statement to combine the Books and Authors tables into one unified view, demonstrating Cognitive Flexibility.</li>
-                    <li class="mb-2"><strong>Privacy:</strong> List two privacy rules you will follow to protect Author data, demonstrating Probity.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload your <code>master.sql</code> file and your privacy rules.</p>
+                <p class="mb-3"><strong>Time:</strong> one class · <strong>You need:</strong> your <code>library.sql</code> from Milestone 4 · <strong>Turn in:</strong> your <code>master.sql</code> file</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Make master.sql</h6>
+                <p class="mb-2">Open <code>library.sql</code> in Notepad. <strong>File → Save as</strong> → All files → <code>master.sql</code>. Now put the sections in this order, each with a <code>--</code> heading:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>-- 1. Schema (Milestone 2): CREATE TABLE Authors, then Books
+-- 2. Data: your INSERT lines
+-- 3. Reads (Milestone 3): your 3 SELECT queries
+-- 4. Changes (Milestone 4): INSERT, UPDATE ... WHERE, DELETE ... WHERE, SELECT
+-- 5. Privacy rules</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 2 · Run the whole thing</h6>
+                <p class="mb-2"><strong>db-fiddle.com</strong> → <strong>SQLite</strong>. Paste sections 1 and 2 into <strong>Schema SQL</strong> and sections 3 and 4 into <strong>Query SQL</strong> → <strong>Run</strong>. Fix anything red until every query shows results.</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · Privacy rules</h6>
+                <p class="mb-2">Under <code>-- 5. Privacy rules</code>, write 2 rules you'll follow to protect Author data, as <code>--</code> comments. Make them specific, for example: "We only store an author's name, birth year, and nationality; we never collect home addresses."</p>
+
+                <div class="border border-primary rounded p-3 mb-3 bg-light">
+                    <p class="fw-bold mb-2">🚀 Level 4.0 Challenge: a JOIN</p>
+                    <p class="mb-2">Write one query that combines both tables so each book shows its author's name. Here's the pattern on the Games example; write yours for Books and Authors:</p>
+                    <pre class="p-3 rounded no-copy mb-0"><code>SELECT Games.title, Studios.name
+FROM Games
+JOIN Studios ON Games.studio_id = Studios.studio_id;</code></pre>
+                </div>
+
+                <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Desktop → <code>master.sql</code> → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ Books and Authors with primary keys and a foreign key · ☐ INSERTs fill both tables · ☐ the 3 SELECT queries work · ☐ INSERT, UPDATE, and DELETE all work, and UPDATE and DELETE use WHERE · ☐ the whole file runs with no errors · ☐ 2 specific privacy rules</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your master.sql file (your privacy rules are at the bottom).</p>
                 <a href="/student/notes.html?chapter=14&amp;day=7&amp;turnin=Project%3A%20The%20Library%20Database%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 7</a>
             </div>
         </div>

@@ -21,6 +21,7 @@ const PULSE_THRESHOLD = 3;
 // and how the admin results endpoint aggregates each item: 'scale' (1-4 +
 // NA), 'choice' (a fixed option list), 'text' (open-ended, never averaged).
 const SCALE_OPTIONS = ['1', '2', '3', '4', 'NA'];
+const SCALE5_OPTIONS = ['1', '2', '3', '4', '5', 'NA'];   // forms with scaleMax: 5
 
 const AGENCY360_ITEMS = {
     1: { part: 'A', type: 'scale' }, 2: { part: 'A', type: 'scale' }, 3: { part: 'A', type: 'scale' },
@@ -60,9 +61,74 @@ const CS_COURSE_REVIEW_ITEMS = {
     30: { part: 'F', type: 'text' }, 31: { part: 'F', type: 'text' }
 };
 
+// End-of-semester course evaluations (1-5 scale), survey/cs-semester-survey.html
+// and survey/wd-semester-survey.html. Item numbers must match those pages.
+const CS_SEMESTER_ITEMS = {
+    1: { part: 'A', type: 'scale' },
+    2: { part: 'A', type: 'scale' },
+    3: { part: 'A', type: 'scale' },
+    4: { part: 'A', type: 'scale' },
+    5: { part: 'A', type: 'scale' },
+    6: { part: 'A', type: 'scale' },
+    7: { part: 'B', type: 'scale' },
+    8: { part: 'B', type: 'scale' },
+    9: { part: 'B', type: 'scale' },
+    10: { part: 'B', type: 'scale' },
+    11: { part: 'B', type: 'scale' },
+    12: { part: 'B', type: 'scale' },
+    13: { part: 'C', type: 'scale' },
+    14: { part: 'C', type: 'scale' },
+    15: { part: 'C', type: 'scale' },
+    16: { part: 'C', type: 'scale' },
+    17: { part: 'C', type: 'scale' },
+    18: { part: 'D', type: 'scale' },
+    19: { part: 'D', type: 'scale' },
+    20: { part: 'D', type: 'choice', options: ['A lot', 'A fair amount', 'Some', 'Very little'] },
+    21: { part: 'D', type: 'choice', options: ['Yes', 'Maybe', 'No'] },
+    22: { part: 'E', type: 'text' },
+    23: { part: 'E', type: 'text' },
+    24: { part: 'E', type: 'text' },
+    25: { part: 'E', type: 'text' },
+    26: { part: 'E', type: 'text' }
+};
+
+const WD_SEMESTER_ITEMS = {
+    1: { part: 'A', type: 'scale' },
+    2: { part: 'A', type: 'scale' },
+    3: { part: 'A', type: 'scale' },
+    4: { part: 'A', type: 'scale' },
+    5: { part: 'A', type: 'scale' },
+    6: { part: 'A', type: 'scale' },
+    7: { part: 'B', type: 'scale' },
+    8: { part: 'B', type: 'scale' },
+    9: { part: 'B', type: 'scale' },
+    10: { part: 'B', type: 'scale' },
+    11: { part: 'B', type: 'scale' },
+    12: { part: 'B', type: 'scale' },
+    13: { part: 'C', type: 'scale' },
+    14: { part: 'C', type: 'scale' },
+    15: { part: 'C', type: 'scale' },
+    16: { part: 'C', type: 'scale' },
+    17: { part: 'C', type: 'scale' },
+    18: { part: 'D', type: 'scale' },
+    19: { part: 'D', type: 'scale' },
+    20: { part: 'D', type: 'choice', options: ['A lot', 'A fair amount', 'Some', 'Very little'] },
+    21: { part: 'D', type: 'choice', options: ['Yes', 'Maybe', 'No'] },
+    22: { part: 'E', type: 'choice', options: ['Yes', 'Maybe', 'No', 'I\'m already in Web Design 2', 'I graduate this year'] },
+    23: { part: 'E', type: 'choice', options: ['Schedule conflict', 'I need another class to graduate', 'Not what I expected', 'Too hard', 'Not interested anymore', 'Other'] },
+    24: { part: 'E', type: 'text' },
+    25: { part: 'F', type: 'text' },
+    26: { part: 'F', type: 'text' },
+    27: { part: 'F', type: 'text' },
+    28: { part: 'F', type: 'text' },
+    29: { part: 'F', type: 'text' }
+};
+
 const FORMS = {
     agency360: { items: AGENCY360_ITEMS, terms: ['Fall', 'Spring'] },
-    cs_course_review: { items: CS_COURSE_REVIEW_ITEMS, terms: ['Midpoint', 'End of term'] }
+    cs_course_review: { items: CS_COURSE_REVIEW_ITEMS, terms: ['Midpoint', 'End of term'] },
+    cs_semester_eval: { items: CS_SEMESTER_ITEMS, terms: ['Fall semester', 'Spring semester'], scaleMax: 5 },
+    wd_semester_eval: { items: WD_SEMESTER_ITEMS, terms: ['Fall semester', 'Spring semester'], scaleMax: 5 }
 };
 
 async function ensureTables(connection) {
@@ -104,7 +170,7 @@ router.post('/survey/submit', requireLogin, async (req, res) => {
     for (const [qNum, item] of Object.entries(form.items)) {
         const val = answers[qNum];
         if (val === undefined || val === null || val === '') continue;
-        if (item.type === 'scale' && !SCALE_OPTIONS.includes(String(val))) continue;
+        if (item.type === 'scale' && !(form.scaleMax === 5 ? SCALE5_OPTIONS : SCALE_OPTIONS).includes(String(val))) continue;
         if (item.type === 'choice' && !item.options.includes(String(val))) continue;
         if (item.type === 'text') { cleaned[qNum] = String(val).slice(0, 5000); continue; }
         cleaned[qNum] = String(val);

@@ -506,6 +506,14 @@
 
                 <h6 class="fw-bold mt-3">Step 7 · Back up (last thing, every class)</h6>
                 <p class="mb-2"><strong>Playground:</strong> in the Playground bar, <strong>Export → Download as .zip</strong>. <strong>Local:</strong> right-click your site → <strong>Export</strong>. Upload the .zip to a Google Drive folder named <strong>CoffeeShopCMS backups</strong>.</p>
+
+                <h6 class="fw-bold mt-3">Step 8 · ✋ Sign out before the laptop goes back (every laptop day this chapter)</h6>
+                <ol>
+                    <li class="mb-1">Sign out of the class website and your Google account (click your picture → <strong>Sign out</strong>). If you used GitHub: your picture → <strong>Sign out</strong>.</li>
+                    <li class="mb-1">Close every Chrome window. (Your Playground site stays saved in this laptop's browser.)</li>
+                    <li class="mb-1">Click Start, type <strong>Credential Manager</strong>, open it, and click <strong>Windows Credentials</strong>. If you see anything that starts with <code>git:https://github.com</code>, click it → <strong>Remove</strong> → <strong>Yes</strong>.</li>
+                    <li class="mb-1">Show Mr. Miller the signed-out screen, then put the laptop back in its numbered slot.</li>
+                </ol>
                 <p class="mb-2"><strong>Full credit checklist:</strong> ☐ permalinks set to Post name · ☐ Hello World and Sample Page deleted · ☐ 4 pages: Home, Menu, About Us, Contact · ☐ 2 categories: Seasonal Flavors and Community Events · ☐ 2 posts, each in one of your new categories (not Uncategorized) · ☐ both screenshots uploaded</p>
                 <p class="mb-3 text-danger fw-bold">Turn In: 2 screenshots: your "All Pages" screen and your "All Posts" screen.</p>
                 <a href="/student/notes.html?chapter=12&amp;day=2&amp;turnin=Milestone%202%3A%20Information%20Architecture%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 2</a>
@@ -548,6 +556,45 @@
         <h5 class="fw-bold mt-4 text-primary">Featured Images &amp; Shortcodes</h5>
         <p>Every post needs a <strong>Featured Image</strong>. What is it? <strong>The main thumbnail people see when the post is shared on social media.</strong></p>
         <p>You will also frequently use Shortcodes. What is a 'Shortcode'? <strong>A small piece of code in brackets (e.g., <code>[gallery id="5"]</code>) that executes a larger script or plugin feature within a post.</strong></p>
+
+        <!-- BLOCK EDITOR PRACTICE LAB -->
+        <div class="card border-info shadow-sm my-4 text-start">
+            <div class="card-header bg-info text-dark fw-bold">Block Editor Lab: Write Mike's Menu Page (practice, not graded)</div>
+            <div class="card-body small p-4">
+                <p class="mb-3"><strong>Time:</strong> about 16 minutes · <strong>You need:</strong> your CoffeeShopCMS site from Milestone 2</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Open your site</h6>
+                <p class="mb-2">Chrome → <strong>playground.wordpress.net</strong> → <strong>Your Playgrounds</strong> → <strong>CoffeeShopCMS</strong> (Local users: open Local → CoffeeShopCMS → <strong>WP Admin</strong>). Not there? Download your .zip backup from Drive, then <strong>Import</strong> it. Go to <code>/wp-admin</code> → <strong>Pages</strong> → hover <strong>Menu</strong> → <strong>Edit</strong>.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Build the Menu page in blocks</h6>
+                <ol>
+                    <li class="mb-1">Click the <strong>+</strong> icon → search <strong>Heading</strong>. Type: <strong>Our Menu</strong></li>
+                    <li class="mb-1">Press <strong>Enter</strong> for a Paragraph block. Write one sentence about Local Legends coffee in your own words (no Lorem Ipsum).</li>
+                    <li class="mb-1"><strong>+</strong> → <strong>List</strong>. Add at least 6 items with prices, for example: House Drip $2.50 · Latte $4.25 · Cappuccino $4.25 · Pumpkin Spice Latte $4.95 · Hot Chocolate $3.25 · Blueberry Muffin $3.00.</li>
+                    <li class="mb-1"><strong>+</strong> → <strong>Custom HTML</strong>. Type exactly: <code>&lt;p&gt;&lt;strong&gt;Ask about oat milk!&lt;/strong&gt;&lt;/p&gt;</code> Click <strong>Preview</strong> on the block to see it.</li>
+                    <li class="mb-1">Select the List block. Use its up arrow to move it above the Paragraph. Then move it back down.</li>
+                    <li class="mb-1">Click <strong>Save</strong> (top right).</li>
+                </ol>
+
+                <h6 class="fw-bold mt-3">Step 3 · Try the safety nets</h6>
+                <ol>
+                    <li class="mb-1"><strong>Undo:</strong> click the Paragraph block → the <strong>⋮</strong> menu → <strong>Delete</strong>. Now press <strong>Ctrl + Z</strong>. It's back.</li>
+                    <li class="mb-1"><strong>Revisions:</strong> change one word and click <strong>Save</strong>. In the right panel (<strong>Page</strong> tab), click <strong>Revisions</strong>. Look at the older version, then click the back arrow without restoring it.</li>
+                    <li class="mb-1"><strong>Featured image:</strong> Posts → edit <strong>The Pumpkin Spice Latte Is Back</strong> → right panel → <strong>Set featured image</strong> → <strong>Upload files</strong>. Use a free coffee photo (search "latte" on openverse.org and download it) or a screenshot. Click <strong>Set featured image</strong> → <strong>Save</strong>.</li>
+                </ol>
+
+                <h6 class="fw-bold mt-3">Step 4 · Check and back up</h6>
+                <p class="mb-2">Open the Menu page with <strong>View Page</strong>. <strong>Partner check:</strong> ☐ heading · ☐ a paragraph in real words · ☐ a list with 6+ prices · ☐ the oat milk line shows as bold text, not code</p>
+                <p class="mb-2"><strong>Back up:</strong> Export → Download as .zip → upload it to your Drive folder <strong>CoffeeShopCMS backups</strong>. Then do the sign-out steps (end of Milestone 2).</p>
+                <details class="mb-0"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>The oat milk line shows the code:</strong> you typed it in a Paragraph block. Delete it and use a <strong>Custom HTML</strong> block.</li>
+                        <li class="mb-1"><strong>A welcome pop-up covers the editor:</strong> close it.</li>
+                        <li class="mb-1"><strong>The photo site is blocked:</strong> use a screenshot of anything coffee-related, or skip the featured image for now.</li>
+                    </ul>
+                </details>
+            </div>
+        </div>
       </div>
       
       <div class="col-lg-4 mt-4 mt-lg-0 text-center">

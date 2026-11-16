@@ -350,12 +350,79 @@ console.log(str);
             <div class="card-header bg-success text-white fw-bold">Milestone 1: The JSON Blueprint Lab [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Architect a valid data structure matching JSON syntax rules for a client application.</p>
+                <p class="mb-3"><strong>Time:</strong> about 36 minutes · <strong>You need:</strong> a laptop with Git Bash and your GitHub login · <strong>Turn in:</strong> your <code>movie.json</code> file</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Get Anna's starter app</h6>
+                <p class="mb-2">Open <strong>Git Bash</strong> (Start → type Git Bash → Enter). Type each line and press Enter:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>cd ~/Desktop/web2-agency-starter
+git pull
+cp -r ch13-the-network ~/Desktop/astro-anna-app
+cd ~/Desktop/astro-anna-app
+ls</code></pre>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> <code>css  index.html  js</code></div>
+                <p class="mb-2"><em>"No such file or directory" on the first line?</em> This laptop doesn't have the class repo. Type <code>cd ~/Desktop</code>, then <code>git clone https://github.com/danyllemiller/web2-agency-starter.git</code>, and start Step 1 again.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Write movie.json</h6>
                 <ol>
-                    <li class="mb-2">Open your code editor and create a file called <code>movie.json</code>.</li>
-                    <li class="mb-2">Create a JSON object representing your favorite movie. You must include a String (Title), a Number (Year), and an Array (Actors). Remember that all JSON keys require double quotes!</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Choose the public API you want to use for your final client project (e.g., PokeAPI, OpenWeather, SpaceX). Find their documentation and copy/paste a sample of the JSON data they return into a file called <code>api_reference.json</code> so you know how it is structured.</li>
+                    <li class="mb-1">Type <code>notepad movie.json</code> and press Enter. Notepad asks to create a new file. Click <strong>Yes</strong>.</li>
+                    <li class="mb-1">Type your favorite movie in this shape (use your own movie):</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>movie.json</code> file.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>{
+  "title": "Apollo 13",
+  "year": 1995,
+  "actors": ["Tom Hanks", "Kevin Bacon", "Bill Paxton"]
+}</code></pre>
+                <ol start="3">
+                    <li class="mb-1">Press <strong>Ctrl + S</strong> to save, then close Notepad.</li>
+                    <li class="mb-1">Check it: in Chrome go to <strong>jsonlint.com</strong>, paste your JSON in the box, and click <strong>Validate JSON</strong>. Fix it until it says <strong>Valid JSON</strong>.</li>
+                </ol>
+                <p class="mb-2"><strong>Check:</strong> ☐ <code>title</code> is a string (double quotes) · ☐ <code>year</code> is a number (no quotes) · ☐ <code>actors</code> is an array <code>[ ]</code> with 2 or more names · ☐ no comma after the last item</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · <strong>MILESTONE STEP 1:</strong> save a sample from your client's API</h6>
+                <ol>
+                    <li class="mb-1">Pick the public API for your app. These two need no key: <strong>PokeAPI</strong> or the <strong>SpaceX API</strong>.</li>
+                    <li class="mb-1">Open one endpoint in Chrome to see the JSON it sends back:<br>PokeAPI: <code>https://pokeapi.co/api/v2/pokemon/pikachu</code><br>SpaceX: <code>https://api.spacexdata.com/v4/rockets</code></li>
+                    <li class="mb-1">Select about 15 lines, starting at a <code>{</code>, and copy them (<strong>Ctrl + C</strong>).</li>
+                    <li class="mb-1">In Git Bash, type <code>notepad api_reference.json</code> → <strong>Yes</strong> → paste (<strong>Ctrl + V</strong>) → save → close.</li>
+                    <li class="mb-1">In your notebook, write your API's name, the endpoint you'll use, and 3 field names you see in the JSON (like <code>name</code>, <code>height</code>, <code>sprites</code>).</li>
+                </ol>
+
+                <h6 class="fw-bold mt-3">Step 4 · Back it up to your GitHub</h6>
+                <p class="mb-2">Use your own name and the email you used for GitHub. Don't add <code>--global</code>; these laptops are shared.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>git init
+git config user.name "Your First Last"
+git config user.email "the email you used for GitHub"
+git add .
+git commit -m "Milestone 1: movie.json and api_reference.json"</code></pre>
+                <p class="mb-2">In Chrome, go to <strong>github.com/new</strong>. Repository name: <code>astro-anna-app</code>. Choose <strong>Public</strong>. Leave <strong>Add a README</strong> off. Click <strong>Create repository</strong>, then copy the address that ends in <code>.git</code>. Back in Git Bash (paste with <strong>right-click → Paste</strong>):</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>git remote add origin https://github.com/YOUR-USERNAME/astro-anna-app.git
+git branch -M main
+git push -u origin main</code></pre>
+                <p class="mb-2">A sign-in window pops up (it can hide behind Git Bash): <strong>Sign in with your browser</strong> → <strong>Authorize</strong>.</p>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> refresh your GitHub page. You see <code>movie.json</code>, <code>api_reference.json</code>, <code>css</code>, <code>index.html</code>, and <code>js</code>.</div>
+                <p class="mb-2"><strong>Push Station checklist</strong> (a reviewer checks your GitHub page): ☐ the repo is named <code>astro-anna-app</code> and it's Public · ☐ you can see <code>movie.json</code> and <code>api_reference.json</code> · ☐ <code>movie.json</code> has a string, a number, and an array</p>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>jsonlint says "Expecting ',' or '}'":</strong> a comma is missing between two lines, or there's an extra comma after the last item.</li>
+                        <li class="mb-1"><strong>jsonlint points at a quote:</strong> JSON only allows double quotes (<code>"</code>), never single quotes (<code>'</code>), and every key needs them.</li>
+                        <li class="mb-1"><strong>"Author identity unknown":</strong> run the two <code>git config</code> lines again, then commit again.</li>
+                        <li class="mb-1"><strong>"rejected" or "fetch first":</strong> the GitHub repo was made with a README. Delete it on GitHub (Settings → bottom → Delete this repository), make it again with nothing turned on, and push again.</li>
+                        <li class="mb-1"><strong>"remote origin already exists":</strong> run <code>git remote set-url origin</code>, a space, and your address. Then push again.</li>
+                        <li class="mb-1"><strong>"Permission denied" or "403":</strong> someone else's GitHub login is saved on this laptop. Do the sign-out steps below, then push again.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 5 · Turn in</h6>
+                <p class="mb-2">Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Desktop → <code>astro-anna-app</code> → <code>movie.json</code> → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>✋ Sign out (last 4 minutes, every laptop day this chapter):</strong></p>
+                <ol class="mb-2">
+                    <li class="mb-1">On github.com, click your picture (top right) → <strong>Sign out</strong> → <strong>Sign out from all accounts</strong>.</li>
+                    <li class="mb-1">Close every Chrome window.</li>
+                    <li class="mb-1">Click Start, type <strong>Credential Manager</strong>, open it, and click <strong>Windows Credentials</strong>. Find anything that starts with <code>git:https://github.com</code> → <strong>Remove</strong> → <strong>Yes</strong>.</li>
+                    <li class="mb-1">Close Git Bash. Show Mr. Miller the signed-out screen, then put the laptop back on the cart.</li>
+                </ol>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ <code>movie.json</code> is valid JSON with a string, a number, and an array · ☐ <code>api_reference.json</code> has real JSON from your API · ☐ both files are in your public <code>astro-anna-app</code> repo on GitHub</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your movie.json file.</p>
                 <a href="/student/notes.html?chapter=13&amp;day=3&amp;turnin=Milestone%201%3A%20The%20JSON%20Blueprint%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 3</a>
             </div>
         </div>
@@ -462,13 +529,63 @@ console.log("3. The rest of my code kept running!");
             <div class="card-header bg-success text-white fw-bold">Milestone 2: The Fetch Connection [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Engineer an asynchronous network request to retrieve JSON data for your client app.</p>
+                <p class="mb-3"><strong>Time:</strong> about 30 minutes · <strong>You need:</strong> your <code>astro-anna-app</code> from Milestone 1 and your API endpoint · <strong>Turn in:</strong> your <code>js/script.js</code> file</p>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">💻 On a different laptop? (no <code>astro-anna-app</code> on the Desktop, or it isn't yours)</summary>
+                    <pre class="p-3 rounded no-copy mt-2 mb-1"><code>cd ~/Desktop
+mv astro-anna-app old-astro
+git clone https://github.com/YOUR-USERNAME/astro-anna-app.git
+cd astro-anna-app
+git config user.name "Your First Last"
+git config user.email "the email you used for GitHub"</code></pre>
+                    <p class="mb-0">Skip the <code>mv</code> line if there's no <code>astro-anna-app</code> folder on the Desktop. Use your own GitHub username in the clone line.</p>
+                </details>
+                <h6 class="fw-bold mt-3">Step 1 · Rename app.js to script.js</h6>
+                <pre class="p-3 rounded no-copy mb-2"><code>cd ~/Desktop/astro-anna-app
+mv js/app.js js/script.js
+sed -i 's/app.js/script.js/' index.html
+grep script index.html</code></pre>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> the last line shows <code>js/script.js</code>.</div>
+
+                <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 2:</strong> write getData()</h6>
+                <p class="mb-2">Type <code>notepad js/script.js</code>. Press <strong>Ctrl + A</strong>, then <strong>Delete</strong>. Type this exactly. Change only the address on line 2 to your endpoint (SpaceX: <code>https://api.spacexdata.com/v4/rockets</code>).</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>// Milestone 2: The Fetch Connection
+const API_URL = "https://pokeapi.co/api/v2/pokemon/pikachu";
+
+async function getData() {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+    console.log(data);
+}
+
+document.getElementById("fetch-btn").addEventListener("click", getData);</code></pre>
+                <p class="mb-2">Save (<strong>Ctrl + S</strong>) and close Notepad.</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · See your data</h6>
                 <ol>
-                    <li class="mb-2">Create an <code>index.html</code> and a <code>script.js</code>.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Write an <code>async function</code> called <code>getData()</code>.</li>
-                    <li class="mb-2">Inside, use <code>fetch()</code> and <code>await</code> to connect to your chosen API endpoint (e.g., <code>https://api.spacexdata.com/v4/rockets/falcon9</code>).</li>
-                    <li class="mb-2">Use <code>await response.json()</code> to parse the response, and <code>console.log()</code> the resulting data object.</li>
+                    <li class="mb-1">Type <code>start index.html</code>. The app opens in Chrome.</li>
+                    <li class="mb-1">Press <strong>F12</strong> → click <strong>Console</strong> → click the green <strong>Load Data</strong> button.</li>
+                    <li class="mb-1">Click the small <strong>▶</strong> triangle to open the object. Write one field you can see in your notebook.</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code> file showing your async fetch.</p>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> an object in the Console, like <code>{abilities: Array(2), base_experience: 112, …}</code>.</div>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>The Console says <code>Promise {&lt;pending&gt;}</code>:</strong> an <code>await</code> is missing. You need one before <code>fetch</code> and one before <code>response.json()</code>.</li>
+                        <li class="mb-1"><strong>Nothing happens when you click:</strong> check the last line says <code>"fetch-btn"</code> exactly, and run <code>grep script index.html</code> again to make sure the page loads <code>js/script.js</code>.</li>
+                        <li class="mb-1"><strong>A red error like "Unexpected token":</strong> there's a typo. Compare your code to the box line by line, especially the <code>{ }</code> and <code>( )</code>.</li>
+                        <li class="mb-1"><strong>"Failed to fetch":</strong> check the address on line 2 by pasting it into a new Chrome tab. You should see JSON.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 4 · Save it to GitHub</h6>
+                <pre class="p-3 rounded no-copy mb-2"><code>git add .
+git commit -m "Milestone 2: async getData with fetch"
+git push</code></pre>
+                <p class="mb-2"><strong>Push Station checklist</strong> (your reviewer opens your Console and clicks Load Data): ☐ the function is named <code>getData</code> and starts with <code>async</code> · ☐ there's an <code>await</code> before <code>fetch</code> and before <code>response.json()</code> · ☐ clicking Load Data prints an object, not "Promise pending" · ☐ the last commit on GitHub says "Milestone 2"</p>
+
+                <h6 class="fw-bold mt-3">Step 5 · Turn in</h6>
+                <p class="mb-2">Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Desktop → <code>astro-anna-app</code> → <code>js</code> → <code>script.js</code> → <strong>Upload to Teacher Server</strong>. Then sign out (Milestone 1, Step 5).</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ <code>async function getData()</code> · ☐ <code>await fetch(...)</code> and <code>await response.json()</code> · ☐ the data object prints in the Console when you click Load Data · ☐ pushed to GitHub</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your script.js file showing your async fetch.</p>
                 <a href="/student/notes.html?chapter=13&amp;day=4&amp;turnin=Milestone%202%3A%20The%20Fetch%20Connection%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 4</a>
             </div>
         </div>
@@ -681,13 +798,67 @@ API_KEY=abc123yoursecretkey</pre>
             <div class="card-header bg-success text-white fw-bold">Milestone 3: Dynamic Search Lab [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Construct dynamic API endpoints using Template Literals and user input.</p>
-                <ol>
-                    <li class="mb-2">In your HTML, create a text <code>&lt;input id="search"&gt;</code> and a <code>&lt;button&gt;</code>.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Add a click listener to the button in JS.</li>
-                    <li class="mb-2">When clicked, it should grab the <code>.value</code> of the input, and inject it dynamically into your API URL using Template Literals (e.g., <code>`https://pokeapi.co/api/v2/pokemon/${userInput}`</code>).</li>
-                    <li class="mb-2">Trigger your fetch function to search for that specific item. In the context of the SpaceX API, if you fetch the '/rockets/falcon9' endpoint, what kind of data are you likely to get? <strong>A single JSON object detailing the specs of the Falcon 9 rocket.</strong></li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code>.</p>
+                <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your <code>astro-anna-app</code> from Milestone 2 · <strong>Turn in:</strong> your <code>js/script.js</code> file</p>
+                <p class="mb-2">Start in Git Bash: <code>cd ~/Desktop/astro-anna-app</code>, then <code>git pull</code>.</p>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">💻 On a different laptop? (no <code>astro-anna-app</code> on the Desktop, or it isn't yours)</summary>
+                    <pre class="p-3 rounded no-copy mt-2 mb-1"><code>cd ~/Desktop
+mv astro-anna-app old-astro
+git clone https://github.com/YOUR-USERNAME/astro-anna-app.git
+cd astro-anna-app
+git config user.name "Your First Last"
+git config user.email "the email you used for GitHub"</code></pre>
+                    <p class="mb-0">Skip the <code>mv</code> line if there's no <code>astro-anna-app</code> folder on the Desktop. Use your own GitHub username in the clone line.</p>
+                </details>
+                <h6 class="fw-bold mt-3">Step 1 · Add a search box</h6>
+                <p class="mb-2">Type <code>notepad index.html</code>. Find this line:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>&lt;button id="fetch-btn"&gt;Load Data&lt;/button&gt;</code></pre>
+                <p class="mb-2">Replace it with these 2 lines. Save and close.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>&lt;input id="search" placeholder="Type a name, like pikachu"&gt;
+&lt;button id="search-btn"&gt;Search&lt;/button&gt;</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 3:</strong> search with what the user typed</h6>
+                <p class="mb-2">Type <code>notepad js/script.js</code> → <strong>Ctrl + A</strong> → <strong>Delete</strong> → type this. Save.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>// Milestone 3: Dynamic Search Lab
+const searchInput = document.getElementById("search");
+const searchBtn = document.getElementById("search-btn");
+const resultsSection = document.getElementById("results");
+
+async function getData(userInput) {
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${userInput}`);
+    const data = await response.json();
+    console.log(data);
+    resultsSection.innerHTML = `&lt;h2&gt;${data.name}&lt;/h2&gt;
+        &lt;img src="${data.sprites.front_default}" alt="${data.name}"&gt;`;
+}
+
+searchBtn.addEventListener("click", function () {
+    const userInput = searchInput.value.trim().toLowerCase();
+    getData(userInput);
+});</code></pre>
+                <ul class="mb-2">
+                    <li class="mb-1">The address uses <strong>backticks</strong> ( <code>`</code> , the key left of the 1 ), not quote marks. That's what lets <code>${userInput}</code> drop what the user typed into the URL. That's a <strong>template literal</strong>.</li>
+                    <li class="mb-1">Using a different API? Change the address and the two fields in the <code>innerHTML</code> lines to keys from your <code>api_reference.json</code>.</li>
+                </ul>
+
+                <h6 class="fw-bold mt-3">Step 3 · Test it</h6>
+                <p class="mb-2">Type <code>start index.html</code>. Search <strong>pikachu</strong>, then <strong>charmander</strong>.</p>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> the name and a picture for each one you search.</div>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>The page shows <code>${data.name}</code> as text:</strong> you used quote marks instead of backticks.</li>
+                        <li class="mb-1"><strong>"Cannot read properties of undefined":</strong> the name was misspelled, so the API found nothing. That's expected for now; Milestone 4 handles it.</li>
+                        <li class="mb-1"><strong>Nothing happens:</strong> check the ids match exactly: <code>search</code>, <code>search-btn</code>, and <code>results</code>. Press F12 → Console to see the error.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 4 · Push and turn in</h6>
+                <pre class="p-3 rounded no-copy mb-2"><code>git add .
+git commit -m "Milestone 3: dynamic search"
+git push</code></pre>
+                <p class="mb-2"><strong>Push Station:</strong> your reviewer searches a name you didn't try, and it works.</p>
+                <p class="mb-2">Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Desktop → <code>astro-anna-app</code> → <code>js</code> → <code>script.js</code> → <strong>Upload to Teacher Server</strong>. Then sign out (Milestone 1, Step 5).</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ a text box and a Search button · ☐ a click listener that reads the box's <code>.value</code> · ☐ a template literal puts it in the API address · ☐ the result shows on the page · ☐ pushed to GitHub</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your script.js.</p>
                 <a href="/student/notes.html?chapter=13&amp;day=5&amp;turnin=Milestone%203%3A%20Dynamic%20Search%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 5</a>
             </div>
         </div>
@@ -752,14 +923,61 @@ API_KEY=abc123yoursecretkey</pre>
             <div class="card-header bg-success text-white fw-bold">Milestone 4: UX States Lab [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Engineer professional error handling and loading feedback states to protect the client's brand reputation.</p>
-                <ol>
-                    <li class="mb-2">Create a <code>&lt;div id="status"&gt;</code> in your HTML.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Wrap your entire fetch logic inside a <code>try/catch</code> block.</li>
-                    <li class="mb-2">Update the status div to say "Loading..." <em>before</em> the fetch.</li>
-                    <li class="mb-2">Ensure you write an <code>if (!response.ok) throw new Error(...)</code> check.</li>
-                    <li class="mb-2">Display "Error: Item not found" inside the <code>catch</code> block if it fails. Clear the loading text if it succeeds.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your robust <code>script.js</code>.</p>
+                <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your <code>astro-anna-app</code> from Milestone 3 and an elbow partner · <strong>Turn in:</strong> your <code>js/script.js</code> file</p>
+                <p class="mb-2">Start in Git Bash: <code>cd ~/Desktop/astro-anna-app</code>, then <code>git pull</code>. (Different laptop? Use the box in Milestone 3.)</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Add a status box</h6>
+                <p class="mb-2">Type <code>notepad index.html</code>. Right under your Search button line, add this line. Save and close.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>&lt;div id="status"&gt;&lt;/div&gt;</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 4:</strong> loading and error states</h6>
+                <p class="mb-2">Type <code>notepad js/script.js</code>. Add this line under the other <code>const</code> lines at the top:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>const statusDiv = document.getElementById("status");</code></pre>
+                <p class="mb-2">Then replace the whole <code>getData</code> function with this. Save and close.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>async function getData(userInput) {
+    statusDiv.textContent = "Loading...";
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${userInput}`);
+        if (!response.ok) {
+            throw new Error(`Status ${response.status}`);
+        }
+        const data = await response.json();
+        statusDiv.textContent = "";
+        console.log(data);
+        resultsSection.innerHTML = `&lt;h2&gt;${data.name}&lt;/h2&gt;
+            &lt;img src="${data.sprites.front_default}" alt="${data.name}"&gt;`;
+    } catch (error) {
+        statusDiv.textContent = "Error: Item not found";
+        resultsSection.innerHTML = "";
+        console.error(error);
+    }
+}</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 3 · The 3-test check (trade laptops with your elbow partner)</h6>
+                <p class="mb-2">Your partner runs these on your app and writes what the screen showed in your notebook:</p>
+                <div class="table-responsive mb-2"><table class="table table-sm table-bordered bg-white mb-0">
+                    <thead class="table-light"><tr><th>Test</th><th>How</th><th>The right state</th></tr></thead>
+                    <tbody>
+                        <tr><td>Real name</td><td>Search <strong>eevee</strong></td><td>"Loading..." flashes, then the name and picture</td></tr>
+                        <tr><td>Misspelled</td><td>Search <strong>pikachuu</strong> (look in the Console for the status code)</td><td>"Error: Item not found" and a 404 in the Console</td></tr>
+                        <tr><td>Offline</td><td>F12 → <strong>Network</strong> tab → change <strong>No throttling</strong> to <strong>Offline</strong> → search <strong>mew</strong> → set it back to No throttling</td><td>"Error: Item not found," not endless loading</td></tr>
+                    </tbody>
+                </table></div>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>"statusDiv is not defined":</strong> the new <code>const statusDiv</code> line is missing or misspelled.</li>
+                        <li class="mb-1"><strong>"Loading..." never goes away:</strong> the line <code>statusDiv.textContent = "";</code> is missing after <code>response.json()</code>.</li>
+                        <li class="mb-1"><strong>A misspelled name still crashes:</strong> check the <code>if (!response.ok)</code> lines are inside the <code>try { }</code>.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 4 · Push and turn in</h6>
+                <pre class="p-3 rounded no-copy mb-2"><code>git add .
+git commit -m "Milestone 4: try/catch and status states"
+git push</code></pre>
+                <p class="mb-2">Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Desktop → <code>astro-anna-app</code> → <code>js</code> → <code>script.js</code> → <strong>Upload to Teacher Server</strong>. Then sign out (Milestone 1, Step 5).</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ "Loading..." shows before the fetch · ☐ the fetch is inside <code>try { }</code> · ☐ <code>if (!response.ok) throw new Error(...)</code> · ☐ the <code>catch</code> shows "Error: Item not found" · ☐ the loading text clears on success · ☐ all 3 tests pass</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: Upload your robust script.js.</p>
                 <a href="/student/notes.html?chapter=13&amp;day=6&amp;turnin=Milestone%204%3A%20UX%20States%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 6</a>
             </div>
         </div>
@@ -869,13 +1087,48 @@ API_KEY=abc123yoursecretkey</pre>
             </div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Synthesize your knowledge of Asynchronous JavaScript, JSON parsing, and DOM manipulation to build a live data application for your agency client.</p>
+                <p class="mb-3"><strong>Time:</strong> one class · <strong>You need:</strong> your <code>astro-anna-app</code> with Milestones 1–4 done · <strong>Turn in:</strong> your whole <code>astro-anna-app</code> folder</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Does your app do everything?</h6>
+                <p class="mb-2">☐ a text box and a Search button · ☐ "Loading..." shows while it fetches · ☐ it fetches live data using what you typed · ☐ the data shows on the page (a name plus a picture or 2 stats) · ☐ a bad search shows a message, not a crash · ☐ offline shows an error, not endless loading</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Break It Bash, then fix one bug</h6>
+                <p class="mb-2">A tester from another team tries to break your app (gibberish, empty searches, offline). Write the bug and how you fixed it in your notebook.</p>
+                <p class="mb-2"><strong>Common fix · Search clicked with an empty box:</strong> put this as the first line inside the click listener's function, right after <code>const userInput = ...</code>:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>if (userInput === "") { statusDiv.textContent = "Type a name first."; return; }</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 3 · Push it</h6>
+                <pre class="p-3 rounded no-copy mb-2"><code>cd ~/Desktop/astro-anna-app
+git add .
+git commit -m "Project: fix after Break It Bash"
+git push</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 4 · Publish a live link (GitHub Pages)</h6>
                 <ol>
-                    <li class="mb-2"><strong>Assemble:</strong> Finish your application using the milestones from Blocks 1-4. </li>
-                    <li class="mb-2"><strong>Logic:</strong> The user must be able to type a query into an input box, see a loading state, fetch live data, and have that data dynamically rendered onto the screen (e.g., displaying the Pokemon image and stats, or the current temperature).</li>
-                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Append complex DOM elements securely using <code>createElement</code>. Protect any API keys via environment variables or a proxy. This demonstrates <strong>Systematic Resolution</strong> and advanced error recovery.</li>
-                    <li class="mb-2"><strong>QA Check &amp; Handoff:</strong> Perform a final review. Does the app crash if you search for gibberish? It shouldn't! Share your live link with an agency peer for a 10-minute UX review.</li>
+                    <li class="mb-1">On github.com, open your <code>astro-anna-app</code> repo → <strong>Settings</strong> (top tabs) → <strong>Pages</strong> (left side).</li>
+                    <li class="mb-1">Under <strong>Branch</strong>, choose <strong>main</strong> and <strong>/ (root)</strong> → <strong>Save</strong>.</li>
+                    <li class="mb-1">Wait 1 minute and refresh. Your link appears at the top: <code>https://YOUR-USERNAME.github.io/astro-anna-app/</code></li>
+                    <li class="mb-1">Open it and search. Then share the link with an agency peer from another team for a 10-minute UX review.</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed App folder.</p>
+
+                <h6 class="fw-bold mt-3">Step 5 · Turn in the whole folder</h6>
+                <p class="mb-2">Click <strong>Jump to Dropbox</strong> below → click <strong>Whole folder</strong> → <strong>Choose Files</strong> → Desktop → <code>astro-anna-app</code> → <strong>Upload</strong> (Chrome asks to confirm; click <strong>Upload</strong>) → <strong>Upload to Teacher Server</strong>. Then sign out (Milestone 1, Step 5).</p>
+
+                <div class="border border-primary rounded p-3 mb-3 bg-light">
+                    <p class="fw-bold mb-2">🚀 Level 4.0 Challenge: build the results safely</p>
+                    <p class="mb-2">Replace the <code>innerHTML</code> lines with <code>createElement</code> and <code>textContent</code>, so text from the API can never run as code:</p>
+                    <pre class="p-3 rounded no-copy mb-2"><code>resultsSection.innerHTML = "";
+const title = document.createElement("h2");
+title.textContent = data.name;
+const pic = document.createElement("img");
+pic.src = data.sprites.front_default;
+pic.alt = data.name;
+resultsSection.append(title, pic);</code></pre>
+                    <p class="mb-0">Using an API that needs a key? Don't put the key in your code on GitHub. Ask Mr. Miller about a proxy.</p>
+                </div>
+
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ everything in Step 1 works · ☐ you fixed at least one bug from Break It Bash · ☐ your GitHub Pages link works · ☐ the whole folder is uploaded</p>
+                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Choose "Whole folder" in the Dropbox below and upload your completed astro-anna-app folder.</p>
                 <a href="/student/notes.html?chapter=13&amp;day=7&amp;turnin=Project%3A%20Real-Time%20Data%20App%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 7</a>
             </div>
         </div>
