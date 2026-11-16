@@ -405,21 +405,52 @@ git commit -m "Resolve rebrand conflicts"</code></pre>
             <div class="card-header bg-success text-white fw-bold">Milestone 1: Agency File Architecture Setup [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Navigate and construct client file architecture using only a Command Line Interface.</p>
-                <ol>
-                    <li class="mb-2">Download the Chapter Starter Files. Move <code>day1-portfolio-repo</code> to your Desktop and rename it <code>portfolio-repo</code>. It already has <code>index.html</code>, <code>css/</code>, and <code>assets/</code>.</li>
-                    <li class="mb-2">Open your computer's Terminal (Mac) or Command Prompt / Git Bash (Windows).</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Using only CLI commands, <code>cd</code> into <code>portfolio-repo</code>, make the <code>js</code> folder, and create <code>js/main.js</code>.</li>
-                    <li class="mb-2">Run <code>ls -R</code> and check it against the target tree in <code>YOUR-TURN.txt</code>.</li>
-                </ol>
-                <div class="border border-success rounded p-3 mb-3 bg-light">
-                    <p class="fw-bold mb-1">📁 Starter files: <code>day1-portfolio-repo</code> in the <a href="/studentFiles/pixelPioneers.zip">Chapter Files (.zip)</a></p>
-                    <p class="mb-2">You write two lines. The <mark>highlighted</mark> part is the only thing you write. Everything else is already built.</p>
-                    <pre class="p-3 rounded no-copy mb-0"><code>cd ~/Desktop/portfolio-repo
-<mark>mkdir js</mark>
-<mark>touch js/main.js</mark>
+                <p class="mb-3"><strong>Time:</strong> about 8 minutes · <strong>You need:</strong> a laptop with Git Bash · <strong>Turn in:</strong> 1 screenshot</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Open Git Bash</h6>
+                <p class="mb-2">Click <strong>Start</strong>, type <strong>Git Bash</strong>, and press <strong>Enter</strong>. Use Git Bash, not Command Prompt. Commands like <code>touch</code> and <code>ls</code> only work in Git Bash.</p>
+                <p class="mb-2">Type each line below exactly as shown and press <strong>Enter</strong> after each one. Many commands print nothing when they work. That's normal.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Get the starter folder</h6>
+                <p class="mb-2">Go to your Desktop and download the class repo. <em>Already have a <code>web2-agency-starter</code> folder on this laptop's Desktop from class? Skip the <code>git clone</code> line.</em></p>
+                <pre class="p-3 rounded no-copy mb-2"><code>cd ~/Desktop
+git clone https://github.com/danyllemiller/web2-agency-starter.git</code></pre>
+                <p class="mb-2">Copy the Day 1 folder onto your Desktop, name the copy <code>portfolio-repo</code>, and move into it:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>cp -r web2-agency-starter/ch11-the-cloud/day1-portfolio-repo portfolio-repo
+cd portfolio-repo</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 3 · <strong>MILESTONE STEP 1:</strong> build the js folder</h6>
+                <p class="mb-2">Make a folder named <code>js</code>, make an empty file named <code>main.js</code> inside it, then list every folder and file:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>mkdir js
+touch js/main.js
 ls -R</code></pre>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see</strong> after <code>ls -R</code> (it should match <code>YOUR-TURN.txt</code>):
+                    <pre class="p-2 rounded no-copy mt-2 mb-0"><code>.:
+YOUR-TURN.txt  assets  css  index.html  js
+
+./assets:
+logo.svg
+
+./css:
+style.css
+
+./js:
+main.js</code></pre>
                 </div>
-                <p class="mb-3 text-danger fw-bold">Turn In: Take a screenshot of your terminal window showing your executed commands.</p>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>"touch: command not found"</strong> or <strong>"is not recognized"</strong>: you're in Command Prompt. Close it and open <strong>Git Bash</strong>.</li>
+                        <li class="mb-1"><strong>"destination path 'web2-agency-starter' already exists"</strong>: you already have it. Skip the clone line and keep going.</li>
+                        <li class="mb-1"><strong>"cp: cannot stat"</strong>: you aren't on the Desktop. Type <code>cd ~/Desktop</code>, then run the <code>cp</code> line again.</li>
+                        <li class="mb-1"><strong>Already made <code>portfolio-repo</code> in class?</strong> Don't copy it again. Type <code>cd ~/Desktop/portfolio-repo</code> and start at Step 3.</li>
+                        <li class="mb-1"><strong>"No such file or directory"</strong>: check your spelling. Every name is lowercase, with dashes and no spaces.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 4 · Screenshot and turn in</h6>
+                <p class="mb-2">With Git Bash showing your commands and the list, press <strong>Windows + PrtScn</strong>. The screen dims for a second, and the picture saves to <strong>Pictures → Screenshots</strong>. (Nothing happened? Try <strong>Windows + Fn + PrtScn</strong>.) Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Pictures → Screenshots → pick the newest one → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ the screenshot shows Git Bash · ☐ you can see <code>mkdir js</code> and <code>touch js/main.js</code> · ☐ the <code>ls -R</code> list shows <code>./js: main.js</code></p>
+                <p class="mb-3 text-danger fw-bold">Turn In: A screenshot of Git Bash showing your commands and the <code>ls -R</code> list with <code>js/main.js</code>.</p>
                 <a href="/student/notes.html?chapter=11&amp;day=1&amp;turnin=Milestone%201%3A%20Agency%20File%20Architecture%20Setup%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 1</a>
             </div>
         </div>
@@ -429,20 +460,63 @@ ls -R</code></pre>
             <div class="card-header bg-success text-white fw-bold">Milestone 2: Local Agency Backup [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Initialize local version control to protect client assets and execute a commit.</p>
+                <p class="mb-3"><strong>Time:</strong> about 12 minutes · <strong>You need:</strong> Git Bash and your <code>portfolio-repo</code> folder from Milestone 1 · <strong>Turn in:</strong> 1 screenshot</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Go to your folder</h6>
+                <pre class="p-3 rounded no-copy mb-2"><code>cd ~/Desktop/portfolio-repo
+pwd</code></pre>
+                <p class="mb-2">The line <code>pwd</code> prints should end in <code>/Desktop/portfolio-repo</code>.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Turn on Git and sign your work</h6>
+                <p class="mb-2">Type your own first and last name and the email you used for GitHub. Keep the quote marks. <strong>Don't add <code>--global</code></strong> (even though <code>YOUR-TURN.txt</code> shows it). These laptops are shared, so this sets your name for this folder only.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>git init
+git config user.name "Your First Last"
+git config user.email "the email you used for GitHub"</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 3 · <strong>MILESTONE STEP 2:</strong> Commit 1</h6>
+                <p class="mb-2">Stage every file, then save a snapshot with a message that says what changed. Don't forget the space and the dot in <code>git add .</code></p>
+                <pre class="p-3 rounded no-copy mb-2"><code>git add .
+git commit -m "Add js folder and main.js"</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 4 · Commit 2: change the headline</h6>
                 <ol>
-                    <li class="mb-2">Ensure your terminal is inside your <code>portfolio-repo</code> folder.</li>
-                    <li class="mb-2">With your class, set your Git name and email and run <code>git init</code> to start tracking the folder.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Stage everything and commit it with a message that says what changed.</li>
-                    <li class="mb-2">Make 3 commits in all. Your partner reads <code>git log --oneline</code> and checks that every message says what changed.</li>
+                    <li class="mb-1">Type <code>notepad index.html</code> and press Enter. Notepad opens.</li>
+                    <li class="mb-1">Find <code>&lt;h1&gt;My Developer Portfolio&lt;/h1&gt;</code>. Change only the words between the tags, for example <code>&lt;h1&gt;Jordan Reyes, Web Developer&lt;/h1&gt;</code>.</li>
+                    <li class="mb-1">Click <strong>File → Save</strong>, then close Notepad.</li>
                 </ol>
-                <div class="border border-success rounded p-3 mb-3 bg-light">
-                    <p class="fw-bold mb-1">📁 Starter files: <code>day1-portfolio-repo</code> in the <a href="/studentFiles/pixelPioneers.zip">Chapter Files (.zip)</a></p>
-                    <p class="mb-2">You write the stage and commit lines. The <mark>highlighted</mark> part is the only thing you write. Everything else is already built.</p>
-                    <pre class="p-3 rounded no-copy mb-0"><code>git init
-<mark>git add .</mark>
-<mark>git commit -m "Add js folder and main.js"</mark></code></pre>
+                <pre class="p-3 rounded no-copy mb-2"><code>git add .
+git commit -m "Change homepage headline"</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 5 · Commit 3: add a comment to main.js</h6>
+                <ol>
+                    <li class="mb-1">Type <code>notepad js/main.js</code> and press Enter. Notepad opens an empty file.</li>
+                    <li class="mb-1">Type <code>// main script</code> on line 1. Click <strong>File → Save</strong>, then close Notepad.</li>
+                </ol>
+                <pre class="p-3 rounded no-copy mb-2"><code>git add .
+git commit -m "Add comment to main.js"</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 6 · Check your history</h6>
+                <pre class="p-3 rounded no-copy mb-2"><code>git log --oneline</code></pre>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> 3 lines, newest on top. Your 7-character codes will be different, and it may say <code>master</code> or <code>main</code>. Both are fine.
+                    <pre class="p-2 rounded no-copy mt-2 mb-1"><code>c3d4e5f (HEAD -&gt; master) Add comment to main.js
+b2c3d4e Change homepage headline
+a1b2c3d Add js folder and main.js</code></pre>
+                    If you see <code>(END)</code> at the bottom, press <strong>q</strong> to get back.
                 </div>
-                <p class="mb-3 text-danger fw-bold">Turn In: Take a screenshot of your terminal showing the successful commit message.</p>
+                <p class="mb-2"><strong>Partner check:</strong> your partner reads your <code>git log --oneline</code>. Every message has to say what changed. "Change homepage headline" ✔ · "stuff," "update," or "asdf" ✘</p>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>"Author identity unknown"</strong> or <strong>"Please tell me who you are"</strong>: run the two <code>git config</code> lines from Step 2, then run your <code>git commit</code> line again.</li>
+                        <li class="mb-1"><strong>"fatal: not a git repository"</strong>: you're in the wrong folder. Type <code>cd ~/Desktop/portfolio-repo</code> and try again.</li>
+                        <li class="mb-1"><strong>"nothing to commit, working tree clean"</strong>: your change wasn't saved. Open the file in Notepad again, make the change, click File → Save, then <code>git add .</code> and commit.</li>
+                        <li class="mb-1"><strong>A strange screen full of <code>~</code> lines opened</strong> (you typed <code>git commit</code> without <code>-m</code>): press <strong>Esc</strong>, type <code>:q!</code>, and press Enter. Then commit again with <code>-m "your message"</code>.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 7 · Screenshot and turn in</h6>
+                <p class="mb-2">With your <code>git log --oneline</code> showing, press <strong>Windows + PrtScn</strong> (saves to Pictures → Screenshots). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → pick the newest screenshot → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ 3 commits show in <code>git log --oneline</code> · ☐ every message says what changed · ☐ your partner checked them</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: A screenshot of Git Bash showing <code>git log --oneline</code> with all 3 commits.</p>
                 <a href="/student/notes.html?chapter=11&amp;day=1&amp;turnin=Milestone%202%3A%20Local%20Agency%20Backup%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 1</a>
             </div>
         </div>
@@ -601,17 +675,55 @@ ls -R</code></pre>
             <div class="card-header bg-success text-white fw-bold">Milestone 3: Syncing with the Agency Hub [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Synchronize a local Git repository with a remote GitHub cloud hub for the PixelPioneers account.</p>
+                <p class="mb-3"><strong>Time:</strong> about 10 minutes · <strong>You need:</strong> your GitHub username and password (on your GitHub Account card) and your <code>portfolio-repo</code> with 3 commits from Milestone 2 · <strong>Turn in:</strong> 1 screenshot</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Make an empty repo on GitHub</h6>
                 <ol>
-                    <li class="mb-2">Log into GitHub and create a new, empty repository named <code>portfolio-repo</code>.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Copy your new repo's URL from GitHub and write the one line that links your local repo to it.</li>
-                    <li class="mb-2">Run <code>git push -u origin main</code> to upload your local commit history to the cloud.</li>
+                    <li class="mb-1">In Chrome, go to <strong>github.com/new</strong>. Sign in if it asks.</li>
+                    <li class="mb-1"><strong>Repository name:</strong> <code>portfolio-repo</code></li>
+                    <li class="mb-1">Choose <strong>Public</strong>.</li>
+                    <li class="mb-1">Leave <strong>Add a README</strong> turned <strong>off</strong>. Don't add a .gitignore or a license either. The repo has to be empty.</li>
+                    <li class="mb-1">Click <strong>Create repository</strong>.</li>
                 </ol>
-                <div class="border border-success rounded p-3 mb-3 bg-light">
-                    <p class="mb-2">You write the <mark>highlighted</mark> line, using your own repo URL. The push line is given.</p>
-                    <pre class="p-3 rounded no-copy mb-0"><code><mark>git remote add origin https://github.com/YOUR-NAME/portfolio-repo.git</mark>
+
+                <h6 class="fw-bold mt-3">Step 2 · Copy your repo's address</h6>
+                <p class="mb-2">On the next page, find the <strong>Quick setup</strong> box. Make sure <strong>HTTPS</strong> is selected. Click the copy button next to the address that ends in <code>.git</code>. It looks like <code>https://github.com/your-username/portfolio-repo.git</code>.</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · <strong>MILESTONE STEP 3:</strong> connect your folder and push</h6>
+                <p class="mb-2">In Git Bash, go to your folder first: <code>cd ~/Desktop/portfolio-repo</code>. Type <code>git remote add origin</code> and a space, then paste your address with <strong>right-click → Paste</strong> or <strong>Shift + Insert</strong> (Ctrl + V doesn't paste in Git Bash). Press Enter. Then type the other two lines.</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>git remote add origin https://github.com/YOUR-USERNAME/portfolio-repo.git
+git branch -M main
 git push -u origin main</code></pre>
-                </div>
-                <p class="mb-3 text-danger fw-bold">Turn In: Submit the URL link to your live GitHub repository.</p>
+                <ul class="mb-2">
+                    <li><code>git remote add origin</code> connects your folder to your GitHub repo. <code>origin</code> is the nickname for that address.</li>
+                    <li><code>git branch -M main</code> names your branch <code>main</code> so it matches GitHub.</li>
+                    <li><code>git push -u origin main</code> uploads all 3 commits.</li>
+                </ul>
+
+                <h6 class="fw-bold mt-3">Step 4 · Sign in</h6>
+                <p class="mb-2">A sign-in window pops up. It can hide behind Git Bash. Click <strong>Sign in with your browser</strong>, then click <strong>Authorize</strong> in Chrome. Go back to Git Bash, and it finishes the upload.</p>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> refresh your GitHub page. You see <code>index.html</code>, <code>css</code>, <code>assets</code>, <code>js</code>, and <code>YOUR-TURN.txt</code>, and it says <strong>3 Commits</strong>.</div>
+                <p class="mb-2"><strong>Push Station checklist</strong> (a partner checks your GitHub page): ☐ the repo is named <code>portfolio-repo</code> and it's Public · ☐ you can see <code>index.html</code>, <code>css</code>, <code>assets</code>, and <code>js</code> · ☐ it says 3 commits, and every message says what changed</p>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>"remote origin already exists"</strong>: type <code>git remote set-url origin</code>, a space, and paste your address. Then push again.</li>
+                        <li class="mb-1"><strong>"src refspec main does not match any"</strong>: run <code>git branch -M main</code>, then push again. Still there? You have no commits yet. Go back to Milestone 2.</li>
+                        <li class="mb-1"><strong>"rejected" or "fetch first"</strong>: the repo was made with a README. On GitHub, open the repo → <strong>Settings</strong> → scroll to the bottom → <strong>Delete this repository</strong>. Make it again with nothing turned on, then push again.</li>
+                        <li class="mb-1"><strong>"Repository not found"</strong>: your address has a typo. Use <code>git remote set-url origin</code> and paste it again.</li>
+                        <li class="mb-1"><strong>"Permission denied" or "403"</strong>: someone else's GitHub login is saved on this laptop. Do the sign-out steps below, then push again.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 5 · Screenshot and turn in</h6>
+                <p class="mb-2">On your GitHub repo page, with the <strong>address bar showing</strong> (like <code>github.com/jordan-reyes/portfolio-repo</code>), press <strong>Windows + PrtScn</strong>. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Pictures → Screenshots → pick the newest one → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ the repo is Public and named <code>portfolio-repo</code> · ☐ your files and 3 commits show on GitHub · ☐ the address bar is in the screenshot</p>
+                <p class="mb-2"><strong>✋ Before the laptop goes back, sign out</strong> (also on your GitHub Account card):</p>
+                <ol class="mb-2">
+                    <li class="mb-1">On github.com, click your picture (top right) → <strong>Sign out</strong> → <strong>Sign out from all accounts</strong>.</li>
+                    <li class="mb-1">Close every Chrome window.</li>
+                    <li class="mb-1">Click Start, type <strong>Credential Manager</strong>, open it, and click <strong>Windows Credentials</strong>. Find anything that starts with <code>git:https://github.com</code> → <strong>Remove</strong> → <strong>Yes</strong>.</li>
+                </ol>
+                <p class="mb-3 text-danger fw-bold">Turn In: A screenshot of your GitHub repo page showing your files, 3 commits, and the address bar.</p>
                 <a href="/student/notes.html?chapter=11&amp;day=2&amp;turnin=Milestone%203%3A%20Syncing%20with%20the%20Agency%20Hub%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 2</a>
             </div>
         </div>
@@ -827,20 +939,66 @@ MIT License — Copyright (c) 2026 CHS Web Design Agency</code></pre>
             <div class="card-header bg-success text-white fw-bold">Milestone 4: Client Infrastructure Proposal [25 pts]</div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Document project infrastructure using standard Markdown practices for a client hand-off.</p>
-                <ol>
-                    <li class="mb-2">Copy <code>README.md</code> from <code>day5-readme</code> into your <code>portfolio-repo</code>. The title, installation, features, and license sections are already written in Markdown.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Write the Hosting Recommendation section for the client on your card: the host type, why it fits, and one risk and how you handle it.</li>
-                    <li class="mb-2">Run <code>git add</code>, <code>git commit</code>, and <code>git push</code> to sync this new file to GitHub.</li>
-                </ol>
-                <div class="border border-success rounded p-3 mb-3 bg-light">
-                    <p class="fw-bold mb-1">📁 Starter files: <code>day5-readme</code> in the <a href="/studentFiles/pixelPioneers.zip">Chapter Files (.zip)</a></p>
-                    <p class="mb-2">You write only the Hosting Recommendation lines. The <mark>highlighted</mark> part is the only thing you write. Everything else is already built.</p>
-                    <pre class="p-3 rounded no-copy mb-0"><code>## Hosting Recommendation
-<mark>- Host type (IaaS / PaaS / SaaS): ______</mark>
-<mark>- Why it fits this client: ______</mark>
-<mark>- One risk and how we handle it: ______</mark></code></pre>
+                <p class="mb-3"><strong>Time:</strong> about 20 minutes · <strong>You need:</strong> Git Bash, your <code>portfolio-repo</code> from Milestones 1–3, and your GitHub login · <strong>Turn in:</strong> 1 screenshot</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Pick your client</h6>
+                <p class="mb-2">Read all three and pick <strong>one</strong>. (In class we used Sweet Crumb Bakery. You can keep that one.)</p>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4"><div class="border border-success rounded p-2 h-100 bg-light"><strong>🧁 Sweet Crumb Bakery</strong><br>A family bakery with 3 employees. Nobody there knows how to code. They want their menu, hours, and online cake orders on the site. <strong>Budget:</strong> about $40 a month. <strong>Biggest fear:</strong> "What if the site goes down on a holiday weekend, when we get the most orders?"</div></div>
+                    <div class="col-md-4"><div class="border border-success rounded p-2 h-100 bg-light"><strong>💻 Code Crew</strong><br>Two experienced developers building a custom game-stats site. They want full control so they can install their own server software and run their own updates. They expect a lot of traffic. <strong>Budget:</strong> about $40 a month. <strong>Biggest fear:</strong> "Being stuck on a host that won't let us install what we need."</div></div>
+                    <div class="col-md-4"><div class="border border-success rounded p-2 h-100 bg-light"><strong>📚 StudyBuddy Tutoring</strong><br>A small startup with one developer. She already wrote the app's code. She just wants to upload it and have it run, without managing servers, operating system updates, or security patches. <strong>Budget:</strong> about $25 a month. <strong>Biggest fear:</strong> "The site crashing the week before finals, when everyone logs in at once."</div></div>
                 </div>
-                <p class="mb-3 text-danger fw-bold">Turn In: Submit the GitHub URL showing your rendered README.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Plan your three answers</h6>
+                <p class="mb-2">Use <strong>The Whole Pizza Menu</strong> table above (IaaS, PaaS, SaaS, On-Premise). Plan each line before you type it:</p>
+                <ul class="mb-2">
+                    <li class="mb-1"><strong>Host type:</strong> pick one: IaaS, PaaS, SaaS, or On-Premise.</li>
+                    <li class="mb-1"><strong>Why it fits:</strong> start with your client's name and use <strong>2 facts</strong> from their card.</li>
+                    <li class="mb-1"><strong>One risk and how we handle it:</strong> name something that could go wrong and exactly what you'd do about it. Think about uptime, support, backups (and where they're kept), price, or security.<br>Too vague: "It could get hacked." Specific: "Someone could guess the owner's password, so we turn on 2-factor login."</li>
+                </ul>
+
+                <h6 class="fw-bold mt-3">Step 3 · Get the README file</h6>
+                <p class="mb-2">In Git Bash, get the newest class files, copy the README into your repo, and open it in Notepad:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>cd ~/Desktop/web2-agency-starter
+git pull
+cp ch11-the-cloud/day5-readme/README.md ~/Desktop/portfolio-repo/
+cd ~/Desktop/portfolio-repo
+notepad README.md</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 4 · <strong>MILESTONE STEP 4:</strong> write the Hosting Recommendation</h6>
+                <ol>
+                    <li class="mb-1">In Notepad, find <code>## Hosting Recommendation</code>. Don't change the title, Installation, Features, or License sections. They're already written.</li>
+                    <li class="mb-1">Replace each <code>______</code> with your answer from Step 2. Keep the dash at the start of each line, and don't delete the <code>##</code> heading.</li>
+                    <li class="mb-1">The line that starts with <code>&lt;!--</code> is a hidden note. "The client on your card" means the client you picked in Step 1. You can leave that line or delete it.</li>
+                    <li class="mb-1">Click <strong>File → Save</strong>, then close Notepad.</li>
+                </ol>
+                <p class="mb-1">Your finished section has this shape, in your own words:</p>
+                <pre class="p-3 rounded no-copy mb-2"><code>## Hosting Recommendation
+- Host type (IaaS / PaaS / SaaS): [your pick]
+- Why it fits this client: [client name] [fact 1] [fact 2]
+- One risk and how we handle it: [the risk], so we [what we do]</code></pre>
+
+                <h6 class="fw-bold mt-3">Step 5 · Push it to GitHub</h6>
+                <pre class="p-3 rounded no-copy mb-2"><code>git add README.md
+git commit -m "Add hosting recommendation to README"
+git push</code></pre>
+                <p class="mb-2">If a sign-in window pops up: <strong>Sign in with your browser</strong> → <strong>Authorize</strong>.</p>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> refresh your GitHub repo page. Under your files, the README shows with your Hosting Recommendation filled in and no <code>______</code> left.</div>
+                <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>"No such file or directory" for <code>web2-agency-starter</code></strong>: this laptop doesn't have the class repo. Run <code>cd ~/Desktop</code>, then <code>git clone https://github.com/danyllemiller/web2-agency-starter.git</code>, and start Step 3 again.</li>
+                        <li class="mb-1"><strong>Your <code>portfolio-repo</code> isn't on this laptop</strong> (you got a different laptop): run <code>cd ~/Desktop</code>, then <code>git clone https://github.com/YOUR-USERNAME/portfolio-repo.git</code>. That downloads your repo from GitHub. Run the two <code>git config</code> lines from Milestone 2 inside it, then start Step 3 again.</li>
+                        <li class="mb-1"><strong>"has no upstream branch"</strong>: run <code>git push -u origin main</code>.</li>
+                        <li class="mb-1"><strong>"Author identity unknown"</strong>: run the two <code>git config</code> lines from Milestone 2, then commit again.</li>
+                        <li class="mb-1"><strong>GitHub still shows <code>______</code></strong>: you didn't save in Notepad before <code>git add</code>. Open <code>README.md</code> again, click File → Save, then run all 3 lines in Step 5 again.</li>
+                        <li class="mb-1"><strong>"Permission denied" or "403"</strong>: do the sign-out steps from Milestone 3, then push again.</li>
+                    </ul>
+                </details>
+
+                <h6 class="fw-bold mt-3">Step 6 · Screenshot and turn in</h6>
+                <p class="mb-2">On your GitHub repo page, scroll so your <strong>Hosting Recommendation</strong> and the <strong>address bar</strong> both show. Press <strong>Windows + PrtScn</strong>. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Pictures → Screenshots → pick the newest one → <strong>Upload to Teacher Server</strong>. Then sign out (Milestone 3, Step 5).</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ one host type, picked for your client · ☐ "why it fits" names the client and uses 2 facts from their card · ☐ a real risk and a specific way to handle it · ☐ the README shows on GitHub</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: A screenshot of your GitHub repo page showing your README's Hosting Recommendation and the address bar.</p>
                 <a href="/student/notes.html?chapter=11&amp;day=5&amp;turnin=Milestone%204%3A%20Client%20Infrastructure%20Proposal%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 5</a>
             </div>
         </div>
