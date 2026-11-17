@@ -193,7 +193,8 @@ Answer: False"></textarea>
 
   function showStart(msg) {
     screen.innerHTML = `
-      <h1 class="h4 fw-bold mb-3">Start a test session</h1>
+      <h1 class="h4 fw-bold mb-1">Start a test session</h1>
+      <p class="small mb-3"><a href="/wpr-practice/guide.html" target="_blank" rel="noopener"><i class="fas fa-book-open me-1"></i>New here? Read the teacher guide</a></p>
       ${msg ? `<div class="alert alert-warning py-2">${esc(msg)}</div>` : ''}
       <form id="startForm" class="d-flex flex-column gap-3" autocomplete="off">
         <div><label class="form-label fw-bold" for="pass">Teacher passcode</label><input id="pass" type="password" class="form-control" required></div>
