@@ -37,8 +37,8 @@ window.WprStandards = (function () {
     const byId = {};
     standards.forEach(s => { byId[s.id] = s; s.indicators.forEach(i => { byId[i.id] = i; }); });
     const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
-    // 80% and up is green, 70-79% yellow, under 70% red (the "reteach" line)
-    const band = p => (p >= 80 ? 'green' : p >= 70 ? 'yellow' : 'red');
+    // Passing is 75% (teacher 2026-11-17): green at 75% and up, red below
+    const band = p => (p >= 75 ? 'green' : 'red');
 
     // Right out of answered, per standard and per indicator, from items like { indicator, right }.
     // Unanswered items (right null) don't count: the percentages are of the questions answered.
@@ -55,5 +55,19 @@ window.WprStandards = (function () {
         return standards.map(s => Object.assign(add(s), { indicators: s.indicators.map(add) }));
     }
 
-    return { standards, byId, tally, pct, band };
+    // The report bars (teacher 2026-11-17): one scale from red (failing) to green (passing). Passing is 75%,
+    // so the scale turns green at 75. Each stop is [percent, [r, g, b]]; GRADIENT_CSS is the same scale for HTML.
+    const PASS = 75;
+    const STOPS = [[0, [220, 38, 38]], [45, [249, 115, 22]], [65, [250, 204, 21]], [75, [34, 197, 94]], [100, [21, 128, 61]]];
+    function gradColor(p) {
+        p = Math.max(0, Math.min(100, p));
+        for (let i = 1; i < STOPS.length; i++) {
+            const [p1, c1] = STOPS[i], [p0, c0] = STOPS[i - 1];
+            if (p <= p1) { const t = (p - p0) / (p1 - p0); return c0.map((v, k) => Math.round(v + (c1[k] - v) * t)); }
+        }
+        return STOPS[STOPS.length - 1][1];
+    }
+    const GRADIENT_CSS = 'linear-gradient(90deg,' + STOPS.map(([q, c]) => `rgb(${c.join(',')}) ${q}%`).join(',') + ')';
+
+    return { standards, byId, tally, pct, band, PASS, gradColor, GRADIENT_CSS };
 })();
