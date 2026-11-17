@@ -737,6 +737,46 @@
           <strong>Trap — Where Everyone Gets Ambushed:</strong> Installing WooCommerce and adding products isn't enough to accept real money — forgetting to configure a Payment Gateway means the checkout page exists but every purchase attempt will fail. Always test a complete purchase (using the gateway's "test mode") before launching a client's store.
         </div>
 
+        <!-- STORE PRACTICE LAB -->
+        <div class="card border-info shadow-sm my-4 text-start">
+            <div class="card-header bg-info text-dark fw-bold">Store Lab: Sell Mike's Coffee Beans (practice, not graded)</div>
+            <div class="card-body small p-4">
+                <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your CoffeeShopCMS site · <strong>Evidence:</strong> a test order in WooCommerce → Orders</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Open your site and back up first</h6>
+                <p class="mb-2">Chrome → <strong>playground.wordpress.net</strong> → <strong>Your Playgrounds</strong> → <strong>CoffeeShopCMS</strong> (Local users: open Local → <strong>WP Admin</strong>). Then <strong>Export</strong> → <strong>Download as .zip</strong> → upload it to your Drive folder <strong>CoffeeShopCMS backups</strong>.</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Install WooCommerce</h6>
+                <p class="mb-2"><strong>Plugins</strong> → <strong>Add New Plugin</strong> → search <strong>WooCommerce</strong>. Check its card (last updated, active installations, stars, compatible) → <strong>Install Now</strong> → <strong>Activate</strong>. If a setup wizard opens, click <strong>Skip setup</strong>. It can take a minute or two; wait before you refresh.</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · Add one product</h6>
+                <p class="mb-2"><strong>Products</strong> → <strong>Add New Product</strong>. Title: <strong>Local Legends House Blend</strong>. Write one sentence about the coffee. In the <strong>Product data</strong> box, Regular price: <strong>14.99</strong>. On the right, <strong>Set product image</strong> (your coffee photo from the Block Editor Lab, or a screenshot). Click <strong>Publish</strong>.</p>
+
+                <h6 class="fw-bold mt-3">Step 4 · Try to buy it</h6>
+                <p class="mb-2">Click <strong>View Product</strong> → <strong>Add to cart</strong> → <strong>View cart</strong> → <strong>Proceed to checkout</strong>. Fill in a made-up name and address.</p>
+                <div class="alert alert-warning small mb-2"><strong>Stop here.</strong> Can you place the order? Something is missing. In your notebook, write what you think is wrong and why, before you go on.</div>
+
+                <h6 class="fw-bold mt-3">Step 5 · Fix it and place a test order</h6>
+                <ol>
+                    <li class="mb-1"><strong>WooCommerce</strong> → <strong>Settings</strong> → <strong>Payments</strong>. Turn on <strong>Cash on delivery</strong>. (This is a test store with no real money. A real store connects Stripe or PayPal here, in test mode first.)</li>
+                    <li class="mb-1">Go back to your product → <strong>Add to cart</strong> → <strong>View cart</strong> → <strong>Proceed to checkout</strong> → fill it in → <strong>Place order</strong>.</li>
+                    <li class="mb-1"><strong>WooCommerce</strong> → <strong>Orders</strong>. Your order is there.</li>
+                </ol>
+                <div class="alert alert-success small mb-2">✅ <strong>What you should see:</strong> a thank-you page after you place the order, and the order listed in WooCommerce → Orders.</div>
+
+                <h6 class="fw-bold mt-3">Step 6 · Check and back up</h6>
+                <p class="mb-2"><strong>Partner check:</strong> ☐ the product shows a price and a picture · ☐ the order is in WooCommerce → Orders. Then <strong>Export</strong> → <strong>Download as .zip</strong> → Drive, and do the sign-out steps (end of Milestone 2).</p>
+                <details class="mb-0"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                    <ul class="mt-2 mb-0">
+                        <li class="mb-1"><strong>No "Add to cart" button:</strong> the product has no Regular price. Edit it and add 14.99.</li>
+                        <li class="mb-1"><strong>Checkout says "No payment methods available":</strong> that's Step 4's problem. Do Step 5.</li>
+                        <li class="mb-1"><strong>The setup wizard won't close:</strong> look for <strong>Skip setup</strong>, or go straight to <strong>Products</strong> → <strong>Add New Product</strong>.</li>
+                        <li class="mb-1"><strong>WooCommerce is very slow:</strong> wait 2 minutes before you refresh.</li>
+                    </ul>
+                </details>
+            </div>
+        </div>
+
         <!-- Notebook gap-fill (Oct 2026): Guided Notebook Ch12 Day 6 -->
         <h5 class="fw-bold mt-4 text-primary">Selling Online: What's Now Your Legal Problem</h5>
         <p>The moment a client sells online, the site carries real legal responsibilities:</p>
