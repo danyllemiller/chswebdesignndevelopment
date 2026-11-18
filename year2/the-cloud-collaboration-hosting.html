@@ -465,6 +465,53 @@ main.js</code></pre>
             </div>
         </div>
         
+        <!-- Why each Git command (Nov 2026): context for Milestone 2 -->
+        <h3 class="section-title mt-5 text-primary">Before Milestone 2: Why You Type Each Git Command</h3>
+        <p>In Milestone 1 you made <code>portfolio-repo</code> with <code>cp</code>. <code>cp</code> copies files only. It doesn't copy any Git history, so right now <code>portfolio-repo</code> is a plain folder. <strong>Git isn't watching it yet.</strong> Milestone 2 turns Git on, puts your name on your work, and saves 3 snapshots. Here's what each command does and why you type it.</p>
+        <div class="card border-primary shadow-sm mb-3 text-start">
+          <div class="card-header bg-primary text-white fw-bold small">Milestone 2 commands, in the order you type them</div>
+          <div class="card-body p-3">
+            <div class="table-responsive">
+            <table class="table table-bordered table-sm small align-middle mb-0">
+              <thead class="table-light"><tr><th>You type</th><th>What it does</th><th>Why you need it</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git init</code></td>
+                  <td>Makes a hidden folder named <code>.git</code> inside the folder you are in. That folder is Git&#39;s memory. Every snapshot you save goes in there.</td>
+                  <td>Without it, Git ignores the folder and every other Git command says <strong>"not a git repository."</strong> Do it <strong>once</strong> per project, and only <strong>inside</strong> the project folder. That&#39;s why you <code>cd</code> and check <code>pwd</code> first.</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git config user.name "…"<br>git config user.email "…"</code></td>
+                  <td>Saves your name and email in this project&#39;s settings.</td>
+                  <td>Every commit is stamped with who made it. Git won&#39;t commit until it knows ("Author identity unknown"). GitHub uses the email to link your commits to your account. No <code>--global</code>: that would sign your name on every project on this laptop, including the next student&#39;s.</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git add .</code></td>
+                  <td>Puts your changed files in the <strong>staging area</strong>, the "loading dock" for the next snapshot. The dot means <strong>everything in this folder</strong> and the folders inside it.</td>
+                  <td>You pick what goes in a snapshot before you save it. A pro might type <code>git add index.html</code> to stage one file. In class, the dot is fine.</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git commit -m "message"</code></td>
+                  <td>Saves a snapshot of everything you staged, with your name, the time, and a message. <code>-m</code> stands for <strong>message</strong>.</td>
+                  <td>A commit is a save point you can go back to. The message tells your team (and future you) what changed. "Change homepage headline" ✔ · "stuff" ✘</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git log --oneline</code></td>
+                  <td>Lists your commits, one line each, newest on top. The 7-character code is that commit&#39;s ID.</td>
+                  <td>Proves your snapshots saved and lets you check your messages. Press <strong>q</strong> if you see <code>(END)</code>.</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git status</code></td>
+                  <td>Tells you which files changed and which are staged. It changes nothing.</td>
+                  <td>Your "where am I?" check. Type it any time you aren&#39;t sure. "working tree clean" means everything is committed.</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-info small mb-4"><strong>The rhythm you'll repeat all year:</strong> change a file and save it → <code>git add .</code> (pack the box) → <code>git commit -m "what changed"</code> (seal it and write the label). <code>git init</code> and <code>git config</code> happen only once, at the start.</div>
+
         <!-- LAB 2 CARD -->
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 2: Local Agency Backup [25 pts]</div>
@@ -477,11 +524,16 @@ main.js</code></pre>
 pwd</code></pre>
                 <p class="mb-2">The line <code>pwd</code> prints should end in <code>/Desktop/portfolio-repo</code>.</p>
 
-                <h6 class="fw-bold mt-3">Step 2 · Turn on Git and sign your work</h6>
-                <p class="mb-2">Type your own first and last name and the email you used for GitHub. Keep the quote marks. <strong>Don't add <code>--global</code></strong> (even though <code>YOUR-TURN.txt</code> shows it). These laptops are shared, so this sets your name for this folder only.</p>
+                <h6 class="fw-bold mt-3">Step 2 · Turn on Git (<code>git init</code>) and sign your work</h6>
+                <ul class="mb-2">
+                    <li class="mb-1"><strong>Line 1, <code>git init</code>,</strong> tells Git to start watching this folder. It makes a hidden <code>.git</code> folder where your snapshots get saved. You do this once for this project.</li>
+                    <li class="mb-1"><strong>Lines 2 and 3, <code>git config</code>,</strong> put your name on every snapshot. Type your own first and last name and the email you used for GitHub. Keep the quote marks. <strong>Don't add <code>--global</code></strong> (even though <code>YOUR-TURN.txt</code> shows it). These laptops are shared, so this sets your name for this folder only.</li>
+                </ul>
                 <pre class="p-3 rounded no-copy mb-2"><code>git init
 git config user.name "Your First Last"
 git config user.email "the email you used for GitHub"</code></pre>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see</strong> after <code>git init</code>: a line that ends in <code>/Desktop/portfolio-repo/.git/</code>, like <code>Initialized empty Git repository in C:/Users/…/Desktop/portfolio-repo/.git/</code>. The two <code>git config</code> lines print nothing. That means they worked.</div>
+                <p class="mb-2"><strong>Line ends somewhere else</strong> (like <code>/Desktop/.git/</code>)? You turned Git on in the wrong folder. Type <code>rm -rf .git</code> to turn it off there, then go back to Step 1. If it says <strong>"Reinitialized existing Git repository"</strong>, don't delete anything. Just do Step 1 again.</p>
 
                 <h6 class="fw-bold mt-3">Step 3 · <strong>MILESTONE STEP 2:</strong> Commit 1</h6>
                 <p class="mb-2">Stage every file, then save a snapshot with a message that says what changed. Don't forget the space and the dot in <code>git add .</code></p>
@@ -678,6 +730,47 @@ a1b2c3d Add js folder and main.js</code></pre>
                     <p class="text-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading…</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Why each push command (Nov 2026): context for Milestone 3 -->
+        <h3 class="section-title mt-5 text-primary">Before Milestone 3: Why You Type Each Push Command</h3>
+        <p>Your 3 commits are saved, but only on this laptop. Your folder doesn't know GitHub exists. Milestone 3 gives your folder GitHub's address and uploads your commits. <strong>Commits stay on the laptop until you push.</strong></p>
+        <div class="card border-primary shadow-sm mb-3 text-start">
+          <div class="card-header bg-primary text-white fw-bold small">Milestone 3 commands, in the order you type them</div>
+          <div class="card-body p-3">
+            <div class="table-responsive">
+            <table class="table table-bordered table-sm small align-middle mb-0">
+              <thead class="table-light"><tr><th>You type</th><th>What it does</th><th>Why you need it</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git remote add origin &lt;address&gt;</code></td>
+                  <td>Saves your GitHub repo&#39;s address in your project under the nickname <code>origin</code>.</td>
+                  <td>Git has to know where to upload. The nickname means you never paste the long address again. Do it once per project. Pasted the wrong one? <code>git remote set-url origin &lt;address&gt;</code> replaces it. (Typing <code>add</code> again gives "remote origin already exists.")</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git branch -M main</code></td>
+                  <td>Renames your branch to <code>main</code>. <code>-M</code> means rename it even if a branch named main is already there.</td>
+                  <td>Git on these laptops may name your first branch <code>master</code>. GitHub uses <code>main</code>. The names have to match, or the push fails with "src refspec main does not match any."</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git push -u origin main</code></td>
+                  <td>Uploads your commits. Read it as: <strong>push</strong> (upload) to <strong>origin</strong> (GitHub) the <strong>main</strong> branch.</td>
+                  <td><code>-u</code> remembers that pairing, so from now on you can type just <code>git push</code>.</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git pull</code></td>
+                  <td>The opposite of push. Downloads your team&#39;s new commits into your folder.</td>
+                  <td>Run it before you start working, so you build on the newest version and avoid merge conflicts.</td>
+                </tr>
+                <tr>
+                  <td class="text-nowrap"><code class="text-warning">git clone &lt;address&gt;</code></td>
+                  <td>Downloads a repo with all its history, and sets <code>origin</code> for you.</td>
+                  <td>That&#39;s why a cloned repo never needs <code>git init</code> or <code>git remote add</code>. Your <code>portfolio-repo</code> was copied with <code>cp</code>, so you did both yourself.</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
         </div>
 
         <!-- LAB 3 CARD -->
