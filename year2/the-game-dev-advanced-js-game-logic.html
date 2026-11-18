@@ -240,14 +240,42 @@ ctx.fillRect(50, 50, 40, 40);</code></pre>
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 1: Canvas Coordinate Art Lab [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Prove spatial reasoning mastery to the Agency Lead Developer by generating digital art via scripting.</p>
-                <ol>
-                    <li class="mb-2">Set up an <code>index.html</code> file with a <code>&lt;canvas width="800" height="600"&gt;</code>. Link a <code>script.js</code> file.</li>
-                    <li class="mb-2">Use <code>getContext('2d')</code> to initialize the canvas.</li>
-                    <li class="mb-2">Using only <code>ctx.fillRect</code> and <code>ctx.fillStyle</code>, draw a recognizable robot face using at least 5 different rectangles. You must calculate the exact X/Y math to make sure the eyes, mouth, and head align perfectly.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> In a separate project file for the PixelPlay Arcade game, initialize an 800x600 canvas and draw your static "Player" rectangle at its starting position.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code> file.</p>
+                  <p><strong>Objective:</strong> Prove spatial reasoning mastery to the Agency Lead Developer by generating digital art via scripting.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 35 minutes · <strong>You need:</strong> VS Code and Chrome · <strong>Turn in:</strong> your <code>script.js</code></p>
+                  <p class="mb-2">Chapter 10's milestones build one game in a folder named <code>pixelplay-game</code>. Practice files go in a separate <code>practice</code> folder.</p>
+                  <h6 class="fw-bold mt-3">Step 1 · Practice: a robot face</h6>
+                  <ol>
+                      <li class="mb-1">Make a folder <code>practice</code> with <code>index.html</code> (Emmet <code>!</code> + Tab) and <code>script.js</code>.</li>
+                      <li class="mb-1">In the body, add a canvas, then the script tag:</li>
+                  </ol>
+                  <pre class="p-3 rounded no-copy mb-2"><code>&lt;canvas id="canvas" width="800" height="600" style="border:1px solid #000"&gt;&lt;/canvas&gt;
+&lt;script src="script.js"&gt;&lt;/script&gt;</code></pre>
+                  <p class="mb-2">In <code>script.js</code>, draw a robot face with <strong>at least 5 rectangles</strong>. The canvas grid starts at the top left (0, 0); x goes right, y goes down:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+ctx.fillStyle = "gray";
+ctx.fillRect(250, 150, 300, 300);   // head: x, y, width, height
+ctx.fillStyle = "cyan";
+ctx.fillRect(310, 230, 50, 50);     // left eye
+ctx.fillRect(440, 230, 50, 50);     // right eye: the same y, mirrored x
+// add a mouth and 2 more rectangles (ears, antenna...)</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 1:</strong> start the real game</h6>
+                  <p class="mb-2">Make a folder <code>pixelplay-game</code> with the same <code>index.html</code> setup (canvas 800 × 600). In its <code>script.js</code>, draw the Player at its starting spot:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+ctx.fillStyle = "lime";
+ctx.fillRect(375, 520, 50, 50);   // the Player</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> a robot face whose eyes line up, and a green Player square near the bottom of the game canvas.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>Blank canvas:</strong> the id in <code>getElementById</code> must match the canvas's id.</li>
+                          <li class="mb-1"><strong>A shape is off the canvas:</strong> x must be under 800 and y under 600.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your project folder → <code>script.js</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ an 800 × 600 canvas with getContext("2d") · ☐ a robot face from 5+ rectangles, lined up with real x/y math · ☐ the Player drawn in the PixelPlay game file</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your script.js file.</p>
                 <a href="/student/notes.html?chapter=10&amp;day=2&amp;turnin=Milestone%201%3A%20Canvas%20Coordinate%20Art%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 2</a>
             </div>
         </div>
@@ -427,13 +455,36 @@ if (y &lt;= 0 || y + size &gt;= canvas.height) { speedY *= -1; }</code></pre>
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 2: The Bouncing Box Lab [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Build a high-performance rendering loop for the client's promotional game.</p>
-                <ol>
-                    <li class="mb-2">In a new file, declare variables: <code>let x = 0;</code> and <code>let speed = 5;</code>.</li>
-                    <li class="mb-2">Create a <code>gameLoop()</code> function that clears the canvas, adds speed to X, draws a box at X, and calls <code>requestAnimationFrame</code>.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Implement the loop in your main PixelPlay Arcade game. Update your player box so it moves across the screen automatically. Add an `if` statement to reverse its direction if it hits the right or left edge of the canvas! (Hint: <code>if (x > canvas.width) { speed = -5; }</code>).</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code> file.</p>
+                  <p><strong>Objective:</strong> Build a high-performance rendering loop for the client's promotional game.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 35 minutes · <strong>You need:</strong> your <code>pixelplay-game</code> · <strong>Turn in:</strong> your <code>script.js</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · <strong>MILESTONE STEP 2:</strong> a game loop</h6>
+                  <p class="mb-2">Replace your Player drawing with a loop that clears, moves, draws, and repeats about 60 times a second:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>let x = 375;
+let speed = 5;
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);   // erase the last frame
+    x = x + speed;                                       // move
+    if (x + 50 &gt; canvas.width || x &lt; 0) {                // hit an edge?
+        speed = -speed;                                  // reverse
+    }
+    ctx.fillStyle = "lime";
+    ctx.fillRect(x, 520, 50, 50);                        // draw
+    requestAnimationFrame(gameLoop);                     // do it again
+}
+gameLoop();</code></pre>
+                  <p class="mb-2"><code>x + 50</code> is the Player's right edge (it's 50 wide), so it turns around before going off the screen.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> the green square slides back and forth along the bottom, smoothly, forever.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>A smeared trail:</strong> <code>clearRect</code> is missing.</li>
+                          <li class="mb-1"><strong>It flies off the screen:</strong> check the <code>if</code>, and that it flips <code>speed</code>.</li>
+                          <li class="mb-1"><strong>It only moves once:</strong> <code>requestAnimationFrame(gameLoop)</code> must be inside the function.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 2 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your project folder → <code>script.js</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ a gameLoop function using requestAnimationFrame · ☐ clearRect every frame · ☐ the Player moves automatically · ☐ it bounces off both edges</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your script.js file.</p>
                 <a href="/student/notes.html?chapter=10&amp;day=3&amp;turnin=Milestone%202%3A%20The%20Bouncing%20Box%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 3</a>
             </div>
         </div>
@@ -558,13 +609,61 @@ for(let i=0; i<10; i++) {
         <div class="card border-success shadow-sm my-4 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 3: The Entity Factory [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Engineer modular, object-oriented blueprints to save agency billable hours.</p>
-                <ol>
-                    <li class="mb-2">Create a class <code>Particle</code>. Give it a constructor that assigns random X and Y properties using <code>Math.random()</code>.</li>
-                    <li class="mb-2">Instantiate 10 copies of the Particle using the <code>new</code> keyword and push them into an array. Update and Draw them in your game loop!</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Convert your game's Player logic into a class `Player`. Create a class `Enemy` (or Item) with its own `draw()` and `update()` methods. Instantiate at least one Enemy in your game.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code>.</p>
+                  <p><strong>Objective:</strong> Engineer modular, object-oriented blueprints to save agency billable hours.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 40 minutes · <strong>You need:</strong> your <code>pixelplay-game</code> · <strong>Turn in:</strong> your <code>script.js</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · Practice: a Particle class</h6>
+                  <p class="mb-2">In your <code>practice</code> file:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+    }
+    draw() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(this.x, this.y, 4, 4);
+    }
+}
+const particles = [];
+for (let i = 0; i &lt; 10; i++) {
+    particles.push(new Particle());
+}
+particles.forEach(p =&gt; p.draw());</code></pre>
+                  <p class="mb-2">A <strong>class</strong> is a blueprint. <code>new Particle()</code> builds one object from it.</p>
+                  <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 3:</strong> Player and Enemy classes</h6>
+                  <p class="mb-2">In <code>pixelplay-game/script.js</code>, turn your Player into a class and add an Enemy:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>class Player {
+    constructor() { this.x = 375; this.y = 520; this.width = 50; this.height = 50; this.speed = 5; }
+    update() {
+        this.x += this.speed;
+        if (this.x + this.width &gt; canvas.width || this.x &lt; 0) this.speed = -this.speed;
+    }
+    draw() { ctx.fillStyle = "lime"; ctx.fillRect(this.x, this.y, this.width, this.height); }
+}
+class Enemy {
+    constructor() { this.x = Math.random() * 750; this.y = 0; this.width = 40; this.height = 40; this.speed = 3; }
+    update() { this.y += this.speed; if (this.y &gt; canvas.height) this.y = 0; }
+    draw() { ctx.fillStyle = "red"; ctx.fillRect(this.x, this.y, this.width, this.height); }
+}
+const player = new Player();
+const enemy = new Enemy();
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    player.update(); player.draw();
+    enemy.update();  enemy.draw();
+    requestAnimationFrame(gameLoop);
+}
+gameLoop();</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> the green Player moving along the bottom and a red Enemy falling from the top, over and over.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>"Cannot access 'Player' before initialization":</strong> the class has to be written above the line that uses <code>new Player()</code>.</li>
+                          <li class="mb-1"><strong>Nothing moves:</strong> call both <code>update()</code> and <code>draw()</code> inside the loop.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your project folder → <code>script.js</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ 10 Particles made with new and stored in an array (practice) · ☐ a Player class with update() and draw() · ☐ an Enemy class with update() and draw() · ☐ at least one Enemy in the game loop</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your script.js.</p>
                 <a href="/student/notes.html?chapter=10&amp;day=5&amp;turnin=Milestone%203%3A%20The%20Entity%20Factory%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 5</a>
             </div>
         </div>
@@ -640,13 +739,42 @@ if (rect1.x < rect2.x + rect2.width &&
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 4: The Hitbox Detector [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Implement bounding box algorithms to determine spatial overlap, ensuring fair play for the client's customers.</p>
-                <ol>
-                    <li class="mb-2">Create a static "Lava" box in the center of the screen. Make your player box follow your mouse or keyboard.</li>
-                    <li class="mb-2">Write an AABB `if` statement. If the player overlaps the Lava, change the player's color to red.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Implement AABB collision detection between your Player class and your Enemy class in your main game loop. <code>console.log("HIT!")</code> when they touch.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code>.</p>
+                  <p><strong>Objective:</strong> Implement bounding box algorithms to determine spatial overlap, ensuring fair play for the client's customers.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 40 minutes · <strong>You need:</strong> your <code>pixelplay-game</code> · <strong>Turn in:</strong> your <code>script.js</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · Control the Player</h6>
+                  <p class="mb-2">Replace the Player's automatic movement with the arrow keys:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>const keys = {};
+document.addEventListener("keydown", e =&gt; keys[e.key] = true);
+document.addEventListener("keyup", e =&gt; keys[e.key] = false);
+// inside Player:
+update() {
+    if (keys["ArrowLeft"] &amp;&amp; this.x &gt; 0) this.x -= 6;
+    if (keys["ArrowRight"] &amp;&amp; this.x + this.width &lt; canvas.width) this.x += 6;
+}</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 4:</strong> AABB collision</h6>
+                  <p class="mb-2">Two boxes overlap only if they overlap on <strong>both</strong> the x axis and the y axis:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>function isColliding(a, b) {
+    return a.x &lt; b.x + b.width &amp;&amp;
+           a.x + a.width &gt; b.x &amp;&amp;
+           a.y &lt; b.y + b.height &amp;&amp;
+           a.y + a.height &gt; b.y;
+}
+// inside gameLoop, after update():
+if (isColliding(player, enemy)) {
+    console.log("HIT!");
+}</code></pre>
+                  <p class="mb-2">Practice idea: in your practice file, put a static red "Lava" box in the middle and turn the player red when <code>isColliding</code> is true.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> move under the falling Enemy: "HIT!" prints in the Console (F12) every time they touch, and never when they don't.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>"HIT!" prints all the time:</strong> check every <code>&lt;</code> and <code>&gt;</code> in the 4 lines; one flipped sign breaks it.</li>
+                          <li class="mb-1"><strong>Arrow keys scroll the page:</strong> click on the game first, or add <code>e.preventDefault()</code> in the keydown listener.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your project folder → <code>script.js</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ arrow keys move the Player · ☐ an isColliding function with all 4 AABB checks · ☐ it logs "HIT!" only when the Player and Enemy touch</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your script.js.</p>
                 <a href="/student/notes.html?chapter=10&amp;day=6&amp;turnin=Milestone%204%3A%20The%20Hitbox%20Detector%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 6</a>
             </div>
         </div>
@@ -919,14 +1047,44 @@ ctx.drawImage(
                 🏆 Project: Game Assembly &amp; QA [100 pts]
             </div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Synthesize Advanced JS and Game Logic into a playable promotional simulation for PixelPlay Arcade.</p>
-                <ol>
-                    <li class="mb-2"><strong>Assemble:</strong> Bring your Player, Enemies, Input, and AABB Collision together into your final Game Loop.</li>
-                    <li class="mb-2"><strong>State:</strong> The game must have a Score, a "Start Screen" that prevents the game from running immediately, and a "Game Over" state when a collision occurs.</li>
-                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Implement gravity physics, Sprite Sheet animation, or Delta Time normalization!</li>
-                    <li class="mb-2"><strong>QA Check:</strong> Swap computers with a peer for a 10-minute playtest to find edge-case bugs. A developer who writes comments explaining their complex math for teammates is showing <strong>Professional Decorum / Teamwork</strong>!</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed Game folder.</p>
+                  <p><strong>Objective:</strong> Synthesize Advanced JS and Game Logic into a playable promotional simulation for PixelPlay Arcade.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 3 classes · <strong>You need:</strong> your <code>pixelplay-game</code> and a playtest partner · <strong>Turn in:</strong> your whole game folder</p>
+                  <h6 class="fw-bold mt-3">Step 1 · Game states</h6>
+                  <p class="mb-2">Add a state variable so the game waits on a Start Screen, plays, and stops on Game Over:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>let state = "start";   // "start", "playing", or "over"
+let score = 0;
+document.addEventListener("keydown", e =&gt; {
+    if (e.key === " " &amp;&amp; state !== "playing") {   // Space starts (or restarts)
+        state = "playing"; score = 0;
+    }
+});
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (state === "start") {
+        ctx.fillStyle = "white"; ctx.font = "32px Arial";
+        ctx.fillText("PixelPlay: press Space to start", 180, 300);
+    } else if (state === "playing") {
+        player.update(); player.draw();
+        enemy.update();  enemy.draw();
+        score++;
+        if (isColliding(player, enemy)) state = "over";
+    } else {
+        ctx.fillStyle = "white"; ctx.font = "32px Arial";
+        ctx.fillText("GAME OVER: " + score + " (Space to retry)", 170, 300);
+    }
+    ctx.fillStyle = "white"; ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 20, 30);
+    requestAnimationFrame(gameLoop);
+}</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · Comment your math</h6>
+                  <p class="mb-2">Above every tricky line (collision, edges), add a <code>//</code> comment explaining it for a teammate.</p>
+                  <h6 class="fw-bold mt-3">Step 3 · Playtest (10 minutes)</h6>
+                  <p class="mb-2">Swap computers with a peer. They try to break your game: hold two keys, go off the edge, restart fast. Write the bugs in your notebook and fix them.</p>
+                  <div class="border border-primary rounded p-3 mb-3 bg-light"><p class="fw-bold mb-0">🚀 Level 4.0 Challenge: add gravity (a jump that falls back down), sprite-sheet animation, or delta-time movement so the game runs the same speed on every computer.</p></div>
+                  <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                  <p class="mb-2">Save everything. Click <strong>Jump to Dropbox</strong> below → <strong>Whole folder</strong> → <strong>Choose Files</strong> → your project folder → <strong>Upload</strong> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ a Start Screen that waits for the player · ☐ a score that counts · ☐ Game Over when the Player and an Enemy collide · ☐ comments explaining the math · ☐ playtested and fixed</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Choose "Whole folder" from the Dropbox below and upload your completed pixelplay-game folder.</p>
                 <a href="/student/notes.html?chapter=10&amp;day=9&amp;turnin=Project%3A%20Game%20Assembly%20%26%20QA%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 9</a>
             </div>
         </div>

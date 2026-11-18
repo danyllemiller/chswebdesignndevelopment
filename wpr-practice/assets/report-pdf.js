@@ -21,8 +21,16 @@
     const plain = s => String(s ?? '').replace(/[\u2018\u2019\u201a\u2032]/g, "'").replace(/[\u201c\u201d\u201e\u2033]/g, '"')
         .replace(/\s*\u2014\s*/g, ' - ').replace(/[\u2013\u2212]/g, '-').replace(/\u2026/g, '...').replace(/\u00d7/g, 'x').replace(/[^\x09\x0a\x0d\x20-\x7e\xa0-\xff]/g, '');
     const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
-    // Green 80% and up, yellow 70-79%, red under 70% (the teacher's "reteach" line)
-    const band = p => (p >= 80 ? { rgb: [25, 135, 84], label: 'On track' } : p >= 70 ? { rgb: [214, 150, 0], label: 'Almost there' } : { rgb: [200, 35, 51], label: 'Review this' });
+    // One scale for every bar and the score box: red (failing) to green (passing). Passing is 75% (teacher 2026-11-17).
+    const PASS = 75;
+    const STOPS = [[0, [220, 38, 38]], [45, [249, 115, 22]], [65, [250, 204, 21]], [75, [34, 197, 94]], [100, [21, 128, 61]]];
+    const gradColor = q => {
+        if (window.WprStandards && window.WprStandards.gradColor) return window.WprStandards.gradColor(q);
+        q = Math.max(0, Math.min(100, q));
+        for (let i = 1; i < STOPS.length; i++) { const [p1, c1] = STOPS[i], [p0, c0] = STOPS[i - 1]; if (q <= p1) { const t = (q - p0) / (p1 - p0); return c0.map((v, k) => Math.round(v + (c1[k] - v) * t)); } }
+        return STOPS[STOPS.length - 1][1];
+    };
+    const band = p => ({ rgb: gradColor(p), label: p >= PASS ? 'Passing' : 'Not passing yet' });
     const TOPIC = { '': 'Workplace Readiness Skills', safety: 'Workplace safety', worklife: 'Work and personal life', bank: 'Your teacher\'s questions' };
     const ENDED = { student: 'You submitted it', time: 'Time ran out', 'left-test': 'Submitted after leaving the test twice', ended: 'Your teacher ended the test' };
     const NAVY = [29, 42, 72], INK = [29, 36, 51], MUTED = [93, 103, 121], LINE = [227, 231, 238];
@@ -53,15 +61,24 @@
             y += gap || 0;
         };
         const heading = text => { room(44); y += 10; font(13, 'bold', NAVY); doc.text(text, M, y); y += 6; doc.setDrawColor(...NAVY); doc.setLineWidth(1.5); doc.line(M, y, R, y); y += 18; };
-        // A label, "75% (3 of 4)" on the right, and a bar in the color band underneath
+        // A label, "75% (3 of 4)" on the right, and a bar underneath that runs red (failing) to green (passing)
+        // across the whole width and fills up to the score; a dark tick marks 75%, passing (teacher 2026-11-17)
         const bar = (label, right, seen, size, style, x, h) => {
-            const p = pct(right, seen), c = band(p);
+            const p = pct(right, seen), w = R - x;
             font(size, style, INK); doc.text(plain(label), x, y);
             font(size, 'normal', INK); doc.text(`${p}% (${right} of ${seen})`, R, y, { align: 'right' });
             y += 6;
-            doc.setFillColor(...LINE); doc.roundedRect(x, y, R - x, h, h / 2, h / 2, 'F');
-            if (p) { doc.setFillColor(...c.rgb); doc.roundedRect(x, y, Math.max(h, (R - x) * p / 100), h, h / 2, h / 2, 'F'); }
+            gradientBar(x, y, w, h, p);
             y += h + 14;
+        };
+        const gradientBar = (x, yy, w, h, p) => {
+            const fill = w * p / 100, step = 2;
+            for (let sx = 0; sx < fill; sx += step) {
+                doc.setFillColor(...gradColor(((sx + step / 2) / w) * 100));
+                doc.rect(x + sx, yy, Math.min(step + 0.3, fill - sx), h, 'F');
+            }
+            doc.setDrawColor(154, 164, 178); doc.setLineWidth(0.6); doc.rect(x, yy, w, h, 'S');
+            doc.setDrawColor(...INK); doc.setLineWidth(1.2); doc.line(x + w * PASS / 100, yy - 2, x + w * PASS / 100, yy + h + 2);
         };
 
         // Banner
@@ -83,13 +100,15 @@
         // The server's score when it sends one: the Sprint counts only the questions answered (teacher 2026-11-06)
         const score = result.score ?? pct(result.correct, result.total), b = band(score);
         doc.setFillColor(...b.rgb); doc.roundedRect(M, y, 150, 92, 10, 10, 'F');
-        font(38, 'bold', [255, 255, 255]); doc.text(`${score}%`, M + 75, y + 50, { align: 'center' });
-        font(11, 'bold', [255, 255, 255]); doc.text(b.label, M + 75, y + 74, { align: 'center' });
+        // Dark text on the yellow-to-light-green part of the scale, white elsewhere, so it stays readable
+        const onLight = score >= 55 && score < 80, ink = onLight ? INK : [255, 255, 255];
+        font(38, 'bold', ink); doc.text(`${score}%`, M + 75, y + 50, { align: 'center' });
+        font(11, 'bold', ink); doc.text(b.label, M + 75, y + 74, { align: 'center' });
         font(14, 'bold', INK); doc.text(`${result.correct} of ${result.total} questions right`, M + 172, y + 30);
         font(11, 'normal', MUTED);
         doc.text(result.scoring === 'answered' ? `You answered ${result.answered} of ${result.total}. Your score counts only those.`
             : `You answered ${result.answered} of ${result.total}. Of those, ${pct(result.correct, result.answered)}% were right.`, M + 172, y + 50);
-        doc.text('Green: 80% or higher   Yellow: 70-79%   Red: under 70%, review it', M + 172, y + 70);
+        doc.text('Bars run red (failing) to green (passing). Passing is 75%.', M + 172, y + 70);
         y += 118;
 
         // By state standard and indicator (questions from the standard pool); otherwise by topic
@@ -100,14 +119,14 @@
             font(9, 'normal', MUTED); doc.text('Nevada CTE Employability Skills for Career Readiness. Based on the questions you answered.', M, y); y += 18;
             std.forEach(s => {
                 room(48);
-                bar(`${s.id} ${s.name}`, s.right, s.seen, 11, 'bold', M, 9);
-                s.indicators.filter(i => i.seen).forEach(i => { room(28); bar(`${i.id} ${i.name}`, i.right, i.seen, 10, 'normal', M + 14, 5); });
+                bar(`${s.id} ${s.name}`, s.right, s.seen, 11, 'bold', M, 12);
+                s.indicators.filter(i => i.seen).forEach(i => { room(30); bar(`${i.id} ${i.name}`, i.right, i.seen, 10, 'normal', M + 14, 8); });
                 y += 6;
             });
         } else {
             heading('By topic');
             font(9, 'normal', MUTED); doc.text('Based on the questions you answered.', M, y); y += 18;
-            topics(review).forEach(g => { room(36); bar(g.name, g.right, g.seen, 11, 'bold', M, 9); });
+            topics(review).forEach(g => { room(38); bar(g.name, g.right, g.seen, 11, 'bold', M, 12); });
         }
 
         // Missed questions

@@ -228,14 +228,27 @@
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 1: Display Fixes [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Utilize display types to manage element flow and spacing for your client's navigation.</p>
-                <ol>
-                    <li class="mb-2">Open your Client Project's <code>style.css</code>.</li>
-                    <li class="mb-2">Target your navigation links (e.g., <code>header nav a</code>).</li>
-                    <li class="mb-2">Because <code>&lt;a&gt;</code> tags are inline, top/bottom padding won't push the surrounding layout correctly. Change their display type to <code>inline-block</code>.</li>
-                    <li class="mb-2">Apply padding (e.g., <code>10px 20px</code>) to the links. Notice how the clickable area grows into a perfect button without breaking the navigation line!</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>style.css</code> file.</p>
+                  <p><strong>Objective:</strong> Utilize display types to manage element flow and spacing for your client's navigation.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 20 minutes · <strong>You need:</strong> your site and <code>css/style.css</code> · <strong>Turn in:</strong> your <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · <strong>MILESTONE STEP 1:</strong> turn nav links into blocks</h6>
+                  <p class="mb-2"><code>&lt;a&gt;</code> tags are <strong>inline</strong>, so top and bottom padding doesn't push anything around. <code>inline-block</code> keeps them on one line but lets padding work. Add to <code>style.css</code>:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>header nav a {
+    display: inline-block;
+    padding: 10px 20px;
+}</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · Check it</h6>
+                  <p class="mb-2">Refresh Chrome. Right-click a nav link → <strong>Inspect</strong>, and hover over the <code>&lt;a&gt;</code> in the Elements panel.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> the highlighted clickable area is a full button shape, and the links are still in one line.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>The links stacked on top of each other:</strong> you used <code>display: block</code>. Use <code>inline-block</code>.</li>
+                          <li class="mb-1"><strong>Nothing changed:</strong> check the selector matches your HTML. If your nav isn't inside a <code>&lt;header&gt;</code>, use <code>nav a</code>.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>css</code> → <code>style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ nav links are display: inline-block · ☐ padding makes each link a bigger click target · ☐ links still sit in one line</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated style.css file.</p>
                 <a href="/student/notes.html?chapter=7&amp;day=1&amp;turnin=Milestone%201%3A%20Display%20Fixes%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 1</a>
             </div>
         </div>
@@ -317,12 +330,44 @@
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestones 2 &amp; 3: Flexbox &amp; Centering [50 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Engineer flexible navigation and perfectly centered heroes using 1D layout logic for the agency template.</p>
-                <ol>
-                    <li class="mb-2"><strong>Navbar:</strong> Apply <code>display: flex;</code> to your <code>&lt;nav&gt;</code> or its child <code>&lt;ul&gt;</code>. Use <code>justify-content: space-between;</code> to push your logo to the left and your navigation links to the right. Use <code>align-items: center;</code> to keep them vertically aligned.</li>
-                    <li class="mb-2"><strong>Centering:</strong> Select your Hero section (e.g., <code>.hero-banner</code>). Apply <code>display: flex;</code>, <code>flex-direction: column;</code>, <code>justify-content: center;</code>, and <code>align-items: center;</code>. Ensure the container has a height (like <code>height: 60vh;</code>) to perfectly center the headline vertically and horizontally!</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload the <code>style.css</code> containing your new flex rules.</p>
+                  <p><strong>Objective:</strong> Engineer flexible navigation and perfectly centered heroes using 1D layout logic for the agency template.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 40 minutes · <strong>You need:</strong> your site and <code>css/style.css</code> · <strong>Turn in:</strong> your <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Part 1 · <strong>MILESTONE 2:</strong> a flexbox navbar</h6>
+                  <p class="mb-2">If your logo and your <code>&lt;nav&gt;</code> are both inside <code>&lt;header&gt;</code>, flex the header so the logo goes left and the links go right. Then flex the list so the links sit in a row:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+header nav ul {
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+}</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> logo on the left, links in a row on the right, all lined up vertically in the middle.</div>
+                  <h6 class="fw-bold mt-3">Part 2 · <strong>MILESTONE 3:</strong> perfectly center the hero</h6>
+                  <p class="mb-2">Use the <code>.hero</code> class from Chapter 6, Milestone 7 (or add <code>class="hero"</code> to the top section of your homepage):</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>.hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    text-align: center;
+}</code></pre>
+                  <p class="mb-2"><code>60vh</code> means 60% of the screen's height. Without a height, there's no space to center in.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your hero headline dead center, top to bottom and left to right.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>The logo and links are stacked:</strong> <code>display: flex</code> has to be on the <strong>parent</strong> (the header), not on each item.</li>
+                          <li class="mb-1"><strong>The hero text is centered left-to-right but not top-to-bottom:</strong> add the <code>height</code>.</li>
+                          <li class="mb-1"><strong>Bullets came back:</strong> add <code>list-style: none;</code> to the <code>ul</code>.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>css</code> → <code>style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ header uses flex with space-between and align-items: center · ☐ nav links sit in a row · ☐ the hero uses flex column with justify-content and align-items: center · ☐ the hero has a height</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload the style.css containing your new flex rules.</p>
                 <a href="/student/notes.html?chapter=7&amp;day=3&amp;turnin=Milestones%202%20%26%203%3A%20Flexbox%20%26%20Centering%20%2850%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 3</a>
             </div>
         </div>
@@ -423,13 +468,48 @@ footer { grid-area: footer; }
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestones 4 &amp; 5: Grid Skeleton &amp; Gallery [50 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Architect multi-dimensional layouts for your client's content organization.</p>
-                <ol>
-                    <li class="mb-2"><strong>Skeleton:</strong> In your <code>&lt;main&gt;</code> section (or a specific page like an About page), use CSS Grid to create a 2-column layout (e.g., a Sidebar at <code>250px</code> and a Main Content area at <code>1fr</code>).</li>
-                    <li class="mb-2"><strong>Gallery:</strong> On a page with multiple images or product cards, create a responsive grid using <code>grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));</code>. Use the <code>gap</code> property (e.g., <code>20px</code>) to create space between items.</li>
-                    <li class="mb-2"><strong>Spanning:</strong> Use <code>grid-column: span 2;</code> to make one "featured" card stretch across the gallery.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>style.css</code>.</p>
+                  <p><strong>Objective:</strong> Architect multi-dimensional layouts for your client's content organization.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 50 minutes · <strong>You need:</strong> your site and <code>css/style.css</code> · <strong>Turn in:</strong> your <code>style.css</code> (and the HTML pages you changed)</p>
+                  <h6 class="fw-bold mt-3">Part 1 · <strong>MILESTONE 4:</strong> a 2-column grid skeleton</h6>
+                  <p class="mb-2">On your About page (or inside <code>&lt;main&gt;</code>), wrap a sidebar and the main content in one container:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>&lt;div class="page-layout"&gt;
+    &lt;aside&gt;Quick facts, links, or a photo&lt;/aside&gt;
+    &lt;div class="content"&gt;Your main text&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                  <pre class="p-3 rounded no-copy mb-2"><code>.page-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+}</code></pre>
+                  <p class="mb-2"><code>1fr</code> means "all the space that's left."</p>
+                  <h6 class="fw-bold mt-3">Part 2 · <strong>MILESTONE 5:</strong> a responsive gallery</h6>
+                  <p class="mb-2">On a page with several images or cards, put them in one container. Give one card a <code>featured</code> class:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>&lt;section class="gallery"&gt;
+    &lt;div class="card featured"&gt;...&lt;/div&gt;
+    &lt;div class="card"&gt;...&lt;/div&gt;
+    &lt;div class="card"&gt;...&lt;/div&gt;
+    &lt;div class="card"&gt;...&lt;/div&gt;
+&lt;/section&gt;</code></pre>
+                  <pre class="p-3 rounded no-copy mb-2"><code>.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+.featured {
+    grid-column: span 2;
+}</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> the cards fill the row and wrap by themselves as you make the window narrower. The featured card is twice as wide.</div>
+                  <p class="mb-2">Check it: press <strong>F12</strong> and click the small <strong>grid</strong> badge next to the container in the Elements panel to see the grid lines.</p>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>Everything is in one column:</strong> <code>display: grid</code> goes on the container, not the cards.</li>
+                          <li class="mb-1"><strong>The featured card doesn't stretch:</strong> the window may be too narrow for 2 columns. Make it wider, or check the <code>featured</code> class is in the HTML.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Whole folder</strong> → <strong>Choose Files</strong> → your site folder → <strong>Upload</strong> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ a 2-column grid (250px sidebar + 1fr content) · ☐ a gallery using repeat(auto-fit, minmax(300px, 1fr)) · ☐ a gap between items · ☐ one featured card spans 2 columns</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your site folder with your updated style.css.</p>
                 <a href="/student/notes.html?chapter=7&amp;day=5&amp;turnin=Milestones%204%20%26%205%3A%20Grid%20Skeleton%20%26%20Gallery%20%2850%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 5</a>
             </div>
         </div>
@@ -495,14 +575,28 @@ footer { grid-area: footer; }
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 6: The Sticky Header [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Implement persistent navigation using advanced positioning to ensure client site usability.</p>
-                <ol>
-                    <li class="mb-2">Target your <code>&lt;header&gt;</code> or <code>&lt;nav&gt;</code> container in your CSS.</li>
-                    <li class="mb-2">Apply <code>position: sticky;</code> and <code>top: 0;</code> to anchor it to the top.</li>
-                    <li class="mb-2">Give it a <code>z-index: 1000;</code> to ensure it stays on top of all other content (like images) as the user scrolls.</li>
-                    <li class="mb-2">Ensure the sticky element has a solid background color so the text underneath doesn't make the links unreadable!</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>style.css</code> file.</p>
+                  <p><strong>Objective:</strong> Implement persistent navigation using advanced positioning to ensure client site usability.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 20 minutes · <strong>You need:</strong> your site and <code>css/style.css</code> · <strong>Turn in:</strong> your <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · <strong>MILESTONE 6:</strong> make the header stick</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--bg-light);
+}</code></pre>
+                  <p class="mb-2"><code>top: 0</code> is where it sticks. <code>z-index: 1000</code> keeps it on top of images as you scroll. The <strong>solid background</strong> stops page text from showing through behind your links.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> scroll down a long page: the header stays pinned at the top, and nothing scrolls on top of it.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>It scrolls away:</strong> <code>sticky</code> needs <code>top: 0</code>. Also, if the header is inside another short box, it can only stick inside that box. Keep the header directly inside <code>&lt;body&gt;</code>.</li>
+                          <li class="mb-1"><strong>Images slide over the header:</strong> add or raise the <code>z-index</code>.</li>
+                          <li class="mb-1"><strong>Text shows through:</strong> give the header a background color.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 2 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>css</code> → <code>style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ position: sticky with top: 0 · ☐ z-index keeps it above content · ☐ a solid background color · ☐ it stays at the top while scrolling</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your style.css file.</p>
                 <a href="/student/notes.html?chapter=7&amp;day=6&amp;turnin=Milestone%206%3A%20The%20Sticky%20Header%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 6</a>
             </div>
         </div>
@@ -705,13 +799,46 @@ nav a {
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestones 7-9: Breakpoints &amp; Refactoring [75 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Implement responsive breakpoints and refactor code to meet professional agency maintainability standards.</p>
-                <ol>
-                    <li class="mb-2"><strong>The Viewport:</strong> Verify that the Viewport Meta tag is present in the <code>&lt;head&gt;</code> of all your HTML files.</li>
-                    <li class="mb-2"><strong>Breakpoints:</strong> Add a media query (e.g., <code>@media (max-width: 768px)</code>). Inside, change your Flexbox Nav from a row to a <code>column</code>. Change your multi-column Grid layouts back to a 1-column layout (<code>grid-template-columns: 1fr;</code>).</li>
-                    <li class="mb-2"><strong>Refactor:</strong> Go through your entire <code>style.css</code>. Ensure all hard-coded colors are using <code>var(--variable)</code> and replace fixed pixel font sizes with <code>rem</code> or <code>clamp()</code>.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your cleaned up, responsive <code>style.css</code> file.</p>
+                  <p><strong>Objective:</strong> Implement responsive breakpoints and refactor code to meet professional agency maintainability standards.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 60 minutes · <strong>You need:</strong> your whole site · <strong>Turn in:</strong> your <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Part 1 · <strong>MILESTONE 7:</strong> check the viewport tag</h6>
+                  <p class="mb-2">Every page needs this in its <code>&lt;head&gt;</code> (Emmet's <code>!</code> adds it). Without it, phones shrink the whole desktop page instead of using your breakpoints:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code></pre>
+                  <h6 class="fw-bold mt-3">Part 2 · <strong>MILESTONE 8:</strong> a breakpoint</h6>
+                  <p class="mb-2">At the <strong>bottom</strong> of <code>style.css</code>, add a media query. Its rules only apply on screens 768px wide or narrower:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>@media (max-width: 768px) {
+    header,
+    header nav ul {
+        flex-direction: column;
+    }
+    .page-layout,
+    .gallery {
+        grid-template-columns: 1fr;
+    }
+    .featured {
+        grid-column: auto;
+    }
+}</code></pre>
+                  <p class="mb-2">Test it: press <strong>F12</strong>, then <strong>Ctrl + Shift + M</strong>, and pick a phone at the top.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> on a phone size, the nav stacks into a column and every grid becomes one column, with no sideways scrolling.</div>
+                  <h6 class="fw-bold mt-3">Part 3 · <strong>MILESTONE 9:</strong> refactor</h6>
+                  <ol>
+                      <li class="mb-1">Press <strong>Ctrl + F</strong> and search <code>#</code>: every color should be a <code>var(--…)</code> from <code>:root</code>.</li>
+                      <li class="mb-1">Search <code>px</code> on font sizes: change them to <code>rem</code>, or use <code>clamp()</code> for headings that grow with the screen:</li>
+                  </ol>
+                  <pre class="p-3 rounded no-copy mb-2"><code>h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+}</code></pre>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>The phone view looks like a tiny desktop:</strong> the viewport tag is missing from that page.</li>
+                          <li class="mb-1"><strong>The media query does nothing:</strong> it must be at the bottom, so it comes after the rules it changes, and every <code>{</code> needs its <code>}</code>.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>css</code> → <code>style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ the viewport tag on every page · ☐ a 768px media query · ☐ the nav stacks and grids go to 1 column on phones · ☐ all colors use var(--…) · ☐ font sizes in rem or clamp()</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your cleaned up, responsive style.css file.</p>
                 <a href="/student/notes.html?chapter=7&amp;day=9&amp;turnin=Milestones%207-9%3A%20Responsiveness%20%26%20Refactoring%20%2875%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 9</a>
             </div>
         </div>
@@ -750,14 +877,34 @@ nav a {
                 🏆 Project: Architecture [100 pts]
             </div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Prove technical mastery of 1D and 2D responsive layouts across multiple device viewports for your Carson City client.</p>
-                <ol>
-                    <li class="mb-2"><strong>Integration:</strong> Finalize the layout for your entire Custom Website. Your navigation must use Flexbox, and your content organization must use CSS Grid. Ensure your images have <code>max-width: 100%</code>.</li>
-                    <li class="mb-2"><strong>Debugging:</strong> Use the <strong>Computed</strong> tab in DevTools to verify your box-sizing math and ensure margins are collapsing correctly.</li>
-                    <li class="mb-2"><strong>Mobile Polish:</strong> Use DevTools to simulate an iPhone. Write Media Queries to ensure there are ZERO horizontal scrollbars. Ensure all text is legible and buttons are large enough for thumbs.</li>
-                    <li class="mb-2"><strong>Peer QA:</strong> Load your site on an actual physical phone. Swap phones with a partner. Document and fix any horizontal scrolling bugs or overlapping text.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed Custom Website project folder.</p>
+                  <p><strong>Objective:</strong> Prove technical mastery of 1D and 2D responsive layouts across multiple device viewports for your Carson City client.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 3 classes · <strong>You need:</strong> your whole Custom Website and a phone (yours or a partner's) · <strong>Turn in:</strong> your whole site folder</p>
+                  <h6 class="fw-bold mt-3">Step 1 · Finish the layout</h6>
+                  <p class="mb-2">Every page: the nav uses <strong>Flexbox</strong> (Milestones 2–3) and the content uses <strong>Grid</strong> (Milestones 4–5). Add this so images never overflow:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>img {
+    max-width: 100%;
+    height: auto;
+}</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · Debug with the Computed tab</h6>
+                  <p class="mb-2">Right-click any box → <strong>Inspect</strong> → <strong>Computed</strong> tab. Check its width, padding, border, and margin add up the way you expect.</p>
+                  <h6 class="fw-bold mt-3">Step 3 · Mobile polish</h6>
+                  <p class="mb-2">In DevTools (<strong>Ctrl + Shift + M</strong>), pick an iPhone. Visit every page. Scroll sideways: if the page moves, something is too wide. Fix it with a media query. Text should be easy to read, and buttons big enough for a thumb (about 44px tall).</p>
+                  <h6 class="fw-bold mt-3">Step 4 · Peer QA on a real phone</h6>
+                  <ol>
+                      <li class="mb-1">Put your site online for a quick test: go to <strong>app.netlify.com/drop</strong> and drag your whole site folder onto the page. In a few seconds you get a link (it lasts about an hour without an account).</li>
+                      <li class="mb-1">Open the link on a real phone. Swap phones with a partner and test each other's sites.</li>
+                      <li class="mb-1">Write every sideways-scrolling bug or overlapping text you find in your notebook, then fix them.</li>
+                  </ol>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>The page scrolls sideways on the phone:</strong> look for a fixed width (like <code>width: 1200px</code>) or a wide image or table, and use <code>max-width: 100%</code>.</li>
+                          <li class="mb-1"><strong>Images are broken on the live link but fine on your computer:</strong> the file name's capital letters don't match the HTML.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 5 · Turn in</h6>
+                  <p class="mb-2">Click <strong>Jump to Dropbox</strong> below → <strong>Whole folder</strong> → <strong>Choose Files</strong> → your site folder → <strong>Upload</strong> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ the nav uses Flexbox and the content uses Grid · ☐ images have max-width: 100% · ☐ zero horizontal scrolling on a phone · ☐ readable text and thumb-size buttons · ☐ you tested on a real phone and fixed what you found</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Choose "Whole folder" in the Dropbox below and upload your completed Custom Website folder.</p>
                 <a href="/student/notes.html?chapter=7&amp;day=15&amp;turnin=Project%3A%20Architecture%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 15</a>
             </div>
         </div>

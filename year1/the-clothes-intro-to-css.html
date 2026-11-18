@@ -343,7 +343,37 @@ h1 {
         <div class="card border-success shadow-sm mb-4 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 1: The External Sheet [25 pts]</div>
           <div class="card-body small p-4">
-              <p><strong>Objective:</strong> Establish a professional project architecture for your agency. Set up your <code>css</code> folder, create your master <code>style.css</code> file, and link it in the <code>&lt;head&gt;</code> of your HTML. Add a global <code>body { background-color: #f4f4f4; }</code> rule to prove they are talking to each other.</p>
+                  <p><strong>Objective:</strong> Establish a professional project architecture for your agency. Set up your <code>css</code> folder, create your master <code>style.css</code> file, and link it in the <code>&lt;head&gt;</code> of your HTML. Add a global <code>body { background-color: #f4f4f4; }</code> rule to prove they are talking to each other.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 20 minutes · <strong>You need:</strong> VS Code and your agency site folder (Home, About, Contact) · <strong>Turn in:</strong> <code>index.html</code> and <code>css/style.css</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · Make the css folder and file</h6>
+                  <ol>
+                      <li class="mb-1">In VS Code, <strong>File → Open Folder</strong> → your own site's folder.</li>
+                      <li class="mb-1">In the Explorer panel, click <strong>New Folder</strong> and name it <code>css</code> (all lowercase).</li>
+                      <li class="mb-1">Click the <code>css</code> folder, then <strong>New File</strong>, and name it <code>style.css</code>.</li>
+                  </ol>
+                  <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 1:</strong> link it</h6>
+                  <p class="mb-2">Open <code>index.html</code>. Inside <code>&lt;head&gt;</code>, right before <code>&lt;/head&gt;</code>, type:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>&lt;!-- Our Stylesheet --&gt;
+&lt;link rel="stylesheet" href="css/style.css"&gt;</code></pre>
+                  <h6 class="fw-bold mt-3">Step 3 · Prove the two files are talking</h6>
+                  <p class="mb-2">Open <code>style.css</code> and type these 3 lines exactly. Save both files.</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>@charset "UTF-8";
+/* Global Styles for my agency site */
+body { background-color: #f4f4f4; }</code></pre>
+                  <p class="mb-2">Open <code>index.html</code> in Chrome (or refresh it).</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> the page background turns light gray.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>Still white:</strong> the <code>href</code> must say <code>css/style.css</code> exactly, and <code>style.css</code> must be inside the <code>css</code> folder.</li>
+                          <li class="mb-1"><strong>The folder is <code>CSS</code> or <code>Css</code>:</strong> rename it to lowercase <code>css</code>.</li>
+                          <li class="mb-1"><strong>Nothing changes after you edit CSS:</strong> save the CSS file, then refresh Chrome.</li>
+                      </ul>
+                  </details>
+                  <p class="mb-2"><strong>Done early?</strong> Add the same <code>&lt;link&gt;</code> line to your About and Contact pages. Then try deleting the link line for a second: what disappears, and what stays? Put it back.</p>
+                  <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                  <p class="mb-2">Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>index.html</code>, then the <code>css</code> folder → <code>style.css</code> (hold <strong>Ctrl</strong> to pick both) → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ a css folder, lowercase · ☐ style.css inside it · ☐ the link line is inside head with href="css/style.css" · ☐ the page turns light gray in Chrome</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload index.html and css/style.css.</p>
               <a href="/student/notes.html?chapter=6&amp;day=1&amp;turnin=Milestone%201%3A%20The%20External%20Sheet%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 1</a>
           </div>
         </div>
@@ -387,14 +417,38 @@ h1 {
         <div class="card border-success shadow-sm mb-4 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 2: Structural Targeting [25 pts]</div>
           <div class="card-body small p-4">
-              <p><strong>Objective:</strong> Practice precision targeting on your client's landing page.</p>
-              <ol>
-                  <li>Open your HTML project files.</li>
-                  <li>Add a class of <code>.hero-text</code> to your main heading.</li>
-                  <li>Add a class of <code>.nav-link</code> to all your navigation anchors.</li>
-                  <li>Add an ID of <code>#contact-form</code> to your form.</li>
-                  <li>Write empty CSS rules in your stylesheet targeting each of these.</li>
-              </ol>
+                  <p><strong>Objective:</strong> Practice precision targeting on your client's landing page.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your agency site and <code>css/style.css</code> · <strong>Turn in:</strong> <code>index.html</code>, <code>contact.html</code>, and <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · <strong>MILESTONE STEP 2:</strong> add a class and an ID in your HTML</h6>
+                  <ol>
+                      <li class="mb-1">In <code>index.html</code>, add <code>class="hero-text"</code> to your main heading: <code>&lt;h1 class="hero-text"&gt;</code></li>
+                      <li class="mb-1">Add <code>class="nav-link"</code> to <strong>every</strong> link in your nav: <code>&lt;a href="about.html" class="nav-link"&gt;</code>. Do it on all 3 pages.</li>
+                      <li class="mb-1">In <code>contact.html</code>, add <code>id="contact-form"</code> to your form: <code>&lt;form id="contact-form"&gt;</code></li>
+                  </ol>
+                  <p class="mb-2">A <strong>class</strong> (.) can be used on many elements. An <strong>ID</strong> (#) is used on only one element per page.</p>
+                  <h6 class="fw-bold mt-3">Step 2 · Target them in your CSS</h6>
+                  <p class="mb-2">At the bottom of <code>css/style.css</code>, add a rule for each. The test outline proves each rule hits the right thing:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>.hero-text {
+    outline: 2px dashed red;   /* test */
+}
+.nav-link {
+    outline: 2px dashed red;   /* test */
+}
+#contact-form {
+    outline: 2px dashed red;   /* test */
+}</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> a red dashed box around your main heading, every nav link, and your contact form. Then delete the 3 test lines; keep the rules. You'll fill them in later.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>No red box:</strong> the class or ID in the HTML must match the CSS exactly, minus the dot or #. <code>hero-text</code> ≠ <code>heroText</code>.</li>
+                          <li class="mb-1"><strong>Only one nav link has a box:</strong> add the class to every link, on every page.</li>
+                          <li class="mb-1"><strong>Nothing in your CSS works:</strong> check your page still links <code>css/style.css</code> (Milestone 1).</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save everything (<strong>Ctrl + S</strong>). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → hold <strong>Ctrl</strong> and pick <code>index.html</code> and <code>contact.html</code>, then also upload <code>css/style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ .hero-text on your h1 · ☐ .nav-link on every nav link · ☐ #contact-form on your form · ☐ a CSS rule for each, and each one targets the right element</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload index.html, contact.html, and css/style.css.</p>
               <a href="/student/notes.html?chapter=6&amp;day=3&amp;turnin=Milestone%202%3A%20Structural%20Targeting%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 3</a>
           </div>
         </div>
@@ -779,7 +833,37 @@ h1 {
         <div class="card border-success shadow-sm my-4 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 4: CSS Variables [25 pts]</div>
           <div class="card-body small p-4">
-            <p><strong>Objective:</strong> Practice efficiency by declaring variables globally. Every brand has a strict color palette. For your agency (and your Carson City clients), consistency is key. At the top of your <code>style.css</code>, create a <code>:root</code> pseudo-class. Define 4 variables: <code>--primary</code>, <code>--secondary</code>, <code>--accent</code>, and <code>--bg-light</code> using your chosen color formats. Then, go through your stylesheet and replace all hard-coded colors with <code>var(--primary)</code>, etc.</p>
+                  <p><strong>Objective:</strong> Practice efficiency by declaring variables globally. Every brand has a strict color palette. For your agency (and your Carson City clients), consistency is key. At the top of your <code>style.css</code>, create a <code>:root</code> pseudo-class. Define 4 variables: <code>--primary</code>, <code>--secondary</code>, <code>--accent</code>, and <code>--bg-light</code> using your chosen color formats. Then, go through your stylesheet and replace all hard-coded colors with <code>var(--primary)</code>, etc.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your <code>css/style.css</code> · <strong>Turn in:</strong> your <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · <strong>MILESTONE STEP 4:</strong> declare your colors once</h6>
+                  <p class="mb-2">At the very top of <code>style.css</code> (right under <code>@charset</code>), add a <code>:root</code> rule with your 4 brand colors (use your UI Kit's hex codes):</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>:root {
+    --primary: #1F2A44;
+    --secondary: #3A7CA5;
+    --accent: #F28C28;
+    --bg-light: #F4F4F4;
+}</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · Use them everywhere</h6>
+                  <p class="mb-2">Replace every hard-coded color in your stylesheet with its variable:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>body {
+    background-color: var(--bg-light);
+    color: var(--primary);
+}
+.nav-link {
+    color: var(--secondary);
+}</code></pre>
+                  <p class="mb-2">Check your work: press <strong>Ctrl + F</strong> in <code>style.css</code> and search for <code>#</code>. Every color should now appear only inside <code>:root</code> (IDs like <code>#contact-form</code> are fine).</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your site looks the same as before. Now change <code>--primary</code> to a different color, save, and refresh: everything that uses it changes at once. Change it back.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>A color disappeared:</strong> check the spelling: <code>var(--primary)</code>, two dashes, inside <code>var( )</code>.</li>
+                          <li class="mb-1"><strong>Nothing uses the variable:</strong> <code>:root</code> must be outside every other rule, at the top.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save everything (<strong>Ctrl + S</strong>). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>css</code> → <code>style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ :root with --primary, --secondary, --accent, and --bg-light · ☐ every hard-coded color replaced with var(--…) · ☐ the site still looks right</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your css/style.css.</p>
             <a href="/student/notes.html?chapter=6&amp;day=7&amp;turnin=Milestone%204%3A%20CSS%20Variables%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 7</a>
           </div>
         </div>
@@ -1008,8 +1092,29 @@ h1 {
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 3: Specificity Audit [25 pts]</div>
           <div class="card-body small p-4">
-            <p><strong>Objective:</strong> Warm up with the provided CSS puzzle file — predict the color of 5 different elements based on Specificity Math, since multiple agency developers working on the same site is exactly how conflicts happen. Then apply that same skill to the file that actually matters: review your own Project's stylesheet, remove any conflicting rules, and make sure your most specific classes sit at the bottom of the file.</p>
-            <p class="mb-3 text-danger fw-bold">Turn In: Your puzzle-file predictions AND your own cleaned-up stylesheet — the second one is what your Project ships with.</p>
+                  <p><strong>Objective:</strong> Warm up with the provided CSS puzzle file — predict the color of 5 different elements based on Specificity Math, since multiple agency developers working on the same site is exactly how conflicts happen. Then apply that same skill to the file that actually matters: review your own Project's stylesheet, remove any conflicting rules, and make sure your most specific classes sit at the bottom of the file.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 35 minutes · <strong>You need:</strong> the puzzle file and your own <code>style.css</code> · <strong>Turn in:</strong> a PDF of your predictions and your cleaned-up <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Part 1 · The puzzle: predict first</h6>
+                  <ol>
+                      <li class="mb-1">Download the <a href="/studentFiles/specificity-puzzle.html" download>Specificity Puzzle</a>. In File Explorer, right-click it → <strong>Open with → Visual Studio Code</strong> (not Chrome yet!).</li>
+                      <li class="mb-1">Read the 10 CSS rules and the 5 lines of text.</li>
+                      <li class="mb-1">In a Google Doc, for each line write: your <strong>predicted color</strong>, the <strong>winning selector</strong>, and its <strong>score</strong>.</li>
+                  </ol>
+                  <p class="mb-2">Scoring: <strong>id = 100</strong>, <strong>class = 10</strong>, <strong>tag = 1</strong>. Add them up for each selector. Highest score wins. If two scores tie, the rule written <strong>later</strong> wins. Example: <code>.nav a</code> = 10 + 1 = 11.</p>
+                  <h6 class="fw-bold mt-3">Part 2 · Check in Chrome</h6>
+                  <p class="mb-2">Now open the puzzle in Chrome. Compare each line's real color to your prediction. For any you missed: right-click the line → <strong>Inspect</strong>. The <strong>Styles</strong> panel shows the winning rule on top and the losing rules crossed out. Write one sentence on why you missed it.</p>
+                  <h6 class="fw-bold mt-3">Part 3 · <strong>MILESTONE STEP 3:</strong> clean up your own stylesheet</h6>
+                  <ol>
+                      <li class="mb-1">Open your own <code>css/style.css</code>.</li>
+                      <li class="mb-1">Find any two rules that fight over the same property on the same element, and delete the one that loses.</li>
+                      <li class="mb-1">Delete every <code>!important</code>; fix the selector instead.</li>
+                      <li class="mb-1">Move your most specific rules (classes and IDs) below your general tag rules.</li>
+                  </ol>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your site looks the same (or better) in Chrome, with no crossed-out rules fighting each other in the Styles panel.</div>
+                  <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                  <p class="mb-2">Download your Google Doc as a <strong>PDF</strong> (File → Download → PDF). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your PDF and your <code>css/style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ 5 predictions, each with the winning selector and its score · ☐ you checked them in Chrome and explained any you missed · ☐ your own stylesheet has no conflicting rules and no !important · ☐ specific rules sit below general ones</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Your puzzle-file predictions AND your own cleaned-up stylesheet — the second one is what your Project ships with.</p>
             <a href="/student/notes.html?chapter=6&amp;day=6&amp;turnin=Milestone%203%3A%20Specificity%20Audit%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 6</a>
           </div>
         </div>
@@ -1309,7 +1414,34 @@ body {
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 5: Brand Typography [25 pts]</div>
           <div class="card-body small p-4">
-            <p><strong>Objective:</strong> Typography speaks volumes about a brand. Import two fonts from Google Fonts (one for headings, one for paragraphs) that match your agency's (or client's) Figma design. Apply them to your <code>body</code> and <code>h1-h6</code> tags in your CSS using the font-family property and font stacks.</p>
+                  <p><strong>Objective:</strong> Typography speaks volumes about a brand. Import two fonts from Google Fonts (one for headings, one for paragraphs) that match your agency's (or client's) Figma design. Apply them to your <code>body</code> and <code>h1-h6</code> tags in your CSS using the font-family property and font stacks.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 30 minutes · <strong>You need:</strong> your site and your Chapter 4 UI Kit fonts · <strong>Turn in:</strong> <code>index.html</code> and <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · Get the fonts</h6>
+                  <ol>
+                      <li class="mb-1">Go to <strong>fonts.google.com</strong>. Find your heading font and click it → <strong>Get font</strong>. Then find your paragraph font → <strong>Get font</strong>.</li>
+                      <li class="mb-1">Click the bag icon (top right) → <strong>Get embed code</strong>. Copy the <code>&lt;link&gt;</code> lines it shows.</li>
+                      <li class="mb-1">Paste them inside <code>&lt;head&gt;</code> on <strong>every</strong> page, <strong>above</strong> your <code>style.css</code> link.</li>
+                  </ol>
+                  <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 5:</strong> apply them with font stacks</h6>
+                  <p class="mb-2">In <code>style.css</code>, use your own font names. The fonts after the comma are backups if the web font fails to load:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>body {
+    font-family: 'Open Sans', Arial, sans-serif;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+}</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your headings and paragraphs in your two new fonts, on every page.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>The font didn't change:</strong> the name in CSS must match Google's name exactly, in quotes, with capitals and spaces.</li>
+                          <li class="mb-1"><strong>It works on one page only:</strong> paste the Google <code>&lt;link&gt;</code> lines into every page's head.</li>
+                          <li class="mb-1"><strong>Still the default font:</strong> the Google link lines must come before your <code>style.css</code> link.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save everything (<strong>Ctrl + S</strong>). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>index.html</code>, then <code>css</code> → <code>style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ 2 Google Fonts linked in the head of every page · ☐ body uses the paragraph font with a backup stack · ☐ h1–h6 use the heading font with a backup stack · ☐ fonts match your design</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your index.html and css/style.css.</p>
             <a href="/student/notes.html?chapter=6&amp;day=8&amp;turnin=Milestone%205%3A%20Brand%20Typography%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 8</a>
           </div>
         </div>
@@ -1407,7 +1539,29 @@ padding: 20px 40px;</code></pre>
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 6: Spacing & Breathing [25 pts]</div>
           <div class="card-body small p-4">
-            <p><strong>Objective:</strong> Give your client's content room to breathe. Apply the Box Model to reduce cognitive load. Apply <code>padding</code> to your <code>&lt;section&gt;</code> tags so text isn't touching the edge of the screen. Apply <code>margin-bottom</code> between your paragraphs to create professional "White Space."</p>
+                  <p><strong>Objective:</strong> Give your client's content room to breathe. Apply the Box Model to reduce cognitive load. Apply <code>padding</code> to your <code>&lt;section&gt;</code> tags so text isn't touching the edge of the screen. Apply <code>margin-bottom</code> between your paragraphs to create professional "White Space."</p>
+                  <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your <code>css/style.css</code> · <strong>Turn in:</strong> your <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · <strong>MILESTONE STEP 6:</strong> add padding and margin</h6>
+                  <p class="mb-2">Padding is space <strong>inside</strong> a box; margin is space <strong>outside</strong> it. Add these to <code>style.css</code> (adjust the numbers to fit your design):</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>section {
+    padding: 2rem;
+}
+p {
+    margin-bottom: 1rem;
+}</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · Check the box model</h6>
+                  <p class="mb-2">In Chrome, right-click a section → <strong>Inspect</strong>. In the Styles panel, scroll to the bottom: the colored box diagram shows the margin (orange), border, padding (green), and content (blue).</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> text no longer touches the edge of the screen, and paragraphs have breathing room between them.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>Nothing changed:</strong> your content must actually be inside <code>&lt;section&gt;</code> tags (Chapter 5, Milestone 6).</li>
+                          <li class="mb-1"><strong>Too much space:</strong> try smaller rem values, like <code>1.5rem</code>.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save everything (<strong>Ctrl + S</strong>). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>css</code> → <code>style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ padding on your sections · ☐ margin-bottom between paragraphs · ☐ text doesn't touch the screen edge</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your css/style.css.</p>
             <a href="/student/notes.html?chapter=6&amp;day=10&amp;turnin=Milestone%206%3A%20Spacing%20%26%20Breathing%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 10</a>
           </div>
         </div>
@@ -1451,7 +1605,37 @@ padding: 20px 40px;</code></pre>
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 7: Visual Accents [25 pts]</div>
           <div class="card-body small p-4">
-            <p><strong>Objective:</strong> Add a <code>background-image</code> to the Hero Section of your agency site (perhaps a nice shot of Carson City). Then, add a <code>border-radius</code> to all your buttons to make them look clickable and modern.</p>
+                  <p><strong>Objective:</strong> Add a <code>background-image</code> to the Hero Section of your agency site (perhaps a nice shot of Carson City). Then, add a <code>border-radius</code> to all your buttons to make them look clickable and modern.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 35 minutes · <strong>You need:</strong> your site and a photo for your hero area · <strong>Turn in:</strong> your whole site folder</p>
+                  <h6 class="fw-bold mt-3">Step 1 · Get a photo</h6>
+                  <ol>
+                      <li class="mb-1">Find a free photo (try <strong>unsplash.com</strong> or <strong>pexels.com</strong>, search "Carson City" or your client's topic). Click <strong>Download</strong>.</li>
+                      <li class="mb-1">Move it into your site's <code>images</code> folder and rename it all lowercase with dashes, like <code>carson-city.jpg</code>.</li>
+                      <li class="mb-1">Give the area at the top of your homepage a class: <code>&lt;section class="hero"&gt;</code> (or add <code>class="hero"</code> to your header).</li>
+                  </ol>
+                  <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 7:</strong> the background image</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>.hero {
+    background-image: url("../images/carson-city.jpg");
+    background-size: cover;
+    background-position: center;
+    min-height: 400px;
+}</code></pre>
+                  <p class="mb-2"><code>../</code> means "go up one folder": your CSS is inside <code>css/</code>, so it has to step out to find <code>images/</code>.</p>
+                  <h6 class="fw-bold mt-3">Step 3 · Round the buttons</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>button, .btn {
+    border-radius: 8px;
+}</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your photo behind the top of your homepage, and buttons with rounded corners.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>No image:</strong> almost always the path. From the css folder it must start with <code>../images/</code>, and the file name must match exactly.</li>
+                          <li class="mb-1"><strong>Text is hard to read on the photo:</strong> pick a darker or simpler photo, or add <code>color: white;</code> to the hero text.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                  <p class="mb-2">Save everything. Click <strong>Jump to Dropbox</strong> below → click <strong>Whole folder</strong> → <strong>Choose Files</strong> → your site folder → <strong>Upload</strong> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ a background image on the hero area · ☐ the image file is in images/ with a clean name · ☐ the path works (../images/…) · ☐ buttons have a border-radius</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your whole site folder (so your image comes too).</p>
             <a href="/student/notes.html?chapter=6&amp;day=11&amp;turnin=Milestone%207%3A%20Visual%20Accents%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 11</a>
           </div>
         </div>
@@ -1482,7 +1666,38 @@ padding: 20px 40px;</code></pre>
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
           <div class="card-header bg-success text-white fw-bold">Milestone 8: Browser Reset [25 pts]</div>
           <div class="card-body small p-4">
-            <p><strong>Objective:</strong> Ensure your agency's site looks identical on all client devices. Add the universal reset (using the <code>*</code> selector) to the very top of your stylesheet to normalize browser defaults. Adjust your header margins now that the browser defaults are gone.</p>
+                  <p><strong>Objective:</strong> Ensure your agency's site looks identical on all client devices. Add the universal reset (using the <code>*</code> selector) to the very top of your stylesheet to normalize browser defaults. Adjust your header margins now that the browser defaults are gone.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 20 minutes · <strong>You need:</strong> your <code>css/style.css</code> · <strong>Turn in:</strong> your <code>style.css</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · <strong>MILESTONE STEP 8:</strong> add the universal reset</h6>
+                  <p class="mb-2">At the very top of <code>style.css</code>, right under <code>@charset</code>, add:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}</code></pre>
+                  <p class="mb-2"><code>*</code> selects every element. Every browser adds its own default spacing; this wipes it out so your site looks the same everywhere.</p>
+                  <h6 class="fw-bold mt-3">Step 2 · Put back the spacing you want</h6>
+                  <p class="mb-2">Refresh Chrome. Everything is squished together; that's expected. Now add your own spacing:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>header {
+    margin-bottom: 2rem;
+}
+h1, h2, h3 {
+    margin-bottom: 1rem;
+}
+ul {
+    list-style: none;
+}</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your page looks clean and spaced the way <strong>you</strong> set it, not the browser.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>Everything is squished:</strong> that's the reset working. Add margin and padding back where you want space.</li>
+                          <li class="mb-1"><strong>Your nav bullets are back:</strong> add <code>list-style: none;</code> to your nav <code>ul</code>.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save everything (<strong>Ctrl + S</strong>). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your site folder → <code>css</code> → <code>style.css</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ the * reset is at the top of the stylesheet · ☐ header margins adjusted · ☐ headings and paragraphs have intentional spacing</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your css/style.css.</p>
             <a href="/student/notes.html?chapter=6&amp;day=12&amp;turnin=Milestone%208%3A%20Browser%20Reset%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 12</a>
           </div>
         </div>
@@ -1804,15 +2019,40 @@ footer p::before {
         <div class="card border-primary shadow-sm mt-5 mx-auto text-start" style="max-width: 900px;">
             <div class="card-header bg-primary text-white fw-bold">🏆 Project: Base CSS Integration [100 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Execute the visual brand guidelines for your Carson High Web Design & Marketing Agency (or local client project) across all pages.</p>
-                <ol>
-                    <li class="mb-2">Link every HTML file to one shared <code>css/style.css</code>.</li>
-                    <li class="mb-2">Define your color palette in <code>:root</code>.</li>
-                    <li class="mb-2">Implement typography scales using <code>rem</code> units.</li>
-                    <li class="mb-2">Apply hover states to all interactive elements.</li>
-                    <li class="mb-2">Pass W3C CSS Validation with zero errors.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload your entire project folder below.</p>
+                  <p><strong>Objective:</strong> Execute the visual brand guidelines for your Carson High Web Design & Marketing Agency (or local client project) across all pages.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 3 classes · <strong>You need:</strong> your whole agency site · <strong>Turn in:</strong> your whole site folder</p>
+                  <h6 class="fw-bold mt-3">Step 1 · One stylesheet for every page</h6>
+                  <p class="mb-2">Open every HTML file. Each one needs <code>&lt;link rel="stylesheet" href="css/style.css"&gt;</code> in its head (Milestone 1).</p>
+                  <h6 class="fw-bold mt-3">Step 2 · Colors in :root</h6>
+                  <p class="mb-2">Every color is a variable in <code>:root</code>, used with <code>var(--…)</code> (Milestone 4).</p>
+                  <h6 class="fw-bold mt-3">Step 3 · A type scale in rem</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>html { font-size: 100%; }
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+p  { font-size: 1rem; }</code></pre>
+                  <p class="mb-2"><code>rem</code> sizes grow when a user turns up their browser's text size; <code>px</code> sizes don't.</p>
+                  <h6 class="fw-bold mt-3">Step 4 · Hover states</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>a:hover,
+button:hover {
+    color: var(--accent);
+}</code></pre>
+                  <p class="mb-2">Every link and button should visibly change when the mouse is over it.</p>
+                  <h6 class="fw-bold mt-3">Step 5 · Validate</h6>
+                  <ol>
+                      <li class="mb-1">Go to <strong>jigsaw.w3.org/css-validator</strong> → <strong>By file upload</strong> → choose your <code>style.css</code> → <strong>Check</strong>.</li>
+                      <li class="mb-1">Fix each error at the line number it gives, in VS Code. Check again until it says <strong>"Congratulations! No Error Found."</strong> Take a screenshot (<strong>Windows + PrtScn</strong>).</li>
+                  </ol>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>"Parse Error":</strong> usually a missing <code>;</code> or <code>}</code> on or just before that line.</li>
+                          <li class="mb-1"><strong>Warnings about variables:</strong> warnings are OK. Errors are not.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 6 · Turn in</h6>
+                  <p class="mb-2">Put your validator screenshot in your site folder. Click <strong>Jump to Dropbox</strong> below → <strong>Whole folder</strong> → <strong>Choose Files</strong> → your site folder → <strong>Upload</strong> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ every page links css/style.css · ☐ colors in :root · ☐ type sizes in rem · ☐ hover states on every link and button · ☐ the CSS validator shows no errors</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your entire project folder below.</p>
                 <a href="/student/notes.html?chapter=6&amp;day=16&amp;turnin=Project%3A%20Base%20CSS%20Integration%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 16</a>
             </div>
         </div>

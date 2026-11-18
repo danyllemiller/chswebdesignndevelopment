@@ -598,14 +598,40 @@ function calculate_tax() { } // snake_case (Python style)</code></pre>
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 1: The Data Vault Lab [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Prove comprehension of data types and assignment operators.</p>
-                <ol>
-                    <li class="mb-2">Create a <code>script.js</code> file and link it to your HTML at the bottom of the body.</li>
-                    <li class="mb-2">Declare a <code>const</code> for your birth year and a <code>let</code> for the current year.</li>
-                    <li class="mb-2">Perform a math operation to calculate your age. Use <code>console.log()</code> to output the result.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Define the core variables for your client's "Profile Generator" project. Create variables for <code>userName</code>, <code>userColor</code>, and <code>userSuperpower</code> using Professional Decorum (camelCase naming convention). Assign them placeholder string values.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code> file.</p>
+                  <p><strong>Objective:</strong> Prove comprehension of data types and assignment operators.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 30 minutes · <strong>You need:</strong> VS Code and Chrome · <strong>Turn in:</strong> your <code>script.js</code></p>
+                  <p class="mb-2">All of Chapter 9's milestones build one app in a folder named <code>profile-app</code> on your Desktop.</p>
+                  <h6 class="fw-bold mt-3">Step 1 · Set up the project</h6>
+                  <ol>
+                      <li class="mb-1">Make a folder on your Desktop named <code>profile-app</code>. In VS Code: <strong>File → Open Folder</strong> → <code>profile-app</code>.</li>
+                      <li class="mb-1">New file <code>index.html</code>. Type <code>!</code> + <strong>Tab</strong> for the boilerplate. Give it a <code>&lt;h1&gt;Profile Generator&lt;/h1&gt;</code>.</li>
+                      <li class="mb-1">New file <code>script.js</code>. Link it at the very bottom of <code>&lt;body&gt;</code>, right before <code>&lt;/body&gt;</code>:</li>
+                  </ol>
+                  <pre class="p-3 rounded no-copy mb-2"><code>&lt;script src="script.js"&gt;&lt;/script&gt;</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · Variables and math</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>// Milestone 1: The Data Vault Lab
+const birthYear = 2009;     // const: it never changes
+let currentYear = 2026;     // let: it can change
+let age = currentYear - birthYear;
+console.log("I am about " + age + " years old.");</code></pre>
+                  <p class="mb-2">Use your own birth year. Open <code>index.html</code> in Chrome, press <strong>F12</strong> → <strong>Console</strong>.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your age printed in the Console.</div>
+                  <h6 class="fw-bold mt-3">Step 3 · <strong>MILESTONE STEP 1:</strong> the Profile Generator's variables</h6>
+                  <p class="mb-2">Add these, in camelCase (first word lowercase, each new word capitalized):</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>let userName = "Alex";
+let userColor = "Blue";
+let userSuperpower = "Fly";</code></pre>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>Nothing in the Console:</strong> check the script tag's file name, and that it's inside <code>&lt;body&gt;</code>.</li>
+                          <li class="mb-1"><strong>"Assignment to constant variable":</strong> you tried to change a <code>const</code>. Use <code>let</code> for values that change.</li>
+                          <li class="mb-1"><strong>Red "Unexpected identifier":</strong> a quote or a comma is missing on that line.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your project folder → <code>script.js</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ script.js linked at the bottom of body · ☐ a const and a let used correctly · ☐ an age calculation logged to the Console · ☐ userName, userColor, and userSuperpower in camelCase</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your script.js file.</p>
                 <a href="/student/notes.html?chapter=9&amp;day=1&amp;turnin=Milestone%201%3A%20The%20Data%20Vault%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 1</a>
             </div>
         </div>
@@ -773,13 +799,31 @@ console.log(sparkyGreeting);</code></pre>
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 2: Reusable UI Functions [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Engineer modular logic using parameters, scope, and return values.</p>
-                <ol>
-                    <li class="mb-2">Write a function called <code>calculateTax</code> that takes two parameters: <code>price</code> and <code>taxRate</code>. Inside, multiply them and <code>return</code> the result.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Create a function named <code>renderProfile</code>. It should take three inputs (name, color, power). Use <strong>Template Literals</strong> to easily inject these variables into a text string.</li>
-                    <li class="mb-2">Use the <code>return</code> keyword to output a full string sentence combining them (e.g., "Alex loves Blue and can Fly!") for the client app.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>script.js</code>.</p>
+                  <p><strong>Objective:</strong> Engineer modular logic using parameters, scope, and return values.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 30 minutes · <strong>You need:</strong> your <code>profile-app</code> · <strong>Turn in:</strong> your <code>script.js</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · A function that returns a value</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>function calculateTax(price, taxRate) {
+    return price * taxRate;
+}
+console.log(calculateTax(20, 0.08));   // 1.6</code></pre>
+                  <p class="mb-2"><code>price</code> and <code>taxRate</code> are <strong>parameters</strong>: the inputs. <code>return</code> sends the answer back.</p>
+                  <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 2:</strong> renderProfile with a template literal</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>function renderProfile(name, color, power) {
+    return `${name} loves ${color} and can ${power}!`;
+}
+console.log(renderProfile(userName, userColor, userSuperpower));</code></pre>
+                  <p class="mb-2">The backticks ( <code>`</code> , the key left of 1) make a <strong>template literal</strong>: <code>${…}</code> drops a variable right into the sentence.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> "Alex loves Blue and can Fly!" (with your values) in the Console.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>The Console shows <code>${name}</code> as text:</strong> you used quote marks instead of backticks.</li>
+                          <li class="mb-1"><strong>"undefined":</strong> you forgot <code>return</code>, or called the function with fewer than 3 values.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your project folder → <code>script.js</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ calculateTax takes 2 parameters and returns the product · ☐ renderProfile takes name, color, and power · ☐ it uses a template literal · ☐ it returns the full sentence</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated script.js.</p>
                 <a href="/student/notes.html?chapter=9&amp;day=2&amp;turnin=Milestone%202%3A%20Reusable%20UI%20Functions%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 2</a>
             </div>
         </div>
@@ -833,13 +877,32 @@ console.log("Is Penny happy? " + isPennyHappy); // Output: true</code></pre>
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 3: Decision Engine Lab [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Implement strict equality and branching logic.</p>
-                <ol>
-                    <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Inside your <code>renderProfile</code> function, add an <code>if/else</code> statement.</li>
-                    <li class="mb-2">If the user picked the <code>userColor</code> "Red," the function should return a special "Elite Hero" message. Ensure you use strict equality (<code>===</code>) to check the color!</li>
-                    <li class="mb-2">Else, return the standard message.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated <code>script.js</code>.</p>
+                  <p><strong>Objective:</strong> Implement strict equality and branching logic.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your <code>profile-app</code> · <strong>Turn in:</strong> your <code>script.js</code></p>
+                  <h6 class="fw-bold mt-3">Step 1 · <strong>MILESTONE STEP 3:</strong> add a decision</h6>
+                  <p class="mb-2">Change <code>renderProfile</code> so a user who picks Red gets a special message:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>function renderProfile(name, color, power) {
+    if (color === "Red") {
+        return `🔥 ELITE HERO: ${name} wields ${color} and can ${power}!`;
+    } else {
+        return `${name} loves ${color} and can ${power}!`;
+    }
+}</code></pre>
+                  <p class="mb-2"><code>===</code> is <strong>strict equality</strong>: same value <em>and</em> same type. A single <code>=</code> assigns a value; it doesn't compare.</p>
+                  <h6 class="fw-bold mt-3">Step 2 · Test both paths</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>console.log(renderProfile("Alex", "Red", "Fly"));
+console.log(renderProfile("Sam", "Blue", "Swim"));</code></pre>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> the Elite Hero message for Red, the normal message for Blue.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>Everyone gets Elite Hero:</strong> you wrote <code>=</code> instead of <code>===</code>.</li>
+                          <li class="mb-1"><strong>"red" doesn't work:</strong> that's expected for now. The Project fixes capital letters.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → your project folder → <code>script.js</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ an if/else inside renderProfile · ☐ === used for the check · ☐ Red returns the Elite Hero message · ☐ everything else returns the normal message</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your updated script.js.</p>
                 <a href="/student/notes.html?chapter=9&amp;day=3&amp;turnin=Milestone%203%3A%20Decision%20Engine%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 3</a>
             </div>
         </div>
@@ -960,13 +1023,36 @@ factButton.addEventListener("click", function() {
         <div class="card border-success shadow-sm my-4 mt-5 text-start">
             <div class="card-header bg-success text-white fw-bold">Milestone 4: The Interactive Wire Lab [25 pts]</div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Synthesize DOM selection with Event Listeners to trigger logic.</p>
-                <ol>
-                    <li class="mb-2">Create a <code>&lt;button id="testBtn"&gt;</code> in your HTML.</li>
-                    <li class="mb-2"><strong>MILESTONE STEP 4:</strong> In your JS, use <code>querySelector</code> to grab the button.</li>
-                    <li class="mb-2">Attach an <code>addEventListener</code> listening for a <code>'click'</code>. When clicked, it should grab the <code>.value</code> from your inputs, pass them into your <code>renderProfile</code> function, and output the result to a blank div using <code>.innerText</code>.</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold">Turn In: Upload your <code>script.js</code>.</p>
+                  <p><strong>Objective:</strong> Synthesize DOM selection with Event Listeners to trigger logic.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 35 minutes · <strong>You need:</strong> your <code>profile-app</code> · <strong>Turn in:</strong> your <code>script.js</code> (and <code>index.html</code>)</p>
+                  <h6 class="fw-bold mt-3">Step 1 · Add the inputs, button, and output</h6>
+                  <p class="mb-2">In <code>index.html</code>, above your script tag:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>&lt;input id="nameInput" placeholder="Name"&gt;
+&lt;input id="colorInput" placeholder="Favorite color"&gt;
+&lt;input id="powerInput" placeholder="Superpower"&gt;
+&lt;button id="testBtn"&gt;Make My Profile&lt;/button&gt;
+&lt;div id="output"&gt;&lt;/div&gt;</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 4:</strong> wire the button</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>const testBtn = document.querySelector("#testBtn");
+const output = document.querySelector("#output");
+testBtn.addEventListener("click", function () {
+    const name = document.querySelector("#nameInput").value;
+    const color = document.querySelector("#colorInput").value;
+    const power = document.querySelector("#powerInput").value;
+    output.innerText = renderProfile(name, color, power);
+});</code></pre>
+                  <p class="mb-2"><code>.value</code> reads what the user typed. <code>.innerText</code> puts text on the page.</p>
+                  <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> type a name, color, and power, click the button, and your sentence appears on the page.</div>
+                  <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                      <ul class="mt-2 mb-0">
+                          <li class="mb-1"><strong>"Cannot read properties of null":</strong> an id doesn't match. <code>#nameInput</code> in JS needs <code>id="nameInput"</code> in HTML.</li>
+                          <li class="mb-1"><strong>Nothing happens:</strong> your script tag must be below the button in the HTML.</li>
+                      </ul>
+                  </details>
+                  <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                  <p class="mb-2">Save both files. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → <code>profile-app</code> → hold <strong>Ctrl</strong> and pick <code>script.js</code> and <code>index.html</code> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ a button with id testBtn · ☐ querySelector grabs the button and inputs · ☐ a click listener reads each .value · ☐ the result shows on the page with .innerText</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Upload your script.js (and index.html).</p>
                 <a href="/student/notes.html?chapter=9&amp;day=4&amp;turnin=Milestone%204%3A%20The%20Interactive%20Wire%20Lab%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 4</a>
             </div>
         </div>
@@ -1195,14 +1281,39 @@ btn.addEventListener("click", fn);
                 🏆 Project: Profile App Assembly [100 pts]
             </div>
             <div class="card-body small p-4">
-                <p><strong>Objective:</strong> Synthesize your JS logic to build an interactive application.</p>
-                <ol>
-                    <li class="mb-2"><strong>Assemble:</strong> Connect an Event Listener to the "Generate Profile" button in your HTML form.</li>
-                    <li class="mb-2"><strong>Logic:</strong> When clicked, use <code>event.preventDefault()</code> to stop the page from refreshing. Grab the <code>.value</code> from your 3 inputs, pass them into your <code>renderProfile</code> function, and output the text to an empty <code>&lt;div&gt;</code> using <code>.innerText</code>.</li>
-                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Instead of just updating text, use <code>document.createElement()</code> and <code>appendChild()</code> to spawn a brand new profile card every time the button is clicked!</li>
-                    <li class="mb-2"><strong>QA Check:</strong> Test your app. Does it freeze if you type "red" instead of "Red"? Fix your logic errors!</li>
-                </ol>
-                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Choose "An Entire Folder" from the Dropbox below and upload your completed App folder.</p>
+                  <p><strong>Objective:</strong> Synthesize your JS logic to build an interactive application.</p>
+                  <p class="mb-3"><strong>Time:</strong> about 2 classes · <strong>You need:</strong> your <code>profile-app</code> · <strong>Turn in:</strong> your whole <code>profile-app</code> folder</p>
+                  <h6 class="fw-bold mt-3">Step 1 · Wrap the inputs in a form</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>&lt;form id="profileForm"&gt;
+    &lt;input id="nameInput" placeholder="Name" required&gt;
+    &lt;input id="colorInput" placeholder="Favorite color" required&gt;
+    &lt;input id="powerInput" placeholder="Superpower" required&gt;
+    &lt;button type="submit"&gt;Generate Profile&lt;/button&gt;
+&lt;/form&gt;
+&lt;div id="output"&gt;&lt;/div&gt;</code></pre>
+                  <h6 class="fw-bold mt-3">Step 2 · Listen for submit and stop the refresh</h6>
+                  <pre class="p-3 rounded no-copy mb-2"><code>const form = document.querySelector("#profileForm");
+form.addEventListener("submit", function (event) {
+    event.preventDefault();   // stops the page from reloading
+    const name = document.querySelector("#nameInput").value;
+    const color = document.querySelector("#colorInput").value;
+    const power = document.querySelector("#powerInput").value;
+    document.querySelector("#output").innerText = renderProfile(name, color, power);
+});</code></pre>
+                  <h6 class="fw-bold mt-3">Step 3 · QA: fix the "red" bug</h6>
+                  <p class="mb-2">Type <strong>red</strong> (lowercase). No Elite Hero? Make the check ignore capital letters:</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>if (color.toLowerCase() === "red") {</code></pre>
+                  <p class="mb-2">Test: Red, red, RED, and Blue. Try clicking with an empty box.</p>
+                  <div class="border border-primary rounded p-3 mb-3 bg-light"><p class="fw-bold mb-2">🚀 Level 4.0 Challenge: a new card every click</p>
+                  <pre class="p-3 rounded no-copy mb-2"><code>const card = document.createElement("div");
+card.className = "profile-card";
+card.innerText = renderProfile(name, color, power);
+document.querySelector("#output").appendChild(card);</code></pre>
+                  </div>
+                  <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                  <p class="mb-2">Save everything. Click <strong>Jump to Dropbox</strong> below → <strong>Whole folder</strong> → <strong>Choose Files</strong> → your project folder → <strong>Upload</strong> → <strong>Upload to Teacher Server</strong>.</p>
+                  <p class="mb-2"><strong>Full credit checklist:</strong> ☐ a form with 3 inputs and a Generate Profile button · ☐ event.preventDefault() stops the refresh · ☐ the profile shows on the page · ☐ red, Red, and RED all work</p>
+                  <p class="mb-3 text-danger fw-bold">Turn In: Choose "Whole folder" from the Dropbox below and upload your completed profile-app folder.</p>
                 <a href="/student/notes.html?chapter=9&amp;day=6&amp;turnin=Project%3A%20Profile%20App%20Assembly%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 6</a>
             </div>
         </div>

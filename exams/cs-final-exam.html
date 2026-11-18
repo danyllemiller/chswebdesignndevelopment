@@ -51,16 +51,10 @@
 <script>
     window.onload = async () => {
         try {
-            // Fetch questions from every unit (0-8) for the comprehensive final
-            const allByUnit = {};
-
-            // Unit 0 is not included in fetchQuestionsForWeightedMix, fetch separately
-            allByUnit[0] = await window.fetchExamQuestionsFromAPI(0);
-
-            // Units 1-8 via the standard weighted-mix fetcher
-            const units1to8 = await window.fetchQuestionsForWeightedMix(8);
-            Object.assign(allByUnit, units1to8);
-
+            // The CS Final is the shared 100-question CFA (exam_id Final-Exam in
+            // the questions table). Every student gets all 100 in a shuffled
+            // order; examLogicCS.js shuffles each question's choices, and
+            // grading matches on the answer text.
             // Shuffle helper
             const shuffle = arr => {
                 const a = [...arr];
@@ -71,14 +65,9 @@
                 return a;
             };
 
-            // Take up to 12 questions per unit, shuffle each pool first
-            const picked = [];
-            for (let u = 0; u <= 8; u++) {
-                picked.push(...shuffle(allByUnit[u] || []).slice(0, 12));
-            }
-
-            // Final shuffle; cap at 100
-            const questions = shuffle(picked).slice(0, 100);
+            const bank = await window.fetchExamQuestionsFromAPI('final');
+            if (!bank.length) throw new Error('The CS Final question bank is empty.');
+            const questions = shuffle(bank);
 
             initAdaptiveExam({
                 unit: 9,

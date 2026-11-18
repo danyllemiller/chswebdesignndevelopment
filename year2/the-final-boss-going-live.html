@@ -173,12 +173,41 @@
                 <div class="card border-success shadow-sm h-100">
                     <div class="card-header bg-success text-white fw-bold">Milestone 1: Manual FTP Upload [25 pts]</div>
                     <div class="card-body small p-4">
-                        <p><strong>Objective:</strong> Experience legacy server management using SFTP — using your actual Portfolio project, not a throwaway file, so you can honestly compare this method to Lab 2's modern one.</p>
+                        <p><strong>Objective:</strong> Experience publishing by hand, the way FTP-era developers did: upload your actual Portfolio project manually, so you can honestly compare this method to Milestone 2's modern push-to-deploy.</p>
+                        <p class="mb-3"><strong>Time:</strong> about 25 minutes · <strong>You need:</strong> your <code>portfolio-repo</code> folder and your GitHub login · <strong>Turn in:</strong> 1 screenshot</p>
+                        <p class="mb-2"><em>Why not real FTP?</em> FTP needs a server with student logins and passwords. Netlify's drag-and-drop upload works the same way: you copy files to a server by hand, with no Git and no automation.</p>
+
+                        <h6 class="fw-bold mt-3">Step 1 · Have your folder ready</h6>
+                        <p class="mb-2">Your <code>portfolio-repo</code> folder should be on the Desktop. Not on this laptop? In Git Bash: <code>cd ~/Desktop</code> → <code>git clone https://github.com/YOUR-USERNAME/portfolio-repo.git</code>.</p>
+
+                        <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 1:</strong> upload it by hand</h6>
                         <ol>
-                            <li class="mb-2">Use the provided credentials to log into our school's sandbox server via FileZilla.</li>
-                            <li class="mb-2"><strong>MILESTONE STEP 1:</strong> Upload your actual Portfolio project folder to the <code>/public_html</code> directory. Verify the site is live by visiting the temporary IP address.</li>
-                            <li class="mb-2">Now change one line of text in your project locally and re-upload it via FileZilla to update the live sandbox copy. Time how long that took, start to finish — you'll compare it to Lab 2's push-to-deploy time.</li>
+                            <li class="mb-1">In Chrome, go to <strong>app.netlify.com</strong> → <strong>Sign up</strong> or <strong>Log in</strong> with <strong>GitHub</strong>. (Logged in, your site stays up. Without logging in, it disappears after an hour.)</li>
+                            <li class="mb-1">Click <strong>Add new project</strong> (or <strong>Add new site</strong>) → <strong>Deploy manually</strong>.</li>
+                            <li class="mb-1">Open File Explorer next to Chrome. <strong>Drag your whole <code>portfolio-repo</code> folder</strong> onto the box that says to drag and drop your project folder.</li>
+                            <li class="mb-1">Wait for "Published," then click your new link.</li>
                         </ol>
+                        <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your portfolio live at a <code>…netlify.app</code> link, with every image showing.</div>
+                        <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                            <ul class="mt-2 mb-0">
+                                <li class="mb-1"><strong>An image works on your computer but not live:</strong> web servers care about capital letters. <code>Logo.png</code> and <code>logo.png</code> are different files there. Make the file name and the <code>src</code> in your HTML match exactly.</li>
+                                <li class="mb-1"><strong>"Page not found":</strong> you dragged a folder that has another folder inside it. Drag the folder that has <code>index.html</code> directly in it.</li>
+                                <li class="mb-1"><strong>No "Deploy manually" option:</strong> look for the box that says to drag and drop your project folder on the Projects page.</li>
+                            </ul>
+                        </details>
+
+                        <h6 class="fw-bold mt-3">Step 3 · Time a manual update</h6>
+                        <ol>
+                            <li class="mb-1">Start a timer.</li>
+                            <li class="mb-1">Change one line of text in your <code>index.html</code> (Notepad) and save.</li>
+                            <li class="mb-1">In Netlify, open your project → <strong>Deploys</strong> → drag your whole folder onto the box again.</li>
+                            <li class="mb-1">Stop the timer when the live site shows your change (<strong>Ctrl + Shift + R</strong> to reload). Write the time in your notebook. You'll compare it with Milestone 2.</li>
+                        </ol>
+
+                        <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                        <p class="mb-2">On your live site, with your change and the address bar showing, press <strong>Windows + PrtScn</strong>. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Pictures → Screenshots → the newest one → <strong>Upload to Teacher Server</strong>. Before the laptop goes back, log out of Netlify and GitHub.</p>
+                        <p class="mb-2"><strong>Full credit checklist:</strong> ☐ your portfolio is live from a manual upload · ☐ every image shows (file names match exactly) · ☐ you re-uploaded a change and timed it · ☐ the screenshot shows your change and the address bar</p>
+                        <p class="mb-3 text-danger fw-bold">Turn In: A screenshot of your live site showing your change and the address bar.</p>
                         <a href="/student/notes.html?chapter=16&amp;day=1&amp;turnin=Milestone%201%3A%20Manual%20FTP%20Upload%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold w-100 shadow-sm mt-auto">⬇️ Dropbox: Notebook Day 1</a>
                     </div>
                 </div>
@@ -188,10 +217,43 @@
                     <div class="card-header bg-success text-white fw-bold">Milestone 2: Automated Cloud Launch [25 pts]</div>
                     <div class="card-body small p-4">
                         <p><strong>Objective:</strong> Set up a modern CI/CD deployment pipeline.</p>
+                        <p class="mb-3"><strong>Time:</strong> about 30 minutes · <strong>You need:</strong> your GitHub login and your <code>portfolio-repo</code> on GitHub (from Chapter 11) · <strong>Turn in:</strong> 1 screenshot</p>
+
+                        <h6 class="fw-bold mt-3">Step 1 · Connect Netlify to GitHub</h6>
                         <ol>
-                            <li class="mb-2">Log into Netlify using your GitHub account. Link your Portfolio repository.</li>
-                            <li class="mb-2"><strong>MILESTONE STEP 2:</strong> Click "Deploy". Once live, if you want to update your live Netlify site, what is the correct workflow? <strong>Change code locally -> Save -> Commit -> Push to GitHub.</strong> Do this now to verify the webhook works!</li>
+                            <li class="mb-1">In Chrome, go to <strong>app.netlify.com</strong> → <strong>Sign up</strong> (or Log in) → <strong>GitHub</strong>. Sign in to GitHub and click <strong>Authorize Netlify</strong>.</li>
+                            <li class="mb-1">Click <strong>Add new project</strong> (it may say <strong>Add new site</strong>) → <strong>Import an existing project</strong> → <strong>GitHub</strong>. If GitHub asks, click <strong>Install</strong> or <strong>Authorize</strong> for Netlify.</li>
+                            <li class="mb-1">Pick your <code>portfolio-repo</code>. Leave the build settings blank (it's plain HTML). Click <strong>Deploy</strong>.</li>
                         </ol>
+                        <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> after about a minute, "Published" and a green link like <code>https://random-name-123.netlify.app</code>. Click it: your portfolio is live.</div>
+                        <p class="mb-2">Optional: <strong>Project configuration → Change project name</strong> to something professional, like <code>jordan-reyes-portfolio</code>. Write your live link in your notebook.</p>
+
+                        <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 2:</strong> prove the pipeline works</h6>
+                        <p class="mb-2">Change one thing in your code, then push. Netlify should update the live site by itself. In Git Bash:</p>
+                        <pre class="p-3 rounded no-copy mb-2"><code>cd ~/Desktop/portfolio-repo
+git pull
+notepad index.html</code></pre>
+                        <p class="mb-2">Change your headline or add a sentence. Save and close. Then:</p>
+                        <pre class="p-3 rounded no-copy mb-2"><code>git add .
+git commit -m "Test Netlify auto-deploy"
+git push</code></pre>
+                        <p class="mb-2">Watch the <strong>Deploys</strong> tab in Netlify. When the new deploy says <strong>Published</strong>, refresh your live link.</p>
+                        <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your change on the live site, and 2 deploys in the list. The newest one shows your commit message.</div>
+                        <p class="mb-2"><em>No <code>portfolio-repo</code> on this laptop?</em> <code>cd ~/Desktop</code> → <code>git clone https://github.com/YOUR-USERNAME/portfolio-repo.git</code> → run your two <code>git config</code> lines inside it (Chapter 11, Milestone 2).</p>
+                        <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                            <ul class="mt-2 mb-0">
+                                <li class="mb-1"><strong>Your repo isn't in Netlify's list:</strong> click <strong>Configure the Netlify app on GitHub</strong> and give it access to <code>portfolio-repo</code>.</li>
+                                <li class="mb-1"><strong>The live site shows "Page not found":</strong> your <code>index.html</code> must be in the top folder of the repo, not inside another folder.</li>
+                                <li class="mb-1"><strong>No new deploy after you push:</strong> check that the push worked (refresh GitHub; your commit is there), then click <strong>Trigger deploy</strong> in Netlify.</li>
+                                <li class="mb-1"><strong>The change doesn't show:</strong> press <strong>Ctrl + Shift + R</strong> to reload without the cache.</li>
+                            </ul>
+                        </details>
+
+                        <h6 class="fw-bold mt-3">Step 3 · Turn in</h6>
+                        <p class="mb-2">On Netlify's <strong>Deploys</strong> page, with both deploys showing, press <strong>Windows + PrtScn</strong> (saves to Pictures → Screenshots). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → pick the newest screenshot → <strong>Upload to Teacher Server</strong>.</p>
+                        <p class="mb-2"><strong>Before the laptop goes back:</strong> log out of Netlify and GitHub, close Chrome, and remove any <code>git:https://github.com</code> login in Credential Manager.</p>
+                        <p class="mb-2"><strong>Full credit checklist:</strong> ☐ Netlify is connected to your GitHub repo · ☐ the first deploy is Published and the site is live · ☐ a pushed change deployed by itself (2 deploys) · ☐ the screenshot shows both deploys</p>
+                        <p class="mb-3 text-danger fw-bold">Turn In: A screenshot of your Netlify Deploys page showing both deploys.</p>
                         <a href="/student/notes.html?chapter=16&amp;day=2&amp;turnin=Milestone%202%3A%20Automated%20Cloud%20Launch%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold w-100 shadow-sm mt-auto">⬇️ Dropbox: Notebook Day 2</a>
                     </div>
                 </div>
@@ -555,11 +617,37 @@
                     <div class="card-header bg-success text-white fw-bold">Milestone 3: The QA Audit [25 pts]</div>
                     <div class="card-body small p-4">
                         <p><strong>Objective:</strong> Perform professional Quality Assurance on a peer's project — and receive the same for your own, since the bugs your partner finds are exactly what you'll fix in Lab 4.</p>
+                        <p class="mb-3"><strong>Time:</strong> about 30 minutes · <strong>You need:</strong> your partner's live link and a Google Doc · <strong>Turn in:</strong> 1 PDF</p>
+
+                        <h6 class="fw-bold mt-3">Step 1 · Trade links</h6>
+                        <p class="mb-2">Give your partner your live Netlify link, and get theirs. Make a Google Doc named <strong>QA Audit Report, First Last</strong>. Write whose site you're testing and its link at the top.</p>
+
+                        <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 3:</strong> run the 3 tests on your partner's site</h6>
                         <ol>
-                            <li class="mb-2">Exchange URLs with a partner.</li>
-                            <li class="mb-2"><strong>MILESTONE STEP 3:</strong> Test for Link Rot, run the Resize Test, and check the Console. Report 2 bugs back to your partner to fix.</li>
-                            <li class="mb-2">Receive your partner's 2 bugs on your own site. Write them down — Lab 4's Lighthouse fix should address at least one of them, not just whatever score issue is easiest.</li>
+                            <li class="mb-1"><strong>Link rot:</strong> click every link in the menu and on every page. Does each one open the right page? Does every image show?</li>
+                            <li class="mb-1"><strong>Resize test:</strong> press <strong>F12</strong>, then <strong>Ctrl + Shift + M</strong>. Pick a phone at the top, then a tablet. Is anything cut off, overlapping, or too small to tap?</li>
+                            <li class="mb-1"><strong>Console check:</strong> in DevTools, click <strong>Console</strong> and reload. Any red errors (like a missing file or a 404)?</li>
                         </ol>
+                        <p class="mb-2">Also use the <strong>Pre-Launch Security &amp; Quality Checklist</strong> on this page.</p>
+
+                        <h6 class="fw-bold mt-3">Step 3 · Write up 2 bugs, professionally</h6>
+                        <p class="mb-2">For each bug, copy this into your doc and fill it in:</p>
+                        <pre class="p-3 rounded no-copy mb-2"><code>Bug #1
+Page / link:
+Steps to see it: 1) ... 2) ...
+What should happen:
+What actually happens:
+How serious: High (broken, can't use it) / Medium / Low (looks off)
+Screenshot: (paste one)</code></pre>
+                        <p class="mb-2">Write about the site, not the person: "The Contact link returns a 404," not "you messed up the link."</p>
+
+                        <h6 class="fw-bold mt-3">Step 4 · Get your own report back</h6>
+                        <p class="mb-2">Your partner gives you the 2 bugs they found on <strong>your</strong> site. Copy them into your notebook. You'll fix at least one in Milestone 4.</p>
+
+                        <h6 class="fw-bold mt-3">Step 5 · Turn in</h6>
+                        <p class="mb-2"><strong>File → Download → PDF Document (.pdf)</strong>. Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Downloads → your PDF → <strong>Upload to Teacher Server</strong>.</p>
+                        <p class="mb-2"><strong>Full credit checklist:</strong> ☐ all 3 tests run on your partner's site · ☐ 2 bugs, each with the page, steps, expected vs. actual, and how serious · ☐ a screenshot for each bug · ☐ professional wording · ☐ you wrote down the 2 bugs found on your site</p>
+                        <p class="mb-3 text-danger fw-bold">Turn In: Upload your QA Audit Report as a PDF.</p>
                         <a href="/student/notes.html?chapter=16&amp;day=6&amp;turnin=Milestone%203%3A%20The%20QA%20Audit%20Report%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold w-100 shadow-sm mt-auto">⬇️ Dropbox: Notebook Day 6</a>
                     </div>
                 </div>
@@ -569,10 +657,45 @@
                     <div class="card-header bg-success text-white fw-bold">Milestone 4: Lighthouse Polish [25 pts]</div>
                     <div class="card-body small p-4">
                         <p><strong>Objective:</strong> Analyze performance metrics and optimize assets — closing out the bugs your partner reported in Lab 3.</p>
+                        <p class="mb-3"><strong>Time:</strong> about 40 minutes · <strong>You need:</strong> your live Netlify link, your <code>portfolio-repo</code>, and the 2 bugs from Milestone 3 · <strong>Turn in:</strong> 1 PDF</p>
+
+                        <h6 class="fw-bold mt-3">Step 1 · Run Lighthouse (before)</h6>
                         <ol>
-                            <li class="mb-2">Run a Lighthouse Audit on your live site.</li>
-                            <li class="mb-2"><strong>MILESTONE STEP 4:</strong> Fix at least one of the 2 bugs your partner reported in Lab 3, plus implement at least one Lighthouse fix to raise your score. What is the purpose of a 'Favicon'? <strong>It is the small logo icon that appears in the browser tab, adding a final professional touch.</strong> Add one now!</li>
+                            <li class="mb-1">Open your <strong>live</strong> link in Chrome (not the file on your computer).</li>
+                            <li class="mb-1">Press <strong>F12</strong> → click the <strong>Lighthouse</strong> tab (use <strong>»</strong> if you don't see it). Device: <strong>Mobile</strong>. Check all four categories. Click <strong>Analyze page load</strong>.</li>
+                            <li class="mb-1">Take a screenshot of the 4 scores (<strong>Windows + PrtScn</strong>). Write them in your notebook.</li>
+                            <li class="mb-1">Scroll to <strong>Diagnostics</strong> or <strong>Opportunities</strong> and pick one item you can fix (for example: images too large, missing <code>alt</code> text, low-contrast text, no meta description).</li>
                         </ol>
+
+                        <h6 class="fw-bold mt-3">Step 2 · <strong>MILESTONE STEP 4:</strong> fix 3 things</h6>
+                        <p class="mb-2">In Git Bash: <code>cd ~/Desktop/portfolio-repo</code>, then <code>git pull</code>. Then:</p>
+                        <ol>
+                            <li class="mb-1"><strong>One partner bug</strong> from Milestone 3.</li>
+                            <li class="mb-1"><strong>One Lighthouse fix</strong> from Step 1.</li>
+                            <li class="mb-1"><strong>A favicon</strong> (the little icon in the browser tab). Type <code>notepad favicon.svg</code> → Yes → type this line (pick your own emoji) → save:</li>
+                        </ol>
+                        <pre class="p-3 rounded no-copy mb-2"><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"&gt;&lt;text y=".9em" font-size="90"&gt;🚀&lt;/text&gt;&lt;/svg&gt;</code></pre>
+                        <p class="mb-2">Then type <code>notepad index.html</code> and add this line inside <code>&lt;head&gt;</code> (add it to every page you have):</p>
+                        <pre class="p-3 rounded no-copy mb-2"><code>&lt;link rel="icon" href="favicon.svg"&gt;</code></pre>
+                        <pre class="p-3 rounded no-copy mb-2"><code>git add .
+git commit -m "Lighthouse polish: favicon and fixes"
+git push</code></pre>
+
+                        <h6 class="fw-bold mt-3">Step 3 · Run Lighthouse again (after)</h6>
+                        <p class="mb-2">Wait for Netlify to publish, then press <strong>Ctrl + Shift + R</strong> on your live site and run Lighthouse again. Take a screenshot of the new scores.</p>
+                        <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> your icon in the browser tab, and at least one score the same or higher than before.</div>
+                        <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
+                            <ul class="mt-2 mb-0">
+                                <li class="mb-1"><strong>No Lighthouse tab:</strong> click <strong>»</strong> in the DevTools tab bar → Lighthouse.</li>
+                                <li class="mb-1"><strong>The favicon doesn't show:</strong> check the file is named exactly <code>favicon.svg</code> in the same folder as <code>index.html</code>, then hard-reload (<strong>Ctrl + Shift + R</strong>).</li>
+                                <li class="mb-1"><strong>Scores jump around:</strong> that's normal. Run it twice and use the higher one.</li>
+                            </ul>
+                        </details>
+
+                        <h6 class="fw-bold mt-3">Step 4 · Turn in</h6>
+                        <p class="mb-2">Make a Google Doc named <strong>Lighthouse Polish, First Last</strong>. Add both score screenshots (<strong>Insert → Image → Upload from computer</strong> → Pictures → Screenshots), then list your 3 fixes: the partner bug, the Lighthouse fix, and the favicon. <strong>File → Download → PDF</strong>, then <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → Downloads → your PDF → <strong>Upload to Teacher Server</strong>.</p>
+                        <p class="mb-2"><strong>Full credit checklist:</strong> ☐ Lighthouse run on your <strong>live</strong> link, before and after · ☐ one partner bug fixed · ☐ one Lighthouse fix · ☐ a favicon shows in the tab · ☐ pushed and live on Netlify</p>
+                        <p class="mb-3 text-danger fw-bold">Turn In: A PDF with your before and after Lighthouse scores and your list of fixes.</p>
                         <a href="/student/notes.html?chapter=16&amp;day=7&amp;turnin=Milestone%204%3A%20Lighthouse%20Polish%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold w-100 shadow-sm mt-auto">⬇️ Dropbox: Notebook Day 7</a>
                     </div>
                 </div>
@@ -766,14 +889,37 @@
             </div>
             <div class="card-body small p-4">
                 <p><strong>Objective:</strong> Deploy a professional, optimized, and secure live app for public consumption.</p>
+                <p class="mb-3"><strong>Time:</strong> one class · <strong>You need:</strong> your best Year 2 project (or your portfolio) on GitHub · <strong>Turn in:</strong> a text file with your links</p>
+
+                <h6 class="fw-bold mt-3">Step 1 · Pick it and connect it</h6>
+                <p class="mb-2">Choose your most complex Year 2 project, or your portfolio. If it isn't on Netlify yet, connect it the same way as Milestone 2 (Add new project → Import an existing project → GitHub → your repo → Deploy).</p>
+
+                <h6 class="fw-bold mt-3">Step 2 · Final QA</h6>
+                <p class="mb-2">☐ every link and image works (no link rot) · ☐ it looks right on a phone and a tablet (F12 → Ctrl + Shift + M) · ☐ no red errors in the Console · ☐ text contrast passes (Lighthouse Accessibility shows no contrast warning) · ☐ every bug from Milestone 3 is fixed</p>
+
+                <h6 class="fw-bold mt-3">Step 3 · Lighthouse: 85 or higher</h6>
+                <p class="mb-2">Run Lighthouse on your live link (Milestone 4, Step 1). Fix things until all four scores are <strong>85+</strong>. Take a screenshot of the final scores.</p>
+
+                <h6 class="fw-bold mt-3">Step 4 · Link it from your README</h6>
+                <p class="mb-2">In Git Bash, open your repo folder and type <code>notepad README.md</code>. Near the top, add <code>Live site: https://your-site.netlify.app</code> (your real link). Save, then <code>git add .</code>, <code>git commit -m "Add live link to README"</code>, <code>git push</code>. Check that GitHub shows the link on the repo page.</p>
+
+                <div class="border border-primary rounded p-3 mb-3 bg-light">
+                    <p class="fw-bold mb-2">🚀 Level 4.0 Challenge: 95+ and social sharing tags</p>
+                    <p class="mb-2">Get every Lighthouse score to 95+, and add Open Graph tags inside <code>&lt;head&gt;</code> so your link shows a title, description, and picture when it's shared:</p>
+                    <pre class="p-3 rounded no-copy mb-0"><code>&lt;meta property="og:title" content="Jordan Reyes · Web Developer"&gt;
+&lt;meta property="og:description" content="Portfolio of web projects built at CHS."&gt;
+&lt;meta property="og:image" content="https://your-site.netlify.app/images/preview.png"&gt;
+&lt;meta property="og:url" content="https://your-site.netlify.app"&gt;</code></pre>
+                </div>
+
+                <h6 class="fw-bold mt-3">Step 5 · Turn in</h6>
                 <ol>
-                    <li class="mb-2"><strong>Assemble:</strong> Select your most complex Year 2 project (or your Portfolio site).</li>
-                    <li class="mb-2"><strong>Automation:</strong> Ensure it is connected to Netlify via GitHub for Continuous Deployment.</li>
-                    <li class="mb-2"><strong>QA Check:</strong> Perform a final QA check (all bugs fixed, no link rot, accessibility contrast passes). Run a final Lighthouse Audit (Target score: 85+).</li>
-                    <li class="mb-2"><strong>Details:</strong> Ensure your README.md on GitHub is updated with a link to the live site.</li>
-                    <li class="mb-2"><strong>Level 4.0 Challenge:</strong> Score 95+ on Lighthouse and implement custom social media sharing tags (Open Graph Tags).</li>
+                    <li class="mb-1">Open <strong>Notepad</strong>. Type your <strong>live link</strong> on line 1 and your <strong>GitHub repo link</strong> on line 2.</li>
+                    <li class="mb-1"><strong>File → Save as</strong> → Desktop → <code>live-launch.txt</code>.</li>
+                    <li class="mb-1">Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → pick <code>live-launch.txt</code> and your final Lighthouse screenshot → <strong>Upload to Teacher Server</strong>.</li>
                 </ol>
-                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload the LIVE PUBLIC URL (e.g., <code>https://your-site.netlify.app</code>) via a text document.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ the site is live on Netlify and auto-deploys from GitHub · ☐ final QA passes (links, phone and tablet, Console, contrast) · ☐ Lighthouse 85+ in all four · ☐ the README links to the live site · ☐ both links uploaded</p>
+                <p class="mb-3 text-danger fw-bold mt-4">Turn In: Upload live-launch.txt (your live public link and GitHub link) and your final Lighthouse screenshot.</p>
                 <a href="/student/notes.html?chapter=16&amp;day=9&amp;turnin=Capstone%3A%20Live%20Portfolio%20Launch%20%28100%20pts%29" class="btn btn-sm btn-outline-primary fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 9</a>
             </div>
         </div>

@@ -7,10 +7,14 @@ import { apiFetch } from '../modules/api-client.js';
 
 const PART_TITLES = {
     agency360: { A: 'Helps them learn', B: 'Safe and supportive', C: 'Cares as individuals', D: 'Classroom systems', E: 'Program health', F: 'In their own words' },
-    cs_course_review: { A: 'Helps them learn', B: 'Safe and supportive', C: 'Cares as individuals', D: 'Course systems', E: 'Course health', F: 'In their own words' }
+    cs_course_review: { A: 'Helps them learn', B: 'Safe and supportive', C: 'Cares as individuals', D: 'Course systems', E: 'Course health', F: 'In their own words' },
+    cs_semester_eval: { A: 'The content', B: 'The teaching', C: 'Was the teacher helpful?', D: 'Overall', E: 'In their own words' },
+    wd_semester_eval: { A: 'The content', B: 'The teaching', C: 'Was the teacher helpful?', D: 'Overall', E: 'Next year', F: 'In their own words' }
 };
+// Surveys scored 1-5 instead of 1-4 (shown as "avg x.xx / 5").
+const SCALE_MAX = { cs_semester_eval: 5, wd_semester_eval: 5 };
 
-const FORM_TERMS = { agency360: ['Fall', 'Spring'], cs_course_review: ['Midpoint', 'End of term'] };
+const FORM_TERMS = { agency360: ['Fall', 'Spring'], cs_course_review: ['Midpoint', 'End of term'], cs_semester_eval: ['Fall semester', 'Spring semester'], wd_semester_eval: ['Fall semester', 'Spring semester'] };
 
 function csvEscape(v) { return `"${String(v ?? '').replace(/"/g, '""')}"`; }
 
@@ -44,7 +48,7 @@ async function loadSurveyResults() {
             html += `<div class="col-6 col-md-4 col-lg-2"><div class="card text-center p-3 h-100">
                 <div class="small text-muted fw-bold">Part ${part}</div>
                 <div class="small text-muted mb-1">${partTitles[part] || ''}</div>
-                <div class="fs-4 fw-bold text-primary">${avg !== null ? avg.toFixed(2) : '—'}</div>
+                <div class="fs-4 fw-bold text-primary">${avg !== null ? avg.toFixed(2) : '—'}<span class="fs-6 text-muted"> / ${SCALE_MAX[formKey] || 4}</span></div>
             </div></div>`;
         });
         html += '</div>';
@@ -54,7 +58,7 @@ async function loadSurveyResults() {
             let resultHtml = '';
             if (entry.type === 'scale') {
                 resultHtml = entry.avg !== null
-                    ? `avg <strong>${entry.avg.toFixed(2)}</strong> (n=${entry.n}, NA=${entry.naCount})`
+                    ? `avg <strong>${entry.avg.toFixed(2)}</strong> / ${SCALE_MAX[formKey] || 4} (n=${entry.n}, NA=${entry.naCount})`
                     : `no scored responses (NA=${entry.naCount})`;
             } else if (entry.type === 'choice') {
                 resultHtml = Object.entries(entry.dist).map(([opt, n]) => `${opt}: <strong>${n}</strong>`).join(' &nbsp;·&nbsp; ');

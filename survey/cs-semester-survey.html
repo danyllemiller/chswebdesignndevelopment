@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Comp Sci End-of-Semester Survey | CHS Web Design &amp; Development</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="shortcut icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+  <link href="/css/student-pages.css" rel="stylesheet"/>
+  <link href="/css/survey.css" rel="stylesheet"/>
+
+  <script src="/js/bootstrap.bundle.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/loader.js?v=29"></script>
+  <!-- No auth-guard.js on purpose: this form must work with no login at all. -->
+</head>
+<body class="bg-light">
+
+<div id="nav-placeholder"></div>
+
+<div class="container my-4" style="max-width: 900px;">
+  <div id="survey-root"></div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script type="module">
+  import { renderSurvey } from '/js/survey-common.js';
+
+  renderSurvey({
+  "formId": "cssemestereval",
+  "formKey": "cs_semester_eval",
+  "title": "Comp Sci End-of-Semester Survey",
+  "intro": "Tell me how this semester went: the content, my teaching, and whether I was helpful. Answer honestly. It is anonymous, it is not graded, and nothing here changes your grade.",
+  "termOptions": [
+    "Fall semester",
+    "Spring semester"
+  ],
+  "termLabel": "Which semester is ending?",
+  "showPeriod": true,
+  "scaleMax": 5,
+  "parts": [
+    {
+      "key": "A",
+      "title": "The content",
+      "subtitle": "What we learned",
+      "items": [
+        {
+          "num": 1,
+          "type": "scale",
+          "text": "The topics we covered in this class were interesting."
+        },
+        {
+          "num": 2,
+          "type": "scale",
+          "text": "What I learned is useful. I can see where I would use it outside this class."
+        },
+        {
+          "num": 3,
+          "type": "scale",
+          "text": "The work was the right level of challenge for me."
+        },
+        {
+          "num": 4,
+          "type": "scale",
+          "text": "The projects and labs helped me understand the content."
+        },
+        {
+          "num": 5,
+          "type": "scale",
+          "text": "The chapter pages, notes, and videos on the class website were clear and easy to use."
+        },
+        {
+          "num": 6,
+          "type": "scale",
+          "text": "The tests and quizzes matched what we learned."
+        }
+      ]
+    },
+    {
+      "key": "B",
+      "title": "The teaching",
+      "subtitle": "How the class was taught",
+      "items": [
+        {
+          "num": 7,
+          "type": "scale",
+          "text": "The teacher explained new ideas clearly."
+        },
+        {
+          "num": 8,
+          "type": "scale",
+          "text": "The teacher was prepared and organized."
+        },
+        {
+          "num": 9,
+          "type": "scale",
+          "text": "The teacher made class interesting."
+        },
+        {
+          "num": 10,
+          "type": "scale",
+          "text": "Class time was used well."
+        },
+        {
+          "num": 11,
+          "type": "scale",
+          "text": "Grading was fair, and I knew how I would be graded."
+        },
+        {
+          "num": 12,
+          "type": "scale",
+          "text": "The feedback I got helped me improve my work."
+        }
+      ]
+    },
+    {
+      "key": "C",
+      "title": "Was the teacher helpful?",
+      "subtitle": "Getting help",
+      "items": [
+        {
+          "num": 13,
+          "type": "scale",
+          "text": "The teacher was available when I needed help."
+        },
+        {
+          "num": 14,
+          "type": "scale",
+          "text": "When I asked a question, I got a helpful answer."
+        },
+        {
+          "num": 15,
+          "type": "scale",
+          "text": "I felt comfortable asking for help."
+        },
+        {
+          "num": 16,
+          "type": "scale",
+          "text": "The teacher treated me with respect."
+        },
+        {
+          "num": 17,
+          "type": "scale",
+          "text": "The teacher cared whether I learned."
+        }
+      ]
+    },
+    {
+      "key": "D",
+      "title": "Overall",
+      "subtitle": "The big picture",
+      "items": [
+        {
+          "num": 18,
+          "type": "scale",
+          "scaleWords": "rating",
+          "text": "Overall, how would you rate this class?"
+        },
+        {
+          "num": 19,
+          "type": "scale",
+          "scaleWords": "rating",
+          "text": "Overall, how would you rate the teacher?"
+        },
+        {
+          "num": 20,
+          "type": "choice",
+          "text": "How much did you learn this semester?",
+          "options": [
+            "A lot",
+            "A fair amount",
+            "Some",
+            "Very little"
+          ]
+        },
+        {
+          "num": 21,
+          "type": "choice",
+          "text": "Would you recommend this class to a friend?",
+          "options": [
+            "Yes",
+            "Maybe",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E",
+      "title": "In your own words",
+      "subtitle": "The most useful part of this survey",
+      "items": [
+        {
+          "num": 22,
+          "type": "text",
+          "text": "What do you want the teacher to know?"
+        },
+        {
+          "num": 23,
+          "type": "text",
+          "text": "What would you change about this class if you could?"
+        },
+        {
+          "num": 24,
+          "type": "text",
+          "text": "How could the teacher have made this a better experience for you?"
+        },
+        {
+          "num": 25,
+          "type": "text",
+          "text": "What was the most valuable thing you learned or did this semester?"
+        },
+        {
+          "num": 26,
+          "type": "text",
+          "text": "Anything else?"
+        }
+      ]
+    }
+  ]
+});
+</script>
+
+</body>
+</html>

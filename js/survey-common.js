@@ -9,6 +9,10 @@
 import { apiFetch } from './modules/api-client.js';
 
 const SCALE_LABELS = { '1': 'Strongly disagree', '2': 'Disagree', '3': 'Agree', '4': 'Strongly agree', 'NA': 'Does not apply' };
+// 1-5 forms (config.scaleMax: 5). An item with scaleWords: 'rating' uses the
+// Poor..Excellent words instead of the agree/disagree words.
+const SCALE5_LABELS = { '1': 'Strongly disagree', '2': 'Disagree', '3': 'Neutral', '4': 'Agree', '5': 'Strongly agree', 'NA': 'Does not apply' };
+const RATING5_LABELS = { '1': 'Poor', '2': 'Fair', '3': 'Good', '4': 'Very good', '5': 'Excellent', 'NA': 'Does not apply' };
 
 function el(tag, attrs = {}, children = []) {
     const e = document.createElement(tag);
@@ -21,24 +25,25 @@ function el(tag, attrs = {}, children = []) {
     return e;
 }
 
-function renderScaleItem(formId, item) {
+function renderScaleItem(formId, item, scaleMax = 4) {
+    const words = scaleMax === 5 ? (item.scaleWords === 'rating' ? RATING5_LABELS : SCALE5_LABELS) : SCALE_LABELS;
     const groupName = `${formId}-q${item.num}`;
     const legend = el('legend', { class: 'survey-item-legend', text: `${item.num}. ${item.text}` });
     const fieldset = el('fieldset', { class: 'survey-scale-fieldset' }, legend);
     const optsWrap = el('div', { class: 'survey-scale-options', role: 'group' });
-    SCALE_OPTIONS().forEach(opt => {
+    SCALE_OPTIONS(scaleMax).forEach(opt => {
         const inputId = `${groupName}-${opt}`;
         const input = el('input', { type: 'radio', name: groupName, id: inputId, value: opt, class: 'survey-scale-input' });
         const label = el('label', { for: inputId, class: 'survey-scale-label' }, [
             el('span', { class: 'survey-scale-num', text: opt }),
-            el('span', { class: 'survey-scale-word', text: SCALE_LABELS[opt] })
+            el('span', { class: 'survey-scale-word', text: words[opt] })
         ]);
         optsWrap.appendChild(el('div', { class: 'survey-scale-choice' }, [input, label]));
     });
     fieldset.appendChild(optsWrap);
     return fieldset;
 }
-function SCALE_OPTIONS() { return ['1', '2', '3', '4', 'NA']; }
+function SCALE_OPTIONS(max = 4) { return max === 5 ? ['1', '2', '3', '4', '5', 'NA'] : ['1', '2', '3', '4', 'NA']; }
 
 function renderChoiceItem(formId, item) {
     const groupName = `${formId}-q${item.num}`;
@@ -71,7 +76,7 @@ function renderPartHeader(part) {
 }
 
 // Renders the whole form into #survey-root. `config`:
-// { formId, formKey, title, intro, termOptions, termLabel, showPeriod,
+// { formId, formKey, title, intro, termOptions, termLabel, showPeriod, scaleMax (4 or 5),
 //   parts: [{key, title, subtitle, items: [{num, text, type, options, placeholder}]}] }
 export function renderSurvey(config) {
     const root = document.getElementById('survey-root');
@@ -112,7 +117,7 @@ export function renderSurvey(config) {
         form.appendChild(renderPartHeader(part));
         part.items.forEach(item => {
             let node;
-            if (item.type === 'scale') node = renderScaleItem(config.formId, item);
+            if (item.type === 'scale') node = renderScaleItem(config.formId, item, config.scaleMax || 4);
             else if (item.type === 'choice') node = renderChoiceItem(config.formId, item);
             else node = renderTextItem(config.formId, item);
             form.appendChild(node);

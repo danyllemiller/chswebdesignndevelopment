@@ -129,6 +129,12 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
     if (unit === 'a' || unit === 'A') {
         examIds = ['cs-unit-a', 'cs-u-a-exam', 'cs-unit-0', 'cs-u0-exam', 'unit-0', 'unit-a', 'Unit0-Exam'];
         unitNum = 0;
+    } else if (unit === 'final') {
+        // The shared CS Final (CFA given with the other CS teacher): one fixed
+        // 100-question bank, tagged with each question's real chapter so the
+        // study guide still works. exams/cs-final-exam.html shuffles it.
+        examIds = ['Final-Exam'];
+        unitNum = 9;
     } else {
         const parsed = parseInt(unit, 10);
         if (isNaN(parsed) || parsed < 0 || parsed > 8)
@@ -159,23 +165,24 @@ router.get('/cs-exam-questions', requireLogin, async (req, res) => {
             );
             questions = rows.map(row => ({
                 id: row.id, question: row.question,
-                options: [row.option_a, row.option_b, row.option_c, row.option_d],
+                options: [row.option_a, row.option_b, row.option_c, row.option_d].filter(o => o !== null && o !== ''),
                 answer: row.answer, hint: row.hint || '',
                 chapter: row.chapter !== null ? row.chapter : unitNum
             }));
         }
 
-        if (questions.length === 0) {
+        if (questions.length === 0 && unit !== 'final') {
             const [fallbackRows] = await connection.execute(
                 `SELECT question_id AS id, question_text AS question,
                         option_a, option_b, option_c, option_d,
                         correct_answer AS answer, study_hint AS hint, chapter_number AS chapter
-                 FROM questions WHERE chapter_number = ? ORDER BY RAND()`,
+                 FROM questions WHERE chapter_number = ? AND (exam_id IS NULL OR exam_id <> 'Final-Exam')
+                 ORDER BY RAND()`,
                 [unitNum]
             );
             questions = fallbackRows.map(row => ({
                 id: row.id, question: row.question,
-                options: [row.option_a, row.option_b, row.option_c, row.option_d],
+                options: [row.option_a, row.option_b, row.option_c, row.option_d].filter(o => o !== null && o !== ''),
                 answer: row.answer, hint: row.hint || '',
                 chapter: row.chapter !== null ? row.chapter : unitNum
             }));
