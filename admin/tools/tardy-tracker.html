@@ -278,8 +278,8 @@
     const jsDay = new Date(dateStr + 'T00:00:00').getDay();
     if (jsDay === 0 || jsDay === 6) return null;
     if (info.type === 'S') return 'summer';
-    // 2-hour delay day: same A/B day, A_DELAY/B_DELAY bell times.
-    return info.delay && (info.type === 'A' || info.type === 'B') ? `${info.type}_DELAY` : info.type;
+    // 2-hour delay day: same day type, `<type>_DELAY` bell times.
+    return info.delayKey || info.type;
   }
 
   async function loadScheduleData() {
@@ -292,7 +292,10 @@
       dayTypes = parseSpecialDatesCSV(csvText);
       (eventsData.events || []).forEach(mergeEventIntoDayTypes);
       bellSchedule = bellData.schedule || [];
-      (bellData.delays || []).forEach(d => { const info = dayTypes.get(d); if (info) info.delay = true; });
+      (bellData.delays || []).forEach(d => {
+        const info = dayTypes.get(d);
+        if (info && bellSchedule.some(r => r.schedule_type === `${info.type}_DELAY`)) info.delayKey = `${info.type}_DELAY`;
+      });
     } catch (e) { console.warn('Could not load bell schedule data:', e); }
   }
 

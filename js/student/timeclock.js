@@ -215,8 +215,8 @@ function getBellScheduleKey(dayTypes, dateStr) {
     const jsDay = new Date(dateStr + 'T00:00:00').getDay();
     if (jsDay === 0 || jsDay === 6) return null;
     if (info.type === 'S') return 'summer';
-    // 2-hour delay day: same A/B day, A_DELAY/B_DELAY bell times (server/tardyLogic.js).
-    return info.delay && (info.type === 'A' || info.type === 'B') ? `${info.type}_DELAY` : info.type;
+    // 2-hour delay day: same day type, `<type>_DELAY` bell times (server/tardyLogic.js).
+    return info.delayKey || info.type;
 }
 
 // A student can be enrolled in more than one of the teacher's periods (e.g.
@@ -259,7 +259,10 @@ async function resolveTodaysBellWindow() {
 
         const dayTypes = parseSpecialDatesCSV(csvText);
         (eventsData.events || []).forEach(ev => mergeEventIntoDayTypes(dayTypes, ev));
-        (bellData.delays || []).forEach(d => { const info = dayTypes.get(d); if (info) info.delay = true; });
+        (bellData.delays || []).forEach(d => {
+            const info = dayTypes.get(d);
+            if (info && (bellData.schedule || []).some(r => r.schedule_type === `${info.type}_DELAY`)) info.delayKey = `${info.type}_DELAY`;
+        });
 
         const todayStr = getLocalTodayStr();
         const scheduleKey = getBellScheduleKey(dayTypes, todayStr);

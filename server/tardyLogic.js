@@ -84,7 +84,9 @@ function parseSpecialDatesCSV(text) {
 // times come from the A_DELAY / B_DELAY rows of bell_schedule instead. The
 // teacher turns a date on or off with the 2-Hour Delay button on the daily
 // agenda (POST /api/admin/bell-delay in server/routes/calendar.js).
-const DELAY_DAY_TYPES = new Set(['A', 'B']);
+// Any day type can have a delay version: it just needs bell_schedule rows
+// named `<type>_DELAY` (A_DELAY, B_DELAY, A_MIN_DELAY, C_DELAY...). A delay
+// day whose type has no delay schedule keeps its normal times.
 let delayTableReady = false;
 
 async function ensureDelayTable(connection) {
@@ -102,9 +104,26 @@ async function getDelayDates(connection) {
     return rows.map(r => r.d);
 }
 
-// The schedule_type to use for a day type, given whether that date is a delay day.
-function delayedScheduleKey(type, isDelay) {
-    return isDelay && DELAY_DAY_TYPES.has(type) ? `${type}_DELAY` : type;
+// The schedule types that have delay versions, e.g. Set{'A_DELAY','B_DELAY','A_MIN_DELAY'}.
+async function getDelayScheduleKeys(connection) {
+    const [rows] = await connection.execute(`SELECT DISTINCT schedule_type FROM bell_schedule WHERE schedule_type LIKE '%\\_DELAY'`);
+    return new Set(rows.map(r => r.schedule_type));
+}
+
+// The schedule_type to use for a day type, given whether that date is a delay
+// day and which delay schedules exist.
+function delayedScheduleKey(type, isDelay, delayKeys) {
+    const k = `${type}_DELAY`;
+    return isDelay && delayKeys && delayKeys.has(k) ? k : type;
+}
+
+// Marks each delay date in a dayTypes map with the schedule key it should use.
+async function markDelayDays(connection, dayTypes) {
+    const [dates, keys] = await Promise.all([getDelayDates(connection), getDelayScheduleKeys(connection)]);
+    for (const d of dates) {
+        const info = dayTypes.get(d);
+        if (info) info.delayKey = delayedScheduleKey(info.type, true, keys);
+    }
 }
 
 let dayTypesCache = null;
@@ -127,10 +146,7 @@ async function getDayTypes(connection) {
             dayTypes.set(dateStr, { type: ev.type });
         }
     });
-    for (const d of await getDelayDates(connection)) {
-        const info = dayTypes.get(d);
-        if (info) info.delay = true;
-    }
+    await markDelayDays(connection, dayTypes);
     dayTypesCache = dayTypes;
     dayTypesCacheAt = Date.now();
     return dayTypes;
@@ -141,7 +157,7 @@ function getBellScheduleKeyForDate(dayTypes, dateStr) {
     if (!info || info.type === 'OFF' || info.type === 'none') return null;
     const jsDay = new Date(dateStr + 'T00:00:00').getDay();
     if (jsDay === 0 || jsDay === 6) return null;
-    return info.type === 'S' ? 'summer' : delayedScheduleKey(info.type, info.delay);
+    return info.type === 'S' ? 'summer' : (info.delayKey || info.type);
 }
 
 // Every calendar date a given period actually meets between two dates
@@ -231,5 +247,7 @@ module.exports = {
     clearDayTypesCache,
     ensureDelayTable,
     getDelayDates,
-    delayedScheduleKey
+    getDelayScheduleKeys,
+    delayedScheduleKey,
+    markDelayDays
 };

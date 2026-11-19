@@ -1248,8 +1248,8 @@
     let calYear, calMonth, calDay, currentView = 'month';
     let calSelectedYMD = ''; // full YYYY-MM-DD of the day the user last explicitly selected
     let schoolSpecialDates = {}, bellSchedule = [];
-    let bellDelayDays = new Set(); // 2-hour delay dates: same A/B day, A_DELAY/B_DELAY bell times
-    const bellKeyFor = (ymd, type) => bellDelayDays.has(ymd) && (type === 'A' || type === 'B') ? `${type}_DELAY` : type;  // from school calendar (schoolSpecialDates: {date → {type,label}})
+    let bellDelayDays = new Set(); // 2-hour delay dates: same day type, `<type>_DELAY` bell times
+    const bellKeyFor = (ymd, type) => bellDelayDays.has(ymd) && bellSchedule.some(r => r.schedule_type === `${type}_DELAY`) ? `${type}_DELAY` : type;  // from school calendar (schoolSpecialDates: {date → {type,label}})
 
     function blockBadgeInfo(type) {
       switch (type) {

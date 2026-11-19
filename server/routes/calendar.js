@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { withConnection } = require('../db');
 const { ensureOffDaysTable, requireLogin, requireStaff } = require('../helpers');
-const { getDayTypes, getBellScheduleKeyForDate, getLocalDateStr, clearDayTypesCache, ensureDelayTable, getDelayDates, delayedScheduleKey } = require('../tardyLogic');
+const { getDayTypes, getBellScheduleKeyForDate, getLocalDateStr, clearDayTypesCache, ensureDelayTable, getDelayDates, getDelayScheduleKeys, delayedScheduleKey } = require('../tardyLogic');
 const { forgetSweeps } = require('../jobs/attendanceSweep');
 
 const CALENDAR_EVENTS_DDL = `CREATE TABLE IF NOT EXISTS calendar_events (
@@ -176,7 +176,7 @@ router.get('/bell-schedule', requireLogin, async (req, res) => {
             // day's schedule itself gets the list here; a caller asking for one
             // type on one date (?type=A&date=...) gets the delay times directly.
             delays = await getDelayDates(connection);
-            if (type && /^\d{4}-\d{2}-\d{2}$/.test(date)) type = delayedScheduleKey(type, delays.includes(date));
+            if (type && /^\d{4}-\d{2}-\d{2}$/.test(date)) type = delayedScheduleKey(type, delays.includes(date), await getDelayScheduleKeys(connection));
             if (type) {
                 return connection.execute(
                     `SELECT id, schedule_type, period_label, sort_order,

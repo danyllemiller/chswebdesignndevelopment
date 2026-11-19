@@ -729,8 +729,10 @@ let dayTypes = new Map();   // 'YYYY-MM-DD' -> { type, description }
 let bellSchedule = [];      // rows from bell_schedule table
 
 const DAY_TYPE_LABELS = { A: 'A Day', B: 'B Day', A_MIN: 'A Min Day', B_MIN: 'B Min Day', C: 'All Periods', summer: 'Summer School',
-  A_DELAY: 'A Day · 2-Hour Delay', B_DELAY: 'B Day · 2-Hour Delay' };
-// Dates on a 2-hour delay (snow day): same A/B day, A_DELAY/B_DELAY bell times.
+  A_DELAY: 'A Day · 2-Hour Delay', B_DELAY: 'B Day · 2-Hour Delay', A_MIN_DELAY: 'A Min Day · 2-Hour Delay',
+  B_MIN_DELAY: 'B Min Day · 2-Hour Delay', C_DELAY: 'All Periods · 2-Hour Delay' };
+// Dates on a 2-hour delay (snow day): same day type, `<type>_DELAY` bell times
+// (any type that has a delay schedule in the bell schedule).
 // Comes with /api/bell-schedule; toggled with the button under the day type.
 let delayDays = new Set();
 const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
@@ -789,11 +791,15 @@ function getBellScheduleKey(dateStr) {
   const calType = info?.type;
   if (!calType || calType === 'none') return null;
   if (calType === 'S') return 'summer';
-  return delayDays.has(dateStr) && (calType === 'A' || calType === 'B') ? `${calType}_DELAY` : calType;
+  return delayDays.has(dateStr) && hasDelaySchedule(calType) ? `${calType}_DELAY` : calType;
+}
+
+function hasDelaySchedule(type) {
+  return bellSchedule.some(r => r.schedule_type === `${type}_DELAY`);
 }
 
 // The 2-Hour Delay button: one click switches this date's bell times to the
-// delay schedule (and back). Only shown on regular A and B days.
+// delay schedule (and back). Only shown on day types that have a delay schedule.
 async function toggleDelay(dateStr, btn) {
   const turningOn = !delayDays.has(dateStr);
   if (turningOn && !confirm('Switch this day to the 2-hour delay bell schedule?\n\nClock-ins, tardies, and attendance will use the delay times.')) return;
@@ -846,7 +852,7 @@ function renderBellSchedule(dateStr) {
   typeDiv.textContent = DAY_TYPE_LABELS[key] || key;
   box.appendChild(typeDiv);
 
-  if (info?.type === 'A' || info?.type === 'B') {
+  if (info?.type && hasDelaySchedule(info.type)) {
     const isDelay = delayDays.has(dateStr);
     const btn = document.createElement('button');
     btn.type = 'button';
