@@ -61,6 +61,8 @@ export function computeGradeStats(keys, myGrades, registryData, courseKey) {
             if (!hasScore) {
                 if (isCsActivity) return;
                 if (registryData?.[key]?.isProjectMilestone) return;
+                // Turned in, waiting on self + peer grading: PENDING, not a 0.
+                if (registryData?.[key]?.projectPending) return;
                 const dueDate = registryData?.[key]?.dueDate;
                 const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
                 if (!isPastDue) return;

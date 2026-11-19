@@ -1623,6 +1623,18 @@
                     </table>
                 </div>
             </div>
+                <!-- Self + peer grading (same rules as CS unit projects, 2026-11-19; js/student/project-grading.js) -->
+                <div id="project-grading-panel"
+                     class="card border-info shadow-sm mx-auto text-start my-4"
+                     style="max-width: 900px;"
+                     data-chapter-project-id="13"
+                     data-course="WD"
+                     data-exam-id="ch5_milestone"
+                     data-project-label="Chapter 5 Project"
+                     data-dropbox="/student/notes.html?chapter=5&amp;day=11&amp;turnin=Project%3A%20Zero%20Error%20Audit%20%28100%20pts%29"
+                     data-rubric='[{"key": "item1", "label": "index.html passes with no errors", "description": ""}, {"key": "item2", "label": "about.html passes", "description": ""}, {"key": "item3", "label": "contact.html passes", "description": ""}, {"key": "item4", "label": "Screenshots (or the folder) uploaded", "description": ""}]'>
+                  <div class="card-body small p-4 text-muted"><i class="fas fa-spinner fa-spin me-1"></i>Loading grading tool&hellip;</div>
+                </div>
         </div>
     </div>
 
@@ -1726,5 +1738,6 @@
   <script type="module" src="/js/assignment-uploader.js"></script>
   <script type="module" src="/js/student/quick-check.js?v=4"></script>
 
+    <script type="module" src="/js/student/project-grading.js?v=11"></script>
 </body>
 </html>

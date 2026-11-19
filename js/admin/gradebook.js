@@ -53,7 +53,7 @@ function periodGroupPrefix(period) {
 let allStudents = [];
 let allGrades = {};
 let allAssignments = {};
-let pendingProjects = new Set(); // `${studentId}::${examId}` for CS unit projects awaiting upload + peer review
+let pendingProjects = new Set(); // `${studentId}::${examId}` for CS unit / WD chapter projects awaiting upload + peer review
 let calendarConfig = null;
 let privacyMode = false;
 let showSummaryColumns = true;
@@ -1755,6 +1755,9 @@ function renderGradebook(students, grades, currentPeriod, categoryFilterVal) {
                 // than counting as a punishing zero. Matches
                 // js/student/dashboard.js and server/gradeCalc.js.
                 if (reg?.isProjectMilestone) return;
+                // A turned-in WD chapter project waiting on self + peer
+                // grading is PENDING, not a 0 (server/lib/csProjectGate.js).
+                if (pendingProjects.has(`${s.studentId}::${key}`)) return;
                 // Ungraded — only count it as a missed zero once its due date
                 // has actually passed, so students aren't dinged for work
                 // that isn't due yet. Matches js/student/dashboard.js.

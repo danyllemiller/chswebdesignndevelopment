@@ -7,7 +7,7 @@ const { withConnection } = require('../db');
 const bcrypt = require('bcrypt');
 const { resolveCourseId, clampScore, requireSelfOrStaff, requireLogin } = require('../helpers');
 const { isValidDailyCode } = require('../lib/dailyCode');
-const { isCsUnitProject, hasProjectUpload, syncCsProjectGrade } = require('../lib/csProjectGate');
+const { isGatedProject, projectUnitLabel, hasProjectUpload, syncCsProjectGrade } = require('../lib/csProjectGate');
 
 // Same students.section_id -> uploads/<student_id>/ layout roster.js already
 // creates on account setup (server/routes/uploads.js writes there).
@@ -34,7 +34,7 @@ router.get('/student/section-classmates', requireLogin, async (req, res) => {
     // projects, and that section's students can be reviewed by those
     // aides, so pull both rosters no matter which side is asking.
     const withAides = (sec) => sec.startsWith('AS-') ? [sec, sec.slice(3)] : [sec, `AS-${sec}`];
-    const uploadedOnly = isCsUnitProject(uploaded_for);
+    const uploadedOnly = isGatedProject(uploaded_for);
     try {
         const rows = await withConnection(async (connection) => {
             const requested = String(section_id).toUpperCase();
@@ -140,10 +140,10 @@ async function saveEvaluationAndAggregate(connection, { chapter_project_id, exam
            max_score = VALUES(max_score), status = VALUES(status), computed_at = CURRENT_TIMESTAMP`,
         [chapter_project_id, exam_id, student_id, selfScore, peerScore, autoScore, aggregateScaled, realMaxPoints, status]
     );
-    // A CS unit project only reaches the gradebook once it has an uploaded
-    // file AND a peer review -- a self-review alone used to post a full
-    // score here (server/lib/csProjectGate.js).
-    if (isCsUnitProject(exam_id)) {
+    // A CS unit project (or WD chapter project) only reaches the gradebook
+    // once it has an uploaded file AND a peer review -- a self-review alone
+    // used to post a full score here (server/lib/csProjectGate.js).
+    if (isGatedProject(exam_id)) {
         const gate = await syncCsProjectGrade(connection, student_id, exam_id);
         return { self_score: selfScore, peer_score: peerScore, auto_score: autoScore, aggregate_score: aggregateScaled, max_score: realMaxPoints, status,
             grade_posted: gate.posted, pending_reason: gate.reason };
@@ -467,11 +467,12 @@ router.post('/student/project-evaluation', async (req, res) => {
                 if (peerRows.length === 0) {
                     return { status: 403, body: { error: 'evaluator_student_id must be an active classmate in the same section.' } };
                 }
-                // CS unit projects: only someone who has completed the unit
-                // (uploaded their own project) can review, and only an
-                // uploaded project can be reviewed (teacher decision 2026-10-23).
-                if (isCsUnitProject(exam_id)) {
-                    const unit = String(exam_id).replace(/^Unit(\d+)-Project$/, 'Unit $1');
+                // CS unit projects and WD chapter projects: only someone who
+                // has completed the unit/chapter (uploaded their own project)
+                // can review, and only an uploaded project can be reviewed
+                // (teacher decision 2026-10-23; WD 2026-11-19).
+                if (isGatedProject(exam_id)) {
+                    const unit = projectUnitLabel(exam_id);
                     if (!(await hasProjectUpload(connection, student_id, exam_id))) {
                         return { status: 403, body: { error: `This ${unit} project hasn't been uploaded yet. Upload it in the Dropbox before anyone reviews it.` } };
                     }
@@ -558,9 +559,9 @@ router.get('/student/project-aggregate', requireSelfOrStaff(), async (req, res) 
                  ORDER BY pe.created_at DESC`,
                 [chapter_project_id, exam_id, student_id]
             );
-            // CS unit projects: what's still needed before the grade posts.
+            // CS unit / WD chapter projects: what's still needed before the grade posts.
             let gate = null;
-            if (isCsUnitProject(exam_id)) {
+            if (isGatedProject(exam_id)) {
                 const [[posted]] = await connection.execute('SELECT COUNT(*) AS n FROM responses WHERE student_id = ? AND exam_id = ?', [student_id, exam_id]);
                 gate = {
                     uploaded: await hasProjectUpload(connection, student_id, exam_id),

@@ -68,6 +68,15 @@ function readMetacognition(pane, prefix) {
     return `What was hardest & how I worked through it: ${strategy}\n\nWhat I'd do differently next time: ${nextTime}`;
 }
 
+// WD chapter projects score each full-credit checklist item 0-4; this key
+// sits above the rows so the numbers mean the same thing to everyone.
+function scaleKey() {
+    return `<div class="alert alert-light border small py-2 mb-3"><strong>Score each item:</strong>
+        4 = Exemplary (done, and goes beyond) &middot; 3 = Practitioner (fully done) &middot;
+        2 = Apprentice (partly done) &middot; 1 = Novice (tried, not working yet) &middot; 0 = missing.
+        Use the project's Grading Rubric on this page as your guide.</div>`;
+}
+
 function criterionRow(name, crit, selectedVal) {
     const buttons = [0, 1, 2, 3, 4].map(v => `
         <button type="button" class="btn btn-sm ${Number(selectedVal) === v ? 'btn-primary' : 'btn-outline-primary'} rubric-score-btn"
@@ -77,7 +86,7 @@ function criterionRow(name, crit, selectedVal) {
     return `
         <div class="mb-3 pb-2 border-bottom" data-criterion-row="${crit.key}" data-bonus="${crit.bonus ? '1' : '0'}">
             <p class="mb-1 fw-bold small">${escapeHtml(crit.label)}${bonusBadge}</p>
-            <p class="mb-2 text-muted" style="font-size:.8rem;">${escapeHtml(crit.description)}</p>
+            ${crit.description ? `<p class="mb-2 text-muted" style="font-size:.8rem;">${escapeHtml(crit.description)}</p>` : ''}
             <div class="btn-group" role="group" data-name="${name}">${buttons}</div>
         </div>
     `;
@@ -155,13 +164,21 @@ async function initProjectGradingInner(container) {
     // CS's unit projects are self+peer only by design (Slides/Sheets
     // deliverables, no source code to scan) -- the Auto-Check tab is WD-only
     // now, not just quietly unconfigured for CS like it used to be.
-    const hasAutoCheck = container.dataset.course !== 'CS';
-    // CS unit projects only post to the gradebook once there's an uploaded
-    // file AND a confirmed peer review (server/lib/csProjectGate.js).
-    const isCsUnitProject = /^Unit\d+-Project$/.test(container.dataset.examId || '');
+    // CS unit projects and WD chapter projects (chN_milestone, 2026-11-19)
+    // only post to the gradebook once there's an uploaded file AND a
+    // confirmed peer review (server/lib/csProjectGate.js).
+    const isWdProject = /^ch([2-8]|1[0-6])_milestone$/.test(container.dataset.examId || '');
+    const isCsUnitProject = /^Unit\d+-Project$/.test(container.dataset.examId || '') || isWdProject;
+    // The WD chapter projects have no auto-check (only Ch1 and Ch9 do).
+    const hasAutoCheck = container.dataset.course !== 'CS' && !isWdProject;
     // "Unit4-Project" -> "Unit 4 Project", shown so a reviewer can't review
     // the wrong unit by mistake (it happened: a Unit 4 review landed on Unit 5).
-    const projectLabel = (container.dataset.examId || 'project').replace(/^Unit(\d+)-Project$/, 'Unit $1 Project');
+    const projectLabel = container.dataset.projectLabel || (container.dataset.examId || 'project').replace(/^Unit(\d+)-Project$/, 'Unit $1 Project');
+    // Where STEP 1's upload happens: the CS page's own Dropbox, or the WD
+    // chapter's Guided Notebook turn-in.
+    const dropboxHref = container.dataset.dropbox || '#submission-zone';
+    const dropboxName = isWdProject ? 'Notebook Dropbox' : 'Dropbox above';
+    const unitWord = isWdProject ? 'chapter' : 'unit';
     const PENDING_NOTE = 'Your project grade stays <strong>PENDING</strong> in the gradebook until you have <strong>uploaded your project file</strong> AND a classmate\'s <strong>peer review is confirmed</strong>. A self-assessment alone does not post a grade.';
     let rubric;
     try { rubric = JSON.parse(container.dataset.rubric); }
@@ -188,12 +205,13 @@ async function initProjectGradingInner(container) {
         } catch (e) { /* the server still enforces the rule */ }
     }
     const stopBanner = isCsUnitProject && !uploaded
-        ? `<div class="alert alert-danger fw-bold mb-3"><i class="fas fa-hand me-2"></i>STOP: do STEP 1 first. Upload your ${escapeHtml(projectLabel)} file in the <a href="#submission-zone" class="alert-link">Dropbox above</a>. Nobody can peer review your project until it's turned in.</div>`
+        ? `<div class="alert alert-danger fw-bold mb-3"><i class="fas fa-hand me-2"></i>STOP: do STEP 1 first. Upload your ${escapeHtml(projectLabel)} file in the <a href="${escapeHtml(dropboxHref)}" class="alert-link">${dropboxName}</a>. Nobody can peer review your project until it's turned in.</div>`
         : '';
     container.innerHTML = `
         <div class="card-header bg-info text-white fw-bold"><i class="fas fa-clipboard-check me-2"></i>${isCsUnitProject ? 'STEP 2: Grade the Project (only AFTER Step 1)' : `Grade the Project: Self${hasAutoCheck ? ', Peer, and Auto-Check' : ' and Peer'}`}</div>
         <div class="card-body small p-4">
             ${stopBanner}
+            ${isWdProject && uploaded ? `<p class="small mb-3"><strong>STEP 1</strong> (turn in your project in the <a href="${escapeHtml(dropboxHref)}">Notebook Dropbox</a>) is done. <strong>STEP 2:</strong> grade it here, your Self-Assessment (2A) and an in-person Peer Review (2B). Your grade stays PENDING until both your file and a signed peer review are in.</p>` : ''}
             <ul class="nav nav-tabs mb-3" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-tab="self" type="button">${isCsUnitProject ? 'STEP 2A: My Self-Assessment' : 'My Self-Assessment'}</button></li>
                 <li class="nav-item"><button class="nav-link" data-tab="peer" type="button">${isCsUnitProject ? 'STEP 2B: Peer Review (In Person)' : 'Peer Review (In Person)'}</button></li>
@@ -223,6 +241,7 @@ async function initProjectGradingInner(container) {
     selfPane.innerHTML = `
         <p class="text-muted mb-3">Rate your own work honestly against each part of the assignment. This is averaged with ${hasAutoCheck ? 'a classmate\'s review and an automatic code check' : 'a classmate\'s review'} to make your project grade.</p>
         ${isCsUnitProject ? `<div class="alert alert-warning small py-2">${PENDING_NOTE}</div>` : ''}
+        ${isWdProject ? scaleKey() : ''}
         ${rubric.map(c => criterionRow('self', c)).join('')}
         ${metacognitionFields('self')}
         <button type="button" class="btn btn-primary fw-bold" id="btn-submit-self">Submit Self-Assessment</button>
@@ -269,9 +288,9 @@ async function initProjectGradingInner(container) {
         let blockedThem = blockedMe;
         const meNotice = !isCsUnitProject ? '' : !selfUploaded
             ? `Upload your ${escapeHtml(projectLabel)} in the Dropbox first. Only a project that has been turned in can be reviewed.`
-            : noOneYet ? `No classmate has turned in their ${escapeHtml(projectLabel)} yet. Only students who have completed this unit can review it.` : '';
+            : noOneYet ? `No classmate has turned in their ${escapeHtml(projectLabel)} yet. Only students who have completed this ${unitWord} can review it.` : '';
         const themNotice = !isCsUnitProject ? '' : !selfUploaded
-            ? `You can review classmates' ${escapeHtml(projectLabel)}s after you've uploaded your own. Only students who have completed this unit can review it.`
+            ? `You can review classmates' ${escapeHtml(projectLabel)}s after you've uploaded your own. Only students who have completed this ${unitWord} can review it.`
             : noOneYet ? `No classmate has turned in their ${escapeHtml(projectLabel)} yet, so there is nothing to review.` : '';
         const classmateOptions = reviewers.map(c => `<option value="${escapeHtml(c.student_id)}">${escapeHtml(c.first_name)} ${escapeHtml(c.last_name)}</option>`).join('');
         peerPane.innerHTML = `
@@ -281,7 +300,7 @@ async function initProjectGradingInner(container) {
             </div>
             <p class="text-muted mb-3" data-peer-text="me">Stay logged in on your own computer. Have your reviewer sit with you, look at your work, and give you feedback out loud -- then they select their own name below and fill this out together with you. <strong>Your reviewer signs it at the bottom with their own password</strong> (or your teacher enters the daily code). You can't submit a peer review by yourself.</p>
             <p class="text-muted mb-3 d-none" data-peer-text="them">Use this on <strong>your own computer, signed in as yourself</strong>: your login confirms the review, so no password is needed. Pick whose project you're reviewing, look at their work with them, and fill this out.</p>
-            <div class="alert alert-primary py-2 small d-none" data-peer-only="them"><i class="fas fa-folder-open me-1"></i>You are reviewing a classmate's <strong>${escapeHtml(projectLabel)}</strong> (the project on this page). Reviewing a different unit? Open that unit's project page first.</div>
+            <div class="alert alert-primary py-2 small d-none" data-peer-only="them"><i class="fas fa-folder-open me-1"></i>You are reviewing a classmate's <strong>${escapeHtml(projectLabel)}</strong> (the project on this page). Reviewing a different ${unitWord}? Open that ${unitWord}'s project page first.</div>
             ${meNotice ? `<div class="alert alert-warning py-2 small peer-gate-notice" data-peer-only="me">${meNotice}</div>` : ''}
             ${themNotice ? `<div class="alert alert-warning py-2 small d-none peer-gate-notice" data-peer-only="them">${themNotice}</div>` : ''}
             <div class="mb-3" data-peer-only="me">
@@ -298,6 +317,7 @@ async function initProjectGradingInner(container) {
                     ${classmateOptions}
                 </select>
             </div>
+            ${isWdProject ? scaleKey() : ''}
             ${rubric.map(c => criterionRow('peer', c)).join('')}
             ${critiqueSandwichFields('peer')}
             <div class="border rounded p-3 bg-light mb-3" data-peer-only="me">
@@ -393,7 +413,7 @@ async function initProjectGradingInner(container) {
                 await recheckGate();
                 if (reviewingOther ? blockedThem : blockedMe) {
                     statusEl.innerHTML = `<span class="text-danger fw-bold">${!selfUploaded
-                        ? (reviewingOther ? `Upload your own ${escapeHtml(projectLabel)} first (STEP 1, the Dropbox), then you can review classmates.` : `This ${escapeHtml(projectLabel)} hasn't been uploaded yet. Do STEP 1 first: upload it in the Dropbox above.`)
+                        ? (reviewingOther ? `Upload your own ${escapeHtml(projectLabel)} first (STEP 1, the ${isWdProject ? 'Notebook Dropbox' : 'Dropbox'}), then you can review classmates.` : `This ${escapeHtml(projectLabel)} hasn't been uploaded yet. Do STEP 1 first: upload it in the ${dropboxName}.`)
                         : `No classmate has uploaded their ${escapeHtml(projectLabel)} yet. The reviewer has to turn in their own first.`}</span>`;
                     return;
                 }

@@ -8,6 +8,7 @@ const { resolveCourseId } = require('./helpers');
 const { clockinDate, loadClockinDays } = require('./lib/clockinDays');
 const accommodations = require('./lib/accommodations');
 const lateEnrollment = require('./lib/lateEnrollment');
+const { isWdProject, WD_PROJECT_SQL } = require('./lib/csProjectGate');
 
 const COURSE_WEIGHTS = {
     WD1:  { assignment: 0.50, project_quiz: 0.20, final: 0.20, career: 0.10 },
@@ -174,7 +175,17 @@ async function computeStudentGrade(connection, studentId, sectionId) {
         'SELECT exam_id FROM chapter_projects WHERE course_id = ?',
         [courseCode]
     );
-    const projectExamIds = new Set(projectRows.map(p => p.exam_id));
+    // WD chapter projects are the exception (teacher 2026-11-19): with nothing
+    // turned in they still count as missing (0) once past due. Only one the
+    // student turned in (or was reviewed on) that has no grade yet is
+    // PENDING and left out (server/lib/csProjectGate.js).
+    const projectExamIds = new Set(projectRows.map(p => p.exam_id).filter(id => !isWdProject(id)));
+    const [startedWdRows] = await connection.execute(
+        `SELECT exam_id FROM exam_attempts WHERE student_id = ? AND exam_id REGEXP ?
+         UNION SELECT exam_id FROM project_grade_aggregates WHERE student_id = ? AND exam_id REGEXP ?`,
+        [studentId, WD_PROJECT_SQL, studentId, WD_PROJECT_SQL]
+    );
+    const pendingWdProjects = new Set(startedWdRows.map(r => r.exam_id));
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
     let totalEarned = 0, totalPossible = 0;
@@ -238,7 +249,7 @@ async function computeStudentGrade(connection, studentId, sectionId) {
             // evaluation has actually happened yet, so there's nothing real
             // to score -- stays excluded until saveEvaluationAndAggregate
             // actually writes one.
-            if (projectExamIds.has(key)) return;
+            if (projectExamIds.has(key) || pendingWdProjects.has(key)) return;
             const dueDate = lateEnrollment.dueAfterJoin(accommodations.dueFor(formatDbDate(r.due_date), key, extraDays), joined);
             const isPastDue = !!dueDate && new Date(dueDate + 'T00:00:00') < today;
             if (!isPastDue) return;

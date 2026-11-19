@@ -10,9 +10,31 @@
 // Until then there is no responses row at all, so the gradebook shows the
 // project as PENDING (master-gradebook-data) and it never counts against
 // the student's grade (project milestones with no score are excluded).
+//
+// Web Design chapter projects (WD1 ch2-ch8, WD2 ch10-ch16 "chN_milestone")
+// follow the same upload + self + signed peer review rule (teacher
+// 2026-11-19). One difference: a WD project NOTHING was turned in for still
+// counts as missing (0) once it's past due -- only a turned-in, not-yet-
+// graded one is PENDING and left out of the grade. So WD projects are not
+// "project milestones" in the gradebook's skip-when-blank sense
+// (is_project_milestone below), only pending ones are skipped.
 const CS_UNIT_PROJECT = /^Unit\d+-Project$/;
+const WD_PROJECT = /^ch([2-8]|1[0-6])_milestone$/;
+// The same two patterns for MySQL REGEXP.
+const WD_PROJECT_SQL = '^ch([2-8]|1[0-6])_milestone$';
+const GATED_PROJECT_SQL = '^(Unit[0-9]+-Project|ch([2-8]|1[0-6])_milestone)$';
 
 const isCsUnitProject = (examId) => CS_UNIT_PROJECT.test(String(examId || ''));
+const isWdProject = (examId) => WD_PROJECT.test(String(examId || ''));
+// Any project under the upload + peer review gate (CS or WD).
+const isGatedProject = (examId) => isCsUnitProject(examId) || isWdProject(examId);
+// "Unit4-Project" -> "Unit 4", "ch3_milestone" -> "Chapter 3", for messages.
+const projectUnitLabel = (examId) => {
+    const s = String(examId || '');
+    const cs = s.match(/^Unit(\d+)-Project$/); if (cs) return `Unit ${cs[1]}`;
+    const wd = s.match(/^ch(\d+)_milestone$/); if (wd) return `Chapter ${wd[1]}`;
+    return 'this';
+};
 
 async function hasProjectUpload(connection, studentId, examId) {
     const [rows] = await connection.execute(
@@ -40,4 +62,4 @@ async function syncCsProjectGrade(connection, studentId, examId) {
     return { posted: true, reason: null };
 }
 
-module.exports = { isCsUnitProject, hasProjectUpload, syncCsProjectGrade };
+module.exports = { isCsUnitProject, isWdProject, isGatedProject, projectUnitLabel, WD_PROJECT_SQL, GATED_PROJECT_SQL, hasProjectUpload, syncCsProjectGrade };

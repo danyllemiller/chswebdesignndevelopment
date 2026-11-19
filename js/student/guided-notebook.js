@@ -389,8 +389,10 @@
     // (js/assignment-uploader.js): files go to the student's folder via
     // /api/upload (folder uploads keep their sub-folders), then the
     // gradebook column is recorded with /api/submit-exam. Interim
-    // milestones score full credit for turning in; a "Project:" waits at 0
-    // for review -- the same rule the dropbox uses.
+    // milestones score full credit for turning in. A chapter project
+    // (chN_milestone) shows PENDING instead: its grade comes from the
+    // self-assessment + signed peer review on the chapter page
+    // (server/lib/csProjectGate.js, teacher 2026-11-19).
     async function uploadTurnin(blockId, blk) {
         const b = day.blocks.find(x => x.id === blockId);
         const folderMode = blk.querySelector(`#tk-${blockId}-folder`).checked;
@@ -442,7 +444,7 @@
                 if (!r.ok) throw new Error('gradebook');
                 blockData(blockId).turnedIn = { at: new Date().toISOString(), files: ok };
                 changed();
-                say(`✅ Turned in ${ok} file${ok === 1 ? '' : 's'}${lastErr ? ` (some failed: ${lastErr})` : ''}.`, 'text-success');
+                say(`✅ Turned in ${ok} file${ok === 1 ? '' : 's'}${lastErr ? ` (some failed: ${lastErr})` : ''}.${held ? ' Next: on the chapter page, do your Self-Assessment and a Peer Review. Your grade shows PENDING until both are in.' : ''}`, 'text-success');
             } catch (e) { say('⚠️ Files uploaded, but the gradebook did not record it. Tell your teacher.', 'text-warning'); }
         } else {
             say(`❌ Upload failed: ${lastErr || 'unknown error'}. If it says "Not authorized," log out and back in, then try again.`, 'text-danger');
