@@ -794,6 +794,11 @@ function getBellScheduleKey(dateStr) {
   return delayDays.has(dateStr) && hasDelaySchedule(calType) ? `${calType}_DELAY` : calType;
 }
 
+function todayIso() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function hasDelaySchedule(type) {
   return bellSchedule.some(r => r.schedule_type === `${type}_DELAY`);
 }
@@ -802,7 +807,10 @@ function hasDelaySchedule(type) {
 // delay schedule (and back). Only shown on day types that have a delay schedule.
 async function toggleDelay(dateStr, btn) {
   const turningOn = !delayDays.has(dateStr);
-  if (turningOn && !confirm('Switch this day to the 2-hour delay bell schedule?\n\nClock-ins, tardies, and attendance will use the delay times.')) return;
+  const dayName = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  if (!confirm(turningOn
+      ? `Put ${dayName} on the 2-hour delay bell schedule?\n\nClock-ins, tardies, and attendance for that day will use the delay times.`
+      : `Take ${dayName} off the 2-hour delay and go back to its normal bell schedule?`)) return;
   btn.disabled = true;
   try {
     const res = await fetch('/api/admin/bell-delay', {
@@ -852,12 +860,15 @@ function renderBellSchedule(dateStr) {
   typeDiv.textContent = DAY_TYPE_LABELS[key] || key;
   box.appendChild(typeDiv);
 
-  if (info?.type && hasDelaySchedule(info.type)) {
+  // Only today or a future day: the agenda can be showing a past lesson's date,
+  // and switching a past day by mistake changes that day's tardy math (11/19).
+  if (info?.type && hasDelaySchedule(info.type) && dateStr >= todayIso()) {
     const isDelay = delayDays.has(dateStr);
+    const shortDay = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' });
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = `btn btn-sm w-100 mb-2 fw-bold ${isDelay ? 'btn-primary' : 'btn-outline-primary'}`;
-    btn.textContent = isDelay ? '❄️ 2-Hour Delay is ON · switch back' : '❄️ 2-Hour Delay';
+    btn.textContent = isDelay ? `❄️ ${shortDay}: 2-Hour Delay is ON · switch back` : `❄️ 2-Hour Delay for ${shortDay}`;
     btn.title = isDelay ? 'Go back to the normal bell schedule for this day' : 'Use the 2-hour delay bell schedule for this day';
     btn.addEventListener('click', () => toggleDelay(dateStr, btn));
     box.appendChild(btn);
