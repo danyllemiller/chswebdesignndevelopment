@@ -79,8 +79,38 @@ function parseSpecialDatesCSV(text) {
     return map;
 }
 
+// 2-hour delay (snow) days. A date listed in bell_delay_days keeps its A or B
+// day type -- every "is this an A day?" check stays the same -- but its bell
+// times come from the A_DELAY / B_DELAY rows of bell_schedule instead. The
+// teacher turns a date on or off with the 2-Hour Delay button on the daily
+// agenda (POST /api/admin/bell-delay in server/routes/calendar.js).
+const DELAY_DAY_TYPES = new Set(['A', 'B']);
+let delayTableReady = false;
+
+async function ensureDelayTable(connection) {
+    if (delayTableReady) return;
+    await connection.execute(`CREATE TABLE IF NOT EXISTS bell_delay_days (
+        delay_date DATE PRIMARY KEY,
+        created_by VARCHAR(50) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+    delayTableReady = true;
+}
+
+async function getDelayDates(connection) {
+    await ensureDelayTable(connection);
+    const [rows] = await connection.execute(`SELECT DATE_FORMAT(delay_date, '%Y-%m-%d') AS d FROM bell_delay_days ORDER BY delay_date`);
+    return rows.map(r => r.d);
+}
+
+// The schedule_type to use for a day type, given whether that date is a delay day.
+function delayedScheduleKey(type, isDelay) {
+    return isDelay && DELAY_DAY_TYPES.has(type) ? `${type}_DELAY` : type;
+}
+
 let dayTypesCache = null;
 let dayTypesCacheAt = 0;
+
+function clearDayTypesCache() { dayTypesCache = null; }
 
 async function getDayTypes(connection) {
     if (dayTypesCache && Date.now() - dayTypesCacheAt < 60000) return dayTypesCache;
@@ -97,6 +127,10 @@ async function getDayTypes(connection) {
             dayTypes.set(dateStr, { type: ev.type });
         }
     });
+    for (const d of await getDelayDates(connection)) {
+        const info = dayTypes.get(d);
+        if (info) info.delay = true;
+    }
     dayTypesCache = dayTypes;
     dayTypesCacheAt = Date.now();
     return dayTypes;
@@ -107,7 +141,7 @@ function getBellScheduleKeyForDate(dayTypes, dateStr) {
     if (!info || info.type === 'OFF' || info.type === 'none') return null;
     const jsDay = new Date(dateStr + 'T00:00:00').getDay();
     if (jsDay === 0 || jsDay === 6) return null;
-    return info.type === 'S' ? 'summer' : info.type;
+    return info.type === 'S' ? 'summer' : delayedScheduleKey(info.type, info.delay);
 }
 
 // Every calendar date a given period actually meets between two dates
@@ -193,5 +227,9 @@ module.exports = {
     getLocalDateStr,
     computeEffectiveCount,
     getDayTypes,
-    getBellScheduleKeyForDate
+    getBellScheduleKeyForDate,
+    clearDayTypesCache,
+    ensureDelayTable,
+    getDelayDates,
+    delayedScheduleKey
 };

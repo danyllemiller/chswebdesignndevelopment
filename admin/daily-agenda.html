@@ -728,7 +728,11 @@ function chapterLabelToUrl(label) {
 let dayTypes = new Map();   // 'YYYY-MM-DD' -> { type, description }
 let bellSchedule = [];      // rows from bell_schedule table
 
-const DAY_TYPE_LABELS = { A: 'A Day', B: 'B Day', A_MIN: 'A Min Day', B_MIN: 'B Min Day', C: 'All Periods', summer: 'Summer School' };
+const DAY_TYPE_LABELS = { A: 'A Day', B: 'B Day', A_MIN: 'A Min Day', B_MIN: 'B Min Day', C: 'All Periods', summer: 'Summer School',
+  A_DELAY: 'A Day · 2-Hour Delay', B_DELAY: 'B Day · 2-Hour Delay' };
+// Dates on a 2-hour delay (snow day): same A/B day, A_DELAY/B_DELAY bell times.
+// Comes with /api/bell-schedule; toggled with the button under the day type.
+let delayDays = new Set();
 const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
 
 // Period color coding, matching the physical planner's Swatches panel.
@@ -784,7 +788,28 @@ function getBellScheduleKey(dateStr) {
   if (jsDay === 0 || jsDay === 6) return null;
   const calType = info?.type;
   if (!calType || calType === 'none') return null;
-  return calType === 'S' ? 'summer' : calType;
+  if (calType === 'S') return 'summer';
+  return delayDays.has(dateStr) && (calType === 'A' || calType === 'B') ? `${calType}_DELAY` : calType;
+}
+
+// The 2-Hour Delay button: one click switches this date's bell times to the
+// delay schedule (and back). Only shown on regular A and B days.
+async function toggleDelay(dateStr, btn) {
+  const turningOn = !delayDays.has(dateStr);
+  if (turningOn && !confirm('Switch this day to the 2-hour delay bell schedule?\n\nClock-ins, tardies, and attendance will use the delay times.')) return;
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/admin/bell-delay', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: dateStr, on: turningOn })
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
+    if (turningOn) delayDays.add(dateStr); else delayDays.delete(dateStr);
+    renderBellSchedule(dateStr);
+  } catch (e) {
+    alert('Could not change the 2-hour delay: ' + e.message);
+    btn.disabled = false;
+  }
 }
 
 // "7:35am" -- lowercase with no space, as the teacher prefers.
@@ -820,6 +845,17 @@ function renderBellSchedule(dateStr) {
   typeDiv.className = 'schedule-day-type';
   typeDiv.textContent = DAY_TYPE_LABELS[key] || key;
   box.appendChild(typeDiv);
+
+  if (info?.type === 'A' || info?.type === 'B') {
+    const isDelay = delayDays.has(dateStr);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `btn btn-sm w-100 mb-2 fw-bold ${isDelay ? 'btn-primary' : 'btn-outline-primary'}`;
+    btn.textContent = isDelay ? '❄️ 2-Hour Delay is ON · switch back' : '❄️ 2-Hour Delay';
+    btn.title = isDelay ? 'Go back to the normal bell schedule for this day' : 'Use the 2-hour delay bell schedule for this day';
+    btn.addEventListener('click', () => toggleDelay(dateStr, btn));
+    box.appendChild(btn);
+  }
 
   if (!periods.length) return empty('No bell schedule configured');
 
@@ -2044,7 +2080,7 @@ if (!courseCfg) {
   const calendarLoad = Promise.all([
     fetch('/special-dates.csv').then(r => r.ok ? r.text() : '').then(parseSpecialDatesCSV).catch(() => {}),
     fetch('/api/events').then(r => r.ok ? r.json() : { events: [] }).then(d => (d.events || []).forEach(mergeEventIntoDayTypes)).catch(() => {}),
-    fetch('/api/bell-schedule').then(r => r.ok ? r.json() : { schedule: [] }).then(d => { bellSchedule = d.schedule || []; }).catch(() => {}),
+    fetch('/api/bell-schedule').then(r => r.ok ? r.json() : { schedule: [] }).then(d => { bellSchedule = d.schedule || []; delayDays = new Set(d.delays || []); }).catch(() => {}),
   ]);
 
   Promise.all([

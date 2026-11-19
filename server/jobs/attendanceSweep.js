@@ -71,8 +71,18 @@ const SWEEP_GRACE_MINUTES = 5;
 // again, so this never needs an explicit clear and can't leak across days.
 const sweptKeys = new Set();
 
+// The 2-Hour Delay button calls this when a day's bell times change after
+// some periods were already swept on the old times, so those periods get
+// swept again at their new end time.
+function forgetSweeps(dateStr, periodLabels) {
+    for (const p of periodLabels) sweptKeys.delete(`${dateStr}:${p}`);
+}
+
 function scheduleDailyAttendanceSweep() {
-    let cachedDate = null;
+    // Today's periods are re-read every tick (one small query a minute) rather
+    // than once per day: on 2026-11-19 a 2-hour delay was set after the first
+    // tick, and the cached normal-day end times swept A1 absent at 9:05, before
+    // the delayed A1 even started.
     let cachedPeriods = null; // [{period_label, end_time}] for today, or [] if no school
 
     async function loadTodaysPeriods(connection, dateStr) {
@@ -94,10 +104,7 @@ function scheduleDailyAttendanceSweep() {
         await withConnection(async (connection) => {
             await ensureAttendanceTables(connection);
 
-            if (cachedDate !== todayStr) {
-                cachedPeriods = await loadTodaysPeriods(connection, todayStr);
-                cachedDate = todayStr;
-            }
+            cachedPeriods = await loadTodaysPeriods(connection, todayStr);
             if (!cachedPeriods || cachedPeriods.length === 0) return; // no school today
 
             for (const { period_label, end_time } of cachedPeriods) {
@@ -124,4 +131,4 @@ function scheduleDailyAttendanceSweep() {
     setInterval(tick, 60 * 1000);
 }
 
-module.exports = { runAttendanceSweep, scheduleDailyAttendanceSweep };
+module.exports = { runAttendanceSweep, scheduleDailyAttendanceSweep, forgetSweeps };

@@ -57,7 +57,7 @@
 
         let schedule = [];
         try {
-            const data = await fetch(`/api/bell-schedule?type=${encodeURIComponent(rotation)}`).then(r => r.json());
+            const data = await fetch(`/api/bell-schedule?type=${encodeURIComponent(rotation)}&date=${todayStr()}`).then(r => r.json());
             schedule = data.schedule || [];
         } catch (_) { return; }
 

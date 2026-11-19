@@ -23,6 +23,7 @@ let currentYear, currentMonth;
 let selectedDate = null;
 let currentView = 'view-monthly';
 let bellScheduleCache = null;
+let bellDelayDays = new Set(); // 2-hour delay dates (same A/B day, A_DELAY/B_DELAY bell times)
 let schoolConfig = { regular_start:'', regular_end:'', summer_start:'', summer_end:'' };
 
 const PERIOD_COLORS = [
@@ -37,6 +38,7 @@ async function getBellSchedule() {
         if (!res.ok) return (bellScheduleCache = []);
         const data = await res.json();
         bellScheduleCache = data.schedule || [];
+        bellDelayDays = new Set(data.delays || []);
     } catch { bellScheduleCache = []; }
     return bellScheduleCache;
 }
@@ -50,6 +52,7 @@ function getBellScheduleKey(dateStr) {
     const calType = specialDates.get(dateStr)?.type;
     if (!calType || calType === 'none') return null;
     if (calType === 'S') return 'summer';
+    if (bellDelayDays.has(dateStr) && (calType === 'A' || calType === 'B')) return `${calType}_DELAY`; // 2-hour delay day
     return calType; // 'A', 'A_MIN', 'B', 'B_MIN', 'C'
 }
 
@@ -1198,6 +1201,8 @@ const BELL_SCHEDULES = {
     B:     { label: 'B Day',     group: 'regular' },
     B_MIN: { label: 'B Min Day', group: 'regular' },
     C:     { label: 'C Day',     group: 'regular' },
+    A_DELAY: { label: 'A 2-Hr Delay', group: 'regular' },
+    B_DELAY: { label: 'B 2-Hr Delay', group: 'regular' },
     summer:{ label: 'Summer',    group: 'summer'  },
 };
 let activeBellSched = 'A';

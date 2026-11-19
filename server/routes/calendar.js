@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { withConnection } = require('../db');
 const { ensureOffDaysTable, requireLogin, requireStaff } = require('../helpers');
+const { getDayTypes, getBellScheduleKeyForDate, getLocalDateStr, clearDayTypesCache, ensureDelayTable, getDelayDates, delayedScheduleKey } = require('../tardyLogic');
+const { forgetSweeps } = require('../jobs/attendanceSweep');
 
 const CALENDAR_EVENTS_DDL = `CREATE TABLE IF NOT EXISTS calendar_events (
     id            INT AUTO_INCREMENT PRIMARY KEY,
@@ -165,9 +167,16 @@ router.post('/admin/calendar-settings', async (req, res) => {
 
 // --- BELL SCHEDULE ---
 router.get('/bell-schedule', requireLogin, async (req, res) => {
-    const type = String(req.query.type || '').trim();
+    let type = String(req.query.type || '').trim();
+    const date = String(req.query.date || '').trim();
     try {
-        const rows = await withConnection((connection) => {
+        let delays = [];
+        const rows = await withConnection(async (connection) => {
+            // 2-hour delay days (server/tardyLogic.js): every page that picks a
+            // day's schedule itself gets the list here; a caller asking for one
+            // type on one date (?type=A&date=...) gets the delay times directly.
+            delays = await getDelayDates(connection);
+            if (type && /^\d{4}-\d{2}-\d{2}$/.test(date)) type = delayedScheduleKey(type, delays.includes(date));
             if (type) {
                 return connection.execute(
                     `SELECT id, schedule_type, period_label, sort_order,
@@ -188,8 +197,57 @@ router.get('/bell-schedule', requireLogin, async (req, res) => {
                  ORDER BY schedule_type ASC, sort_order ASC, start_time ASC`
             ).then(([rows]) => rows);
         });
-        res.json({ schedule: rows });
+        res.json({ schedule: rows, delays });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch bell schedule' }); }
+});
+
+// --- 2-HOUR DELAY BUTTON ---
+// Turns a date's 2-hour delay on or off. The day stays an A or B day; only the
+// bell times switch to A_DELAY / B_DELAY. When it changes for TODAY after some
+// periods were already swept (absences filled in) on the old times, the
+// sweep's automatic absences for periods that haven't ended on the new times
+// are removed and those periods are swept again at their new end time.
+router.post('/admin/bell-delay', requireStaff, async (req, res) => {
+    const date = String(req.body?.date || '').trim();
+    const on = !!req.body?.on;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'date (YYYY-MM-DD) is required' });
+    try {
+        const result = await withConnection(async (connection) => {
+            await ensureDelayTable(connection);
+            if (on) {
+                await connection.execute('INSERT IGNORE INTO bell_delay_days (delay_date, created_by) VALUES (?, ?)',
+                    [date, String(req.session?.user?.student_id || req.session?.user?.username || '')]);
+            } else {
+                await connection.execute('DELETE FROM bell_delay_days WHERE delay_date = ?', [date]);
+            }
+            clearDayTypesCache();
+            try { require('./timeclock').clearDayTypesCache?.(); } catch (e) { /* 60s cache expires on its own */ }
+
+            let cleared = 0;
+            if (date === getLocalDateStr()) {
+                const dayTypes = await getDayTypes(connection);
+                const key = getBellScheduleKeyForDate(dayTypes, date);
+                if (key) {
+                    const [periods] = await connection.execute(
+                        `SELECT period_label, TIME_FORMAT(end_time, '%H:%i') AS end_time FROM bell_schedule WHERE schedule_type = ?`, [key]);
+                    const now = new Date();
+                    const nowMin = now.getHours() * 60 + now.getMinutes();
+                    const notOver = periods.filter(p => { const [h, m] = p.end_time.split(':').map(Number); return h * 60 + m + 5 > nowMin; })
+                        .map(p => p.period_label);
+                    if (notOver.length) {
+                        const marks = notOver.map(() => '?').join(',');
+                        const [del] = await connection.execute(
+                            `DELETE FROM attendance WHERE date = ? AND section_id IN (${marks}) AND status = 'absent'
+                               AND scanned_at IS NULL AND (ic_synced IS NULL OR ic_synced = 0)`, [date, ...notOver]);
+                        cleared = del.affectedRows || 0;
+                        forgetSweeps(date, notOver);
+                    }
+                }
+            }
+            return { date, on, cleared };
+        });
+        res.json({ success: true, ...result });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to change the 2-hour delay' }); }
 });
 
 // --- TEACHER CHECKLIST ---

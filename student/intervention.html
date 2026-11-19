@@ -1247,7 +1247,9 @@
     let classDueDates = []; // real WD/CS chapter due dates, filtered to the student's enrolled course
     let calYear, calMonth, calDay, currentView = 'month';
     let calSelectedYMD = ''; // full YYYY-MM-DD of the day the user last explicitly selected
-    let schoolSpecialDates = {}, bellSchedule = [];  // from school calendar (schoolSpecialDates: {date → {type,label}})
+    let schoolSpecialDates = {}, bellSchedule = [];
+    let bellDelayDays = new Set(); // 2-hour delay dates: same A/B day, A_DELAY/B_DELAY bell times
+    const bellKeyFor = (ymd, type) => bellDelayDays.has(ymd) && (type === 'A' || type === 'B') ? `${type}_DELAY` : type;  // from school calendar (schoolSpecialDates: {date → {type,label}})
 
     function blockBadgeInfo(type) {
       switch (type) {
@@ -1545,6 +1547,7 @@
         // Bell schedule for A/B day period times
         const bs = await apiFetch('/api/bell-schedule');
         if (bs.schedule) bellSchedule = bs.schedule;
+        bellDelayDays = new Set(bs.delays || []);
       } catch (_) {}
     }
 
@@ -2902,7 +2905,7 @@
       let bsPeriods = [];
       if (badge && sdType && bellSchedule.length) {
         bsPeriods = bellSchedule
-          .filter(r => r.schedule_type === sdType)
+          .filter(r => r.schedule_type === bellKeyFor(ymd, sdType))
           .sort((a, b) => a.start_time.localeCompare(b.start_time));
       }
 
@@ -3192,7 +3195,7 @@
             html += `<div class="pp-day-view"><div class="pp-day-view-header">${dayLbl} ${b ? `[${b.label}]` : ''}${stk}</div>`;
             // Bell schedule periods or fallback to block periods
             const bps = b && bellSchedule.length
-              ? bellSchedule.filter(r => r.schedule_type === sd.type).sort((a,c) => a.start_time.localeCompare(c.start_time))
+              ? bellSchedule.filter(r => r.schedule_type === bellKeyFor(ymd, sd.type)).sort((a,c) => a.start_time.localeCompare(c.start_time))
               : [];
             if (bps.length) {
               bps.forEach(p => {

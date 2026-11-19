@@ -6,6 +6,7 @@ const { withConnection } = require('../db');
 const { getCurrentSchoolYear, requireLogin, requireSelfOrStaff, isStaffSession } = require('../helpers');
 const { loadClockinDays } = require('../lib/clockinDays');
 const { isCfaQuestion } = require('../lib/wprCfaQuestions');
+const { getDelayDates, delayedScheduleKey } = require('../tardyLogic');
 // A clock-in question that's on the WPR Baseline CFA stays hidden in a student's history and journal, so
 // they can't study it (or its answer) before the CFA (teacher 2026-11-05). Their points still show.
 const CFA_HIDDEN = 'Hidden: this question is on the WPR Baseline CFA.';
@@ -87,6 +88,11 @@ async function getDayTypes(connection) {
             dayTypes.set(dateStr, { type: ev.type });
         }
     });
+    // 2-hour delay days: same A/B day, delay bell times (see server/tardyLogic.js).
+    for (const d of await getDelayDates(connection)) {
+        const info = dayTypes.get(d);
+        if (info) info.delay = true;
+    }
     dayTypesCache = dayTypes;
     dayTypesCacheAt = Date.now();
     return dayTypes;
@@ -97,7 +103,7 @@ function getBellScheduleKeyForDate(dayTypes, dateStr) {
     if (!info || info.type === 'OFF' || info.type === 'none') return null;
     const jsDay = new Date(dateStr + 'T00:00:00').getDay();
     if (jsDay === 0 || jsDay === 6) return null;
-    return info.type === 'S' ? 'summer' : info.type;
+    return info.type === 'S' ? 'summer' : delayedScheduleKey(info.type, info.delay);
 }
 
 function isSchoolDay(dayTypes, dateStr) {
@@ -961,5 +967,9 @@ router.post('/admin/inject-timesheets', async (req, res) => {
         res.json({ success: true, count });
     } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to inject timesheets' }); }
 });
+
+// Lets the 2-Hour Delay button (server/routes/calendar.js) apply right away
+// instead of waiting out the 60-second day-type cache.
+router.clearDayTypesCache = () => { dayTypesCache = null; };
 
 module.exports = router;
