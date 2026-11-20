@@ -195,27 +195,47 @@ async function checkWdChapterPrework(connection, studentId, examId, chNum) {
     return { ok: preScaleOk && preTestOk, scoreOk: true, projectOk: true, projectRequired: false, preScaleOk, preTestOk };
 }
 
-// The CS Final ("Final-Exam", exams/cs-final-exam.html) unlocks once a student has taken all seven
-// unit tests (any score) AND finished the Unit 3-7 Projects (teacher 2026-10-29: students were
-// reaching the Final with projects undone, since only the unit tests were checked, and only on
-// the workspace's Final tab; Units 1-2 stay out, the same as PROJECT_EXEMPT_UNITS for the unit
-// tests, since most of those files were on the server that died). "Finished" counts the way the
-// unit-test lock above does -- a self review AND a peer review in -- or a project grade that has
-// posted (for a project under the upload + peer review gate in server/lib/csProjectGate.js, or EX).
-// Students excused from projects (projectExemptions) skip that half; the same override row (daily
-// code / admin tool) clears it.
+// The CS Final ("Final-Exam", exams/cs-final-exam.html, the shared CFA) is locked until either
+// (teacher 2026-11-20):
+//   1. the student's own final day (CS_FINAL_DAYS, by section) has come -- from then on it is open
+//      to everyone in that section, nothing else required, so absent students can make it up; or
+//   2. an early unlock: 80% or better on EVERY Unit 1-7 test (the gradebook's best score) AND the
+//      Unit 3-7 Projects finished. Units 1-2 projects stay out, the same as PROJECT_EXEMPT_UNITS for
+//      the unit tests, since most of those files were on the server that died. "Finished" counts
+//      the way the unit-test lock above does -- a self review AND a peer review in -- or a project
+//      grade that has posted (for a project under the upload + peer review gate in
+//      server/lib/csProjectGate.js, or EX). Students excused from projects (projectExemptions) skip
+//      that half.
+// The same override row (daily code / admin tool) still opens it any day.
 const CS_UNITS = [1, 2, 3, 4, 5, 6, 7];
+const CS_FINAL_DAYS = { A3: '2026-12-14', B6: '2026-12-15', A5: '2026-12-16', B4: '2026-12-17', B8: '2026-12-17' };
+const CS_FINAL_EARLY_PCT = 80;
+const localIsoDate = (d = new Date()) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 async function checkCsFinalPrereq(connection, studentId) {
+    const open = { ok: true, final: true, missingExams: [], lowExams: [], missingProjects: [] };
     await ensureUnitPrereqOverridesTable(connection);
     const [overrideRows] = await connection.execute(
         'SELECT id FROM unit_prereq_overrides WHERE student_id = ? AND unit_exam_id = ?', [studentId, 'Final-Exam']);
-    if (overrideRows.length > 0) return { ok: true, final: true, missingExams: [], missingProjects: [] };
+    if (overrideRows.length > 0) return open;
+    const [[student]] = await connection.execute('SELECT section_id FROM students WHERE student_id = ? LIMIT 1', [studentId]);
+    const finalDay = (student && CS_FINAL_DAYS[student.section_id]) || null;
+    if (finalDay && localIsoDate() >= finalDay) return { ...open, finalDay, finalDayOpen: true };
+
     const marks = CS_UNITS.map(() => '?').join(',');
     const [examRows] = await connection.execute(
-        `SELECT DISTINCT exam_id FROM responses WHERE student_id = ? AND exam_id IN (${marks})`,
+        `SELECT exam_id, score, total_points FROM responses WHERE student_id = ? AND exam_id IN (${marks})`,
         [studentId, ...CS_UNITS.map(n => `Unit${n}-Exam`)]);
-    const taken = new Set(examRows.map(r => r.exam_id));
-    const missingExams = CS_UNITS.filter(n => !taken.has(`Unit${n}-Exam`));
+    const byExam = new Map(examRows.map(r => [r.exam_id, r]));
+    const missingExams = [], lowExams = [];
+    CS_UNITS.forEach(n => {
+        const r = byExam.get(`Unit${n}-Exam`);
+        if (!r || r.score === null || r.score === '') { missingExams.push(n); return; }
+        if (r.score === 'EX') return;
+        const pct = Number(r.total_points) > 0 ? (Number(r.score) / Number(r.total_points)) * 100 : 0;
+        if (!(pct >= CS_FINAL_EARLY_PCT)) lowExams.push({ unit: n, pct: Math.round(pct) });
+    });
     let missingProjects = [];
     if (!isProjectExempt(studentId)) {
         const [projectRows] = await connection.execute(
@@ -233,7 +253,15 @@ async function checkCsFinalPrereq(connection, studentId) {
             return rows.length > 0 && !rows.some(finished);
         });
     }
-    return { ok: !missingExams.length && !missingProjects.length, final: true, missingExams, missingProjects };
+    return { ok: !missingExams.length && !lowExams.length && !missingProjects.length, final: true,
+        missingExams, lowExams, missingProjects, finalDay, earlyPct: CS_FINAL_EARLY_PCT };
+}
+
+// "Mon 12/14" for lock messages.
+function finalDayLabel(iso) {
+    if (!iso) return '';
+    const d = new Date(`${iso}T12:00:00`);
+    return `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]} ${d.getMonth() + 1}/${d.getDate()}`;
 }
 
 async function checkUnitPrerequisite(connection, studentId, examId) {
@@ -498,8 +526,11 @@ router.post('/submit-exam', async (req, res) => {
 
         const prereq = await checkUnitPrerequisite(connection, student_id, exam_id);
         if (!prereq.ok && prereq.final) {
-            const reasons = [...prereq.missingExams.map(n => `the Unit ${n} Test`), ...prereq.missingProjects.map(n => `the Unit ${n} Project`)];
-            return { status: 403, body: { error: `The CS Final is locked. Finish ${reasons.join(', ')} first.` } };
+            const reasons = [...prereq.missingExams.map(n => `take the Unit ${n} Test`),
+                ...prereq.lowExams.map(x => `get ${prereq.earlyPct}% on the Unit ${x.unit} Test (now ${x.pct}%)`),
+                ...prereq.missingProjects.map(n => `finish the Unit ${n} Project`)];
+            const day = prereq.finalDay ? `It opens for your class on ${finalDayLabel(prereq.finalDay)}. ` : '';
+            return { status: 403, body: { error: `The CS Final is locked. ${day}To take it early: ${reasons.join(', ')}.` } };
         }
         if (!prereq.ok) {
             const isWdChapter = /^Ch\d+-Exam$/.test(exam_id);

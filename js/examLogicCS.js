@@ -639,7 +639,8 @@ function setupTabLockdown() {
 async function checkUnitPrerequisite(unit) {
     const unitNum = parseInt(unit, 10);
     // 9 is cs-final-exam.html's own number for the CS Final (there is no real Unit 9). It locks
-    // until all seven unit tests are taken and the Unit 3-7 Projects are finished.
+    // until the class's final day, or early with 80%+ on every unit test and the Unit 3-7 Projects
+    // finished (server/routes/gradebook.js checkCsFinalPrereq).
     const isFinal = unitNum === 9;
     if (!isFinal && (isNaN(unitNum) || unitNum < 1 || unitNum > 7)) return { ok: true };
 
@@ -659,6 +660,12 @@ async function checkUnitPrerequisite(unit) {
     }
 }
 
+// "Mon 12/14" from the lock's "2026-12-14".
+function csFinalDayLabel(iso) {
+    const d = new Date(`${iso}T12:00:00`);
+    return isNaN(d) ? '' : `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]} ${d.getMonth() + 1}/${d.getDate()}`;
+}
+
 function renderPrerequisiteBlock(prereq, unit) {
     const container = document.getElementById('exam-container');
     if (!container) return;
@@ -666,9 +673,13 @@ function renderPrerequisiteBlock(prereq, unit) {
 
     const reasonsHtml = [];
     if (prereq.final) {
-        const items = [...(prereq.missingExams || []).map(n => `<li>Take the <strong>Unit ${n} Test</strong></li>`),
+        const pctNeeded = prereq.earlyPct || 80;
+        const items = [...(prereq.missingExams || []).map(n => `<li>Take the <strong>Unit ${n} Test</strong> and get ${pctNeeded}% or better</li>`),
+            ...(prereq.lowExams || []).map(x => `<li>Get ${pctNeeded}% or better on the <strong>Unit ${x.unit} Test</strong> (your best is ${x.pct}%)</li>`),
             ...(prereq.missingProjects || []).map(n => `<li>Finish the <strong>Unit ${n} Project</strong>: upload it, then get your self review AND peer review in</li>`)];
-        reasonsHtml.push(`<p class="mb-2">The CS Final unlocks when every unit test and the Unit 3&ndash;7 Projects are done. You still need to:</p>
+        const day = prereq.finalDay ? csFinalDayLabel(prereq.finalDay) : '';
+        if (day) reasonsHtml.push(`<p class="mb-2 fs-5">The CS Final opens for your class on <strong>${day}</strong>.</p>`);
+        reasonsHtml.push(`<p class="mb-2">To take it early, you need ${pctNeeded}% or better on every Unit 1&ndash;7 test and the Unit 3&ndash;7 Projects done. You still need to:</p>
             <ul class="text-start d-inline-block mb-3">${items.join('')}</ul>`);
     }
     if (prereq.preScaleOk === false || prereq.preTestOk === false) {

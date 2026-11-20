@@ -1428,37 +1428,40 @@ if (!hasExam) {
                 if (dom.paneTitle) dom.paneTitle.innerText = 'CS Course Final Exam';
                 if (dom.examOverlay) dom.examOverlay.classList.remove('d-none');
 
-                // Units 1–7 are required; Units 0 and 8 are extra credit.
-                // Every unit test taken (any score — testing out of a unit
-                // excuses its assignments, not the test itself) AND the
-                // Unit 3-7 Projects finished (teacher 2026-10-29). The server
-                // decides, with the same lock the Final itself checks
-                // (/api/exam/check-prerequisite, exam_id Final-Exam); if it
-                // can't be reached, the unit tests in this page's grades.
-                const requiredUnits = [1, 2, 3, 4, 5, 6, 7];
+                // The server decides (/api/exam/check-prerequisite, exam_id
+                // Final-Exam, the same lock the Final itself checks): open on
+                // the class's final day and after, or early with 80%+ on every
+                // Unit 1-7 test and the Unit 3-7 Projects finished (teacher
+                // 2026-11-20). Units 0 and 8 are extra credit. If it can't be
+                // reached, the Final page itself still checks.
                 let lock = null;
                 try {
                     const lockRes = await fetch(`/api/exam/check-prerequisite?student_id=${encodeURIComponent(currentStudentData.student_id)}&exam_id=Final-Exam`);
                     if (lockRes.ok) lock = await lockRes.json();
                 } catch (e) { /* fall back below */ }
-                if (!lock) {
-                    const missingExams = requiredUnits.filter(n => !(gradesLoaded && hasSatUnitTest(n, grades)));
-                    lock = { ok: missingExams.length === 0, missingExams, missingProjects: [] };
-                }
+                if (!lock) lock = { ok: true };
 
+                const dayLabel = (iso) => {
+                    const d = new Date(`${iso}T12:00:00`);
+                    return isNaN(d) ? '' : `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]} ${d.getMonth() + 1}/${d.getDate()}`;
+                };
                 if (!lock.ok && dom.examOverlay) {
-                    const missing = [...(lock.missingExams || []).map(n => `<li>Take the Unit ${n} Test</li>`),
+                    const pct = lock.earlyPct || 80;
+                    const missing = [...(lock.missingExams || []).map(n => `<li>Take the Unit ${n} Test and get ${pct}% or better</li>`),
+                        ...(lock.lowExams || []).map(x => `<li>Get ${pct}% or better on the Unit ${x.unit} Test (your best is ${x.pct}%)</li>`),
                         ...(lock.missingProjects || []).map(n => `<li>Finish the Unit ${n} Project (upload it, then your self review AND peer review)</li>`)].join('');
+                    const day = lock.finalDay ? dayLabel(lock.finalDay) : '';
                     dom.examOverlay.innerHTML = `<i class="fas fa-lock text-danger fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
                         <h3 class="fw-bold">Final Exam Locked</h3>
-                        <p class="text-muted px-4 mb-2">The CS Final Exam unlocks when you've taken every unit test and finished the Unit 3&ndash;7 Projects. You still need to:</p>
+                        ${day ? `<p class="fs-5 mb-2">The CS Final opens for your class on <strong>${day}</strong>.</p>` : ''}
+                        <p class="text-muted px-4 mb-2">To take it early, you need ${pct}% or better on every Unit 1&ndash;7 test and the Unit 3&ndash;7 Projects done. You still need to:</p>
                         <ul class="text-start text-danger fw-bold d-inline-block mb-0">${missing}</ul>
                         <p class="text-muted small mt-3">Units 0 and 8 are extra credit and not required.</p>`;
                 } else if (dom.examOverlay) {
                     dom.examOverlay.innerHTML = `
                         <i class="fas fa-graduation-cap text-warning fa-4x mb-3 border p-3 rounded-circle bg-white shadow-sm"></i>
                         <h3 class="fw-bold">CS Course Final Exam</h3>
-                        <p class="text-muted px-4 mb-4">You've taken all seven unit tests and finished the Unit 3&ndash;7 Projects. The final exam will open in a new tab.</p>
+                        <p class="text-muted px-4 mb-4">${lock.finalDayOpen ? 'The CS Final is open for your class.' : 'You earned an early unlock: 80% or better on every unit test and your projects done.'} The final exam will open in a new tab.</p>
                         <button id="btn-launch-final" class="btn btn-success btn-lg fw-bold px-5 shadow-sm mt-2">
                             <i class="fas fa-graduation-cap me-2"></i> Launch CS Final Exam
                         </button>`;
@@ -2418,16 +2421,11 @@ const escapeHtmlSimple = function(str) {
             if (unitBtn) {
                 const unitVal = unitBtn.dataset.unit;
                 if (unitVal === 'FINAL_EXAM') {
-                    // If grades are loaded, check lock immediately — no extra click needed
-                    const requiredUnits = [1, 2, 3, 4, 5, 6, 7];
-                    const allDone = gradesLoaded && requiredUnits.every(n => hasSatUnitTest(n, grades));
-                    if (allDone) {
-                        window.open('/exams/cs-final-exam.html', '_blank');
-                    } else {
-                        // Locked or grades not yet loaded — show the lock overlay
-                        activeTab = { type: 'FINAL_EXAM' };
-                        await checkProgressAndGate(false);
-                    }
+                    // Always through the server's Final lock (final day, or the
+                    // 80%-on-every-test early unlock), which shows either the
+                    // lock or the Launch button.
+                    activeTab = { type: 'FINAL_EXAM' };
+                    await checkProgressAndGate(false);
                 } else {
                     activeUnit = csCourseMap.find(u => u.unitNum === parseInt(unitVal, 10));
                     await checkProgressAndGate(true);
