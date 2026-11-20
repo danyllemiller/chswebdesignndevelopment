@@ -16,6 +16,7 @@ const router = express.Router();
 const { withConnection } = require('../db');
 const { requireSelfOrStaff, isStaffSession } = require('../helpers');
 const { studentAgendaOptions } = require('./agenda');
+const { syncNotebookPage } = require('../lib/asStudentPlan');
 
 const CONTENT_DIR = process.env.GUIDED_NOTEBOOK_DIR || '/var/lib/chs-guided-notebook';
 const MAX_DATA_BYTES = 100 * 1024;
@@ -172,6 +173,10 @@ router.post('/student/guided-notebook/save', requireSelfOrStaff(), async (req, r
                  VALUES (?, ?, ?, ?, NOW())
                  ON DUPLICATE KEY UPDATE data_json = VALUES(data_json), updated_at = NOW()`,
                 [String(student_id), c.chapter, Number(day), json]);
+            // An AS student whose notebook pages are graded (Itzel, server/lib/asStudentPlan.js):
+            // the page's % filled in goes to her AS gradebook. Never blocks the save.
+            try { await syncNotebookPage(connection, student_id, c, Number(day), data); }
+            catch (e) { console.error('[guided-notebook] AS page grade', e.message); }
         });
         return res.json({ success: true });
     } catch (err) { console.error(err); return res.status(500).json({ error: 'Could not save.' }); }

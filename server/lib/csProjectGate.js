@@ -59,6 +59,11 @@ async function syncCsProjectGrade(connection, studentId, examId) {
         `INSERT INTO responses (student_id, exam_id, score, total_points, timestamp) VALUES (?, ?, ?, ?, NOW())
          ON DUPLICATE KEY UPDATE score = VALUES(score), total_points = VALUES(total_points), timestamp = NOW()`,
         [studentId, examId, agg.aggregate_score, agg.max_score]);
+    // An AS student following Web 2 (Itzel): copy the project grade into her
+    // AS gradebook (server/lib/asStudentPlan.js; required here, not at the top,
+    // because that file loads after this one).
+    try { await require('./asStudentPlan').syncProjectCopy(connection, studentId, examId); }
+    catch (e) { console.error('[project gate] AS project copy', e.message); }
     return { posted: true, reason: null };
 }
 

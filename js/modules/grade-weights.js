@@ -83,6 +83,9 @@ export function getAssignmentCategory(name, courseKey, storedCategory) {
     }
 
     if (lowerName.includes('final')) return 'final';
+    // Pre-tests and pre-scales are Assignments; every real test is
+    // Projects/Tests/Quizzes (teacher 2026-11-20).
+    if (/pre-?assessment|pre-?scale|pre-?test|diagnostic|^unit\d+-pre(-score)?$/.test(lowerName)) return 'assignment';
     if (lowerName.includes('project') || lowerName.includes('quiz') || lowerName.includes('exam') || lowerName.includes('summative') || lowerName.includes('assessment') || lowerName.includes('milestone')) return 'project_quiz';
     return 'assignment';
 }
