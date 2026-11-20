@@ -412,7 +412,7 @@
                 <span class="tag ${x.kind === 'bug' ? 'missing' : 'quick'}">${x.kind === 'bug' ? 'Bug' : 'Request'} #${x.id}</span>
                 <p class="task-title">${esc(x.description)}</p>
                 ${x.page_url ? `<p class="task-desc"><span class="path">${esc(x.page_url)}</span></p>` : ''}
-                ${x.staff_note ? `<p class="task-desc"><strong>Ms. Miller:</strong> ${esc(x.staff_note)}</p>` : ''}
+                ${x.staff_note ? `<p class="task-desc" style="white-space:pre-line"><strong>Ms. Miller:</strong> ${esc(x.staff_note)}</p>` : ''}
                 ${x.status === 'fixed' ? `<p class="task-note">Marked fixed: ${esc(x.fixer_note)}. Waiting for Ms. Miller's review.</p>` : `
                 <textarea class="form-control form-control-sm mb-2" rows="2" placeholder="What did you change? (file and fix)" data-note="${x.id}"></textarea>
                 <button class="btn btn-sm btn-success fw-bold" data-fixed="${x.id}">Mark fixed</button> <span class="task-note" data-msg="${x.id}"></span>`}
