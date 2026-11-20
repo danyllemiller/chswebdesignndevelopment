@@ -260,6 +260,14 @@
     border-bottom: 1px dashed var(--box-border);
     flex: 0 0 auto;
   }
+  /* The 2-hour delay switch: just a snowflake before the day type (11/20). */
+  .delay-flake {
+    border: 0; background: none; padding: 0 .15rem; margin-right: .2rem;
+    font-size: .82rem; line-height: 1; cursor: pointer; opacity: .35; border-radius: 4px;
+  }
+  .delay-flake:hover, .delay-flake:focus-visible { opacity: 1; }
+  .delay-flake.on { opacity: 1; background: #cfe2ff; }
+  .delay-flake:disabled { cursor: wait; }
   .schedule-list {
     list-style: none; padding-left: 0; margin: 0; font-size: .85rem;
     flex: 1 1 auto; display: flex; flex-direction: column; gap: .4rem;
@@ -733,7 +741,7 @@ const DAY_TYPE_LABELS = { A: 'A Day', B: 'B Day', A_MIN: 'A Min Day', B_MIN: 'B 
   B_MIN_DELAY: 'B Min Day · 2-Hour Delay', C_DELAY: 'All Periods · 2-Hour Delay' };
 // Dates on a 2-hour delay (snow day): same day type, `<type>_DELAY` bell times
 // (any type that has a delay schedule in the bell schedule).
-// Comes with /api/bell-schedule; toggled with the button under the day type.
+// Comes with /api/bell-schedule; toggled with the snowflake before the day type.
 let delayDays = new Set();
 const EVENT_TYPE_PRI = { A: 6, B: 5, C: 4, A_MIN: 3, B_MIN: 2, S: 2, OFF: 1, none: 0 };
 
@@ -857,22 +865,26 @@ function renderBellSchedule(dateStr) {
 
   const typeDiv = document.createElement('div');
   typeDiv.className = 'schedule-day-type';
-  typeDiv.textContent = DAY_TYPE_LABELS[key] || key;
   box.appendChild(typeDiv);
 
-  // Only today or a future day: the agenda can be showing a past lesson's date,
-  // and switching a past day by mistake changes that day's tardy math (11/19).
+  // The 2-hour delay switch is a small snowflake right before the day type
+  // (teacher 11/20: the full-width button was too big). Faint = normal day,
+  // highlighted = delay is on. Only today or a future day: the agenda can be
+  // showing a past lesson's date, and switching a past day by mistake changes
+  // that day's tardy math (11/19). The confirm box names the date.
   if (info?.type && hasDelaySchedule(info.type) && dateStr >= todayIso()) {
     const isDelay = delayDays.has(dateStr);
     const shortDay = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' });
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = `btn btn-sm w-100 mb-2 fw-bold ${isDelay ? 'btn-primary' : 'btn-outline-primary'}`;
-    btn.textContent = isDelay ? `❄️ ${shortDay}: 2-Hour Delay is ON · switch back` : `❄️ 2-Hour Delay for ${shortDay}`;
-    btn.title = isDelay ? 'Go back to the normal bell schedule for this day' : 'Use the 2-hour delay bell schedule for this day';
+    btn.className = `delay-flake${isDelay ? ' on' : ''}`;
+    btn.textContent = '❄️';
+    btn.title = isDelay ? `${shortDay} is on the 2-hour delay. Click to go back to the normal bell schedule.` : `2-hour delay for ${shortDay}: click to switch to the delay bell schedule`;
+    btn.setAttribute('aria-label', btn.title);
     btn.addEventListener('click', () => toggleDelay(dateStr, btn));
-    box.appendChild(btn);
+    typeDiv.appendChild(btn);
   }
+  typeDiv.appendChild(document.createTextNode(DAY_TYPE_LABELS[key] || key));
 
   if (!periods.length) return empty('No bell schedule configured');
 
