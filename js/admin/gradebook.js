@@ -194,9 +194,7 @@ const toggleHtml = `
     if (btnAssignmentSortDir) {
         btnAssignmentSortDir.addEventListener('click', () => {
             assignmentSortDir = assignmentSortDir === 'asc' ? 'desc' : 'asc';
-            btnAssignmentSortDir.innerHTML = assignmentSortDir === 'asc'
-                ? '<i class="fas fa-arrow-down-a-z me-1"></i> Forward'
-                : '<i class="fas fa-arrow-up-a-z me-1"></i> Backward';
+            paintSortDirButton();
             applyFiltersAndRender();
         });
     }
@@ -1011,7 +1009,85 @@ function updateCategoryDropdown() {
     else select.value = 'All';
 }
 
+// ── Remembered view (teacher 2026-11-20) ────────────────────────────────
+// A REFRESH keeps every filter (period, student, category, Needs IC Entry
+// Only, both sorts, sort direction, Summaries). Leaving the page and coming
+// back starts clean. Kept in sessionStorage (this tab only) and used only
+// when the browser says this load was a reload.
+const VIEW_KEY = 'gb-view-v1';
+let pendingViewRestore = null; // { student, category } applied once the period's data is in
+
+function paintSortDirButton() {
+    const btn = document.getElementById('btnAssignmentSortDir');
+    if (btn) btn.innerHTML = assignmentSortDir === 'asc'
+        ? '<i class="fas fa-arrow-down-a-z me-1"></i> Forward'
+        : '<i class="fas fa-arrow-up-a-z me-1"></i> Backward';
+}
+
+function setNeedsIcButton(active) {
+    const btn = document.getElementById('needsIcFilterBtn');
+    if (!btn) return;
+    btn.classList.toggle('active', active);
+    btn.classList.toggle('btn-outline-primary', !active);
+    btn.classList.toggle('btn-primary', active);
+    btn.classList.toggle('text-white', active);
+}
+
+function saveView() {
+    const val = id => document.getElementById(id)?.value;
+    const period = val('periodFilter');
+    if (!period) return;
+    try {
+        sessionStorage.setItem(VIEW_KEY, JSON.stringify({
+            period, student: val('studentFilter') || 'All', category: val('categoryFilter') || 'All',
+            needsIc: !!document.getElementById('needsIcFilterBtn')?.classList.contains('active'),
+            sortStudents: currentSortMode, sortAssignments: assignmentSortMode,
+            sortDir: assignmentSortDir, summaries: showSummaryColumns
+        }));
+    } catch (e) { /* storage blocked: the view just isn't remembered */ }
+}
+
+// The saved view, but only when this page load is a refresh; any other way
+// of arriving (a link, the address bar, Back/Forward) clears it.
+function savedViewForThisLoad() {
+    let isReload = false;
+    try { isReload = performance.getEntriesByType('navigation')[0]?.type === 'reload'; } catch (e) { /* old browser */ }
+    try {
+        if (!isReload) { sessionStorage.removeItem(VIEW_KEY); return null; }
+        return JSON.parse(sessionStorage.getItem(VIEW_KEY) || 'null');
+    } catch (e) { return null; }
+}
+
+function restoreView(saved) {
+    const hasOption = (el, v) => !!el && [...el.options].some(o => o.value === v && !o.disabled);
+    const sortStudents = document.getElementById('sortStudentFilter');
+    if (hasOption(sortStudents, saved.sortStudents)) { currentSortMode = saved.sortStudents; sortStudents.value = saved.sortStudents; }
+    const sortAssignments = document.getElementById('sortAssignmentFilter');
+    if (hasOption(sortAssignments, saved.sortAssignments)) { assignmentSortMode = saved.sortAssignments; sortAssignments.value = saved.sortAssignments; }
+    if (saved.sortDir === 'asc' || saved.sortDir === 'desc') { assignmentSortDir = saved.sortDir; paintSortDirButton(); }
+    if (typeof saved.summaries === 'boolean') {
+        showSummaryColumns = saved.summaries;
+        document.getElementById('btnToggleSummaries')?.classList.toggle('active', showSummaryColumns);
+    }
+    setNeedsIcButton(!!saved.needsIc);
+    const periodSel = document.getElementById('periodFilter');
+    if (!hasOption(periodSel, saved.period)) return;
+    periodSel.value = saved.period;
+    pendingViewRestore = { student: saved.student, category: saved.category };
+    loadData(saved.period);
+}
+
 function applyFiltersAndRender() {
+    // After a refresh: the student and category picks go back in once the
+    // period's data (and so its student list) has loaded.
+    if (pendingViewRestore) {
+        const r = pendingViewRestore;
+        pendingViewRestore = null;
+        [['studentFilter', r.student], ['categoryFilter', r.category]].forEach(([id, v]) => {
+            const el = document.getElementById(id);
+            if (el && v && [...el.options].some(o => o.value === v)) el.value = v;
+        });
+    }
     const periodVal = document.getElementById('periodFilter')?.value || 'All';
     const studentVal = document.getElementById('studentFilter')?.value || 'All';
     const categoryVal = document.getElementById('categoryFilter')?.value || 'All';
@@ -1019,6 +1095,7 @@ function applyFiltersAndRender() {
         document.getElementById('gradebookBody').innerHTML = '<tr><td colspan="100%" class="text-center p-5 text-muted"><h4>No Class Selected</h4></td></tr>';
         return;
     }
+    saveView();
     renderGradebook(getFilteredStudents(periodVal, studentVal), allGrades, periodVal, categoryVal);
 }
 
@@ -1035,7 +1112,15 @@ window.addEventListener('DOMContentLoaded', () => {
     // endpoint -- the full gradebook (loadData) only fires once the teacher
     // actually picks a period or group below, instead of pulling every
     // student's entire grade history before she's had any chance to choose.
-    initPeriodPicker();
+    const savedView = savedViewForThisLoad();
+    initPeriodPicker().then(() => { if (savedView) restoreView(savedView); });
+    // Coming back with Back/Forward can show this page straight from the
+    // browser's memory, filters and all; start it clean instead.
+    window.addEventListener('pageshow', (ev) => {
+        if (!ev.persisted) return;
+        try { sessionStorage.removeItem(VIEW_KEY); } catch (e) { /* ignore */ }
+        location.reload();
+    });
 
     document.getElementById('periodFilter')?.addEventListener('change', (e) => {
         if (!e.target.value) return; // the disabled placeholder option -- ignore
@@ -1049,11 +1134,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('markEnteredIcBtn')?.addEventListener('click', markEnteredIcForCurrentView);
 
     document.getElementById('needsIcFilterBtn')?.addEventListener('click', (e) => {
-        const btn = e.currentTarget;
-        const active = btn.classList.toggle('active');
-        btn.classList.toggle('btn-outline-primary', !active);
-        btn.classList.toggle('btn-primary', active);
-        btn.classList.toggle('text-white', active);
+        setNeedsIcButton(!e.currentTarget.classList.contains('active'));
         applyFiltersAndRender();
     });
 });
