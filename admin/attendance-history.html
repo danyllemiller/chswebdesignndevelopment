@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | Attendance by Period</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=29"></script>
+  <script type="module" src="/js/auth-guard.js?v=3"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 1500px; margin: 2.5rem auto; }
+    .summary-pill { font-weight: 800; font-size: 1.05rem; }
+    .grid-wrap { overflow-x: auto; max-height: 75vh; }
+    .att-grid { border-collapse: separate; border-spacing: 0; font-size: .82rem; background: #fff; }
+    .att-grid th, .att-grid td { border: 1px solid #dee2e6; padding: .3rem .4rem; text-align: center; white-space: nowrap; }
+    .att-grid thead th { position: sticky; top: 0; background: #cfe2ff; z-index: 2; }
+    .att-grid .name-col { position: sticky; left: 0; background: #fff; z-index: 1; text-align: left; font-weight: 700; min-width: 170px; }
+    .att-grid thead .name-col { background: #cfe2ff; z-index: 3; }
+    /* The site's thead is navy (css/dacStyleSheets.css), so header text is light */
+    .att-grid .day-head a { color: #ffffff !important; text-decoration: none; display: block; line-height: 1.1; }
+    .att-grid .day-head a:hover { text-decoration: underline; }
+    .att-grid .day-head small { display: block; font-weight: 400; color: #c7c9db; font-size: .7rem; }
+    .att-grid td.cell { padding: 0; }
+    .att-grid td.cell a { display: block; padding: .3rem .4rem; text-decoration: none; font-weight: 700; color: inherit; min-width: 30px; }
+    .att-grid td.cell a:hover { outline: 2px solid #0d6efd; outline-offset: -2px; }
+    .c-present { background: #d1f2e0; color: #0f5132; }
+    .c-tardy { background: #fff3cd; color: #997404; }
+    .c-absent { background: #fde0de; color: #842029; }
+    .c-none { color: #adb5bd; }
+    .tot { font-weight: 800; background: #f8f9fa; }
+    .tot-p { color: #0f5132; } .tot-t { color: #997404; } .tot-a { color: #842029; }
+    .left-row .name-col { color: #6c757d; font-weight: 400; font-style: italic; }
+    .period-card .card-header .period-name { color: #ffffff !important; }
+    .period-card .card-header .hdr-stats { color: #e3e5f0 !important; }
+    .totals-table { font-size: .85rem; }
+    .totals-table td, .totals-table th { padding: .3rem .5rem; }
+    .low-pct { color: #842029; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container-fluid tools-card px-3">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+          <h2 class="gochi text-primary mb-1"><i class="fas fa-table-cells me-2"></i>Attendance by Period</h2>
+          <p class="text-muted mb-0">Every class day for a period. Click a day or a cell to open that day's report, where you can fix it.</p>
+          <a href="/admin/attendance-report.html" class="btn btn-outline-primary btn-sm mt-2"><i class="fas fa-clipboard-check me-1"></i>One-Day Attendance Report</a>
+        </div>
+        <div class="d-flex gap-2 flex-wrap align-items-end">
+          <div>
+            <label class="form-label small fw-bold text-muted mb-1" for="periodSelect">Period</label>
+            <select id="periodSelect" class="form-select border-primary fw-bold text-primary"></select>
+          </div>
+          <div>
+            <label class="form-label small fw-bold text-muted mb-1" for="fromInput">From</label>
+            <input type="date" id="fromInput" class="form-control border-primary fw-bold text-primary">
+          </div>
+          <div>
+            <label class="form-label small fw-bold text-muted mb-1" for="toInput">To</label>
+            <input type="date" id="toInput" class="form-control border-primary fw-bold text-primary">
+          </div>
+          <button type="button" id="allDatesBtn" class="btn btn-outline-secondary fw-bold" title="Every recorded day">All days</button>
+          <button type="button" id="csvBtn" class="btn btn-success fw-bold"><i class="fas fa-file-csv me-1"></i>Download CSV</button>
+        </div>
+      </div>
+
+      <div id="summaryRow" class="d-flex gap-4 flex-wrap mb-3"></div>
+      <div id="content">
+        <div class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</div>
+      </div>
+      <p class="small text-muted mt-3 mb-0"><strong>Here %</strong> = days present or tardy ÷ days marked. <strong>–</strong> = not marked that day (or not in the class yet). Gray, slanted names have left the class.</p>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module" src="/js/admin/attendance-history.js?v=1"></script>
+</body>
+</html>

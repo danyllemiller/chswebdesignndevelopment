@@ -137,12 +137,21 @@ async function loadReport() {
 }
 
 async function init() {
-    dateInput.value = todayStr();
+    // ?period=B4&date=2026-10-06 opens that day directly (the Attendance by
+    // Period grid links here so a day can be fixed).
+    const params = new URLSearchParams(location.search);
+    const wantDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get('date') || '') ? params.get('date') : null;
+    const wantPeriod = params.get('period');
+    dateInput.value = wantDate || todayStr();
     await loadPeriods();
-    try {
-        const cp = await apiFetch('/api/admin/attendance/current-period');
-        if (cp.current) periodSelect.value = cp.current;
-    } catch (e) { /* default to whatever the dropdown's first option is */ }
+    if (wantPeriod && [...periodSelect.options].some(o => o.value === wantPeriod)) {
+        periodSelect.value = wantPeriod;
+    } else {
+        try {
+            const cp = await apiFetch('/api/admin/attendance/current-period');
+            if (cp.current) periodSelect.value = cp.current;
+        } catch (e) { /* default to whatever the dropdown's first option is */ }
+    }
     loadReport();
 
     dateInput.addEventListener('change', loadReport);

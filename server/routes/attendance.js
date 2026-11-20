@@ -519,4 +519,70 @@ router.get('/admin/attendance/summary', requireStaff, async (req, res) => {
     }
 });
 
+// GET /admin/attendance/history?section_id=B4|ALL&from=YYYY-MM-DD&to=YYYY-MM-DD
+// Every recorded day for a period (teacher 2026-11-20: "see all the
+// attendance for each period"), for admin/attendance-history.html. A class
+// day is any date that period has attendance rows for (the absent sweep
+// fills in everyone who never scanned, so a day that met is complete).
+// Students are today's roster plus anyone who has a row there in the range
+// but has since left the class (enrolled: false). ALL returns every period
+// with rows in the range, in bell-schedule order.
+router.get('/admin/attendance/history', requireStaff, async (req, res) => {
+    const isDate = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '');
+    const sectionId = String(req.query.section_id || '');
+    if (!sectionId) return res.status(400).json({ error: 'section_id is required' });
+    const to = isDate(req.query.to) ? req.query.to : getLocalDateStr();
+    try {
+        const result = await withConnection(async (connection) => {
+            await ensureAttendanceTables(connection);
+            let from = isDate(req.query.from) ? req.query.from : null;
+            if (!from) {
+                const [[first]] = await connection.execute(
+                    sectionId === 'ALL' ? "SELECT DATE_FORMAT(MIN(date), '%Y-%m-%d') AS d FROM attendance WHERE section_id <> 'T1'" : "SELECT DATE_FORMAT(MIN(date), '%Y-%m-%d') AS d FROM attendance WHERE section_id = ?",
+                    sectionId === 'ALL' ? [] : [sectionId]);
+                from = (first && first.d) || to;
+            }
+            let sections = [sectionId];
+            if (sectionId === 'ALL') {
+                const [bell] = await connection.execute('SELECT DISTINCT period_label FROM bell_schedule ORDER BY period_label');
+                const [had] = await connection.execute(
+                    'SELECT DISTINCT section_id FROM attendance WHERE date BETWEEN ? AND ?', [from, to]);
+                const withRows = new Set(had.map(r => r.section_id));
+                sections = bell.map(r => r.period_label).filter(p => withRows.has(p));
+            }
+            const periods = [];
+            for (const section of sections) {
+                const roster = await getEnrolledStudents(connection, section);
+                const [rows] = await connection.execute(
+                    `SELECT a.student_id, DATE_FORMAT(a.date, '%Y-%m-%d') AS d, a.status, s.first_name, s.last_name
+                     FROM attendance a LEFT JOIN students s ON s.student_id = a.student_id
+                     WHERE a.section_id = ? AND a.date BETWEEN ? AND ?`,
+                    [section, from, to]);
+                const dates = [...new Set(rows.map(r => r.d))].sort();
+                const students = new Map();
+                roster.forEach(r => students.set(String(r.student_id), {
+                    student_id: String(r.student_id), first_name: r.first_name || '', last_name: r.last_name || '', enrolled: true, marks: {} }));
+                rows.forEach(r => {
+                    const id = String(r.student_id);
+                    if (!students.has(id)) students.set(id, { student_id: id, first_name: r.first_name || '', last_name: r.last_name || `#${id}`, enrolled: false, marks: {} });
+                    students.get(id).marks[r.d] = r.status;
+                });
+                const list = [...students.values()].map(st => {
+                    const vals = Object.values(st.marks);
+                    const present = vals.filter(v => v === 'present').length;
+                    const tardy = vals.filter(v => v === 'tardy').length;
+                    const absent = vals.filter(v => v === 'absent').length;
+                    return { ...st, present, tardy, absent };
+                }).sort((a, b) => (b.enrolled - a.enrolled) || a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
+                periods.push({ section_id: section, dates, students: list });
+            }
+            return { from, to, periods };
+        });
+        res.json(result);
+    } catch (err) {
+        console.error('[attendance] history error:', err);
+        res.status(500).json({ error: 'Failed to load attendance history.' });
+    }
+});
+
 module.exports = router;
