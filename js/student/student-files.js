@@ -121,41 +121,8 @@ async function startFileManager() {
         const idBadge = document.getElementById('student-id-badge');
         if (idBadge) idBadge.innerText = `ID: ${currentStudentId}`;
 
-        // Help Request Button
-        const helpBtn = document.getElementById('btn-request-help');
-        if (helpBtn) {
-            helpBtn.classList.remove('d-none');
-            let isHelpRequested = false;
-
-            const updateHelpUI = () => {
-                if (isHelpRequested) {
-                    helpBtn.className = "btn btn-danger shadow-sm fw-bold";
-                    helpBtn.innerHTML = '<i class="fas fa-times-circle me-2"></i> Cancel Help Request';
-                } else {
-                    helpBtn.className = "btn btn-outline-danger shadow-sm fw-bold";
-                    helpBtn.innerHTML = '<i class="fas fa-life-ring me-2"></i> Request Admin Help';
-                }
-            };
-
-            updateHelpUI();
-
-            helpBtn.onclick = async () => {
-                isHelpRequested = !isHelpRequested;
-                helpBtn.disabled = true;
-                try {
-                    await fetch('/api/student/help-request', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ student_id: myOwnStudentId, requested: isHelpRequested })
-                    });
-                    updateHelpUI();
-                } catch (e) {
-                    console.error("Failed to update help request.", e);
-                    isHelpRequested = !isHelpRequested;
-                }
-                helpBtn.disabled = false;
-            };
-        }
+        // The old "Request Admin Help" button here only set a flag no teacher page ever
+        // read. The sitewide "I'm stuck" button (js/help-button.js) replaces it (2026-11-23).
 
         setupFileUI(currentStudentId);
         setupDownloadAll();

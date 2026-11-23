@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Classroom Tools | "I'm Stuck" Requests</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon/favicon-96x96.png">
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/fontawesome.min.css">
+
+  <link href="/css/dacStyleSheets.css?v=2.0" rel="stylesheet"/>
+
+  <script src="/js/loader.js?v=29"></script>
+  <script type="module" src="/js/auth-guard.js?v=3"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6fb; }
+    .tools-card { max-width: 1000px; margin: 2.5rem auto; }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<div class="container-fluid tools-card px-3">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <h2 class="gochi text-primary mb-1"><i class="fas fa-hand me-2"></i>"I'm Stuck" Requests</h2>
+      <p class="text-muted">Students press <strong>I'm stuck</strong> on any lesson page (it's hidden on tests). Only you see the request. A red <strong>stuck</strong> alert also shows in the bottom-right corner of every teacher page, so you don't need to keep this page open. Requests clear after 6 hours.</p>
+      <div id="content"><div class="text-center p-5 text-muted"><div class="spinner-border text-primary mb-3"></div><br>Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="/js/bootstrap.bundle.js"></script>
+<script type="module" src="/js/admin/help-requests.js?v=1"></script>
+</body>
+</html>

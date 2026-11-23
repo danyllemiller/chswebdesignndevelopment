@@ -65,6 +65,17 @@
 })();
 
 // ==========================================
+// "I'M STUCK" HELP BUTTON (sitewide: a private button for students, an alert for the teacher)
+// ==========================================
+(function injectHelpButton() {
+  if (document.getElementById('help-button-script')) return;
+  const script = document.createElement('script');
+  script.id = 'help-button-script';
+  script.src = '/js/help-button.js?v=1';
+  document.body ? document.body.appendChild(script) : document.head.appendChild(script);
+})();
+
+// ==========================================
 // INFINITE CAMPUS SYNC REMINDER (sitewide, self-guards to the teacher)
 // ==========================================
 (function injectIcReminderBadge() {

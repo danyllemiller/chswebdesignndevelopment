@@ -97,6 +97,13 @@ async function loadRoster() {
             }
         });
 
+        // ?student=<id> (from Needs Grading's "Open files"): open that student's folder.
+        const wanted = new URLSearchParams(location.search).get('student');
+        if (wanted && [...studentSelect.options].some(o => o.value === wanted)) {
+            studentSelect.value = wanted;
+            studentSelect.dispatchEvent(new Event('change'));
+        }
+
     } catch (error) {
         console.error("Error loading roster:", error);
         studentSelect.innerHTML = '<option value="">Error loading roster</option>';

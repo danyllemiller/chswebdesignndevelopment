@@ -496,9 +496,9 @@ main.js</code></pre>
                   <td>A commit is a save point you can go back to. The message tells your team (and future you) what changed. "Change homepage headline" ✔ · "stuff" ✘</td>
                 </tr>
                 <tr>
-                  <td class="text-nowrap"><code class="text-warning">git log --oneline</code></td>
-                  <td>Lists your commits, one line each, newest on top. The 7-character code is that commit&#39;s ID.</td>
-                  <td>Proves your snapshots saved and lets you check your messages. Press <strong>q</strong> if you see <code>(END)</code>.</td>
+                  <td class="text-nowrap"><code class="text-warning">git log</code></td>
+                  <td>Lists your commits, newest on top. Each one shows its ID, the <strong>Author</strong> (who made it), the <strong>Date</strong>, and the message.</td>
+                  <td>Proves your snapshots saved and that they&#39;re yours: your name is on every one. Press <strong>q</strong> if you see <code>(END)</code> or <code>:</code> at the bottom.</td>
                 </tr>
                 <tr>
                   <td class="text-nowrap"><code class="text-warning">git status</code></td>
@@ -543,29 +543,45 @@ git commit -m "Add js folder and main.js"</code></pre>
                 <h6 class="fw-bold mt-3">Step 4 · Commit 2: change the headline</h6>
                 <ol>
                     <li class="mb-1">Type <code>notepad index.html</code> and press Enter. Notepad opens.</li>
-                    <li class="mb-1">Find <code>&lt;h1&gt;My Developer Portfolio&lt;/h1&gt;</code>. Change only the words between the tags, for example <code>&lt;h1&gt;Jordan Reyes, Web Developer&lt;/h1&gt;</code>.</li>
+                    <li class="mb-1">Find <code>&lt;h1&gt;My Developer Portfolio&lt;/h1&gt;</code>. Change only the words between the tags to your own name, for example <code>&lt;h1&gt;Jordan Reyes, Web Developer&lt;/h1&gt;</code>.</li>
                     <li class="mb-1">Click <strong>File → Save</strong>, then close Notepad.</li>
                 </ol>
+                <p class="mb-2">Write the commit message in <strong>your own words</strong>, with your name in it, so it says exactly what you changed. For example:</p>
                 <pre class="p-3 rounded no-copy mb-2"><code>git add .
-git commit -m "Change homepage headline"</code></pre>
+git commit -m "Change headline to Jordan Reyes"</code></pre>
 
                 <h6 class="fw-bold mt-3">Step 5 · Commit 3: add a comment to main.js</h6>
                 <ol>
                     <li class="mb-1">Type <code>notepad js/main.js</code> and press Enter. Notepad opens an empty file.</li>
-                    <li class="mb-1">Type <code>// main script</code> on line 1. Click <strong>File → Save</strong>, then close Notepad.</li>
+                    <li class="mb-1">On line 1, type <code>// main script by</code> and your first name and last initial, like <code>// main script by Jordan R.</code> Click <strong>File → Save</strong>, then close Notepad.</li>
                 </ol>
+                <p class="mb-2">Again, write your own message that says what changed, for example:</p>
                 <pre class="p-3 rounded no-copy mb-2"><code>git add .
-git commit -m "Add comment to main.js"</code></pre>
+git commit -m "Sign main.js with my name"</code></pre>
 
                 <h6 class="fw-bold mt-3">Step 6 · Check your history</h6>
-                <pre class="p-3 rounded no-copy mb-2"><code>git log --oneline</code></pre>
-                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> 3 lines, newest on top. Your 7-character codes will be different, and it may say <code>master</code> or <code>main</code>. Both are fine.
-                    <pre class="p-2 rounded no-copy mt-2 mb-1"><code>c3d4e5f (HEAD -&gt; master) Add comment to main.js
-b2c3d4e Change homepage headline
-a1b2c3d Add js folder and main.js</code></pre>
-                    If you see <code>(END)</code> at the bottom, press <strong>q</strong> to get back.
+                <pre class="p-3 rounded no-copy mb-2"><code>git log</code></pre>
+                <div class="alert alert-success py-2 px-3 mb-2"><strong>✅ What you should see:</strong> 3 commits, newest on top, each with <strong>your name</strong> after <code>Author:</code> and today&#39;s date. Your codes and messages will be different, and it may say <code>master</code> or <code>main</code>. Both are fine.
+                    <pre class="p-2 rounded no-copy mt-2 mb-1"><code>commit c3d4e5f8a1… (HEAD -&gt; master)
+Author: Jordan Reyes &lt;jordan@example.com&gt;
+Date:   Tue Nov 17 10:42:13 2026 -0800
+
+    Sign main.js with my name
+
+commit b2c3d4e7f0…
+Author: Jordan Reyes &lt;jordan@example.com&gt;
+Date:   Tue Nov 17 10:39:50 2026 -0800
+
+    Change headline to Jordan Reyes
+
+commit a1b2c3d9e2…
+Author: Jordan Reyes &lt;jordan@example.com&gt;
+Date:   Tue Nov 17 10:35:02 2026 -0800
+
+    Add js folder and main.js</code></pre>
+                    If you see <code>(END)</code> or <code>:</code> at the bottom, take your screenshot first (Step 7), then press <strong>q</strong> to get back.
                 </div>
-                <p class="mb-2"><strong>Partner check:</strong> your partner reads your <code>git log --oneline</code>. Every message has to say what changed. "Change homepage headline" ✔ · "stuff," "update," or "asdf" ✘</p>
+                <p class="mb-2"><strong>Partner check:</strong> your partner reads your <code>git log</code>. Your name is the Author on all 3, and every message says what changed. "Change headline to Jordan Reyes" ✔ · "stuff," "update," or "asdf" ✘</p>
                 <details class="mb-3"><summary class="fw-bold text-primary" style="cursor: pointer;">🛠 If it doesn't work (click to open)</summary>
                     <ul class="mt-2 mb-0">
                         <li class="mb-1"><strong>"Author identity unknown"</strong> or <strong>"Please tell me who you are"</strong>: run the two <code>git config</code> lines from Step 2, then run your <code>git commit</code> line again.</li>
@@ -576,9 +592,9 @@ a1b2c3d Add js folder and main.js</code></pre>
                 </details>
 
                 <h6 class="fw-bold mt-3">Step 7 · Screenshot and turn in</h6>
-                <p class="mb-2">With your <code>git log --oneline</code> showing, press <strong>Windows + PrtScn</strong> (saves to Pictures → Screenshots). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → pick the newest screenshot → <strong>Upload to Teacher Server</strong>.</p>
-                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ 3 commits show in <code>git log --oneline</code> · ☐ every message says what changed · ☐ your partner checked them</p>
-                <p class="mb-3 text-danger fw-bold">Turn In: A screenshot of Git Bash showing <code>git log --oneline</code> with all 3 commits.</p>
+                <p class="mb-2">With your <code>git log</code> showing all 3 commits and your name, press <strong>Windows + PrtScn</strong> (saves to Pictures → Screenshots). Click <strong>Jump to Dropbox</strong> below → <strong>Choose Files</strong> → pick the newest screenshot → <strong>Upload to Teacher Server</strong>.</p>
+                <p class="mb-2"><strong>Full credit checklist:</strong> ☐ 3 commits show in <code>git log</code> · ☐ your name is the Author on all 3 · ☐ every message says what changed, in your own words · ☐ your partner checked them</p>
+                <p class="mb-3 text-danger fw-bold">Turn In: A screenshot of Git Bash showing <code>git log</code> with all 3 commits and your name as the Author.</p>
                 <a href="/student/notes.html?chapter=11&amp;day=1&amp;turnin=Milestone%202%3A%20Local%20Agency%20Backup%20%2825%20pts%29" class="btn btn-sm btn-outline-success fw-bold shadow-sm">⬇️ Jump to Dropbox: Notebook Day 1</a>
             </div>
         </div>

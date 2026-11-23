@@ -77,6 +77,8 @@ router.use('/', require('./routes/newsletter'));
 router.use('/', require('./routes/budgetGame'));
 router.use('/', require('./routes/survey'));
 router.use('/', require('./routes/interviews'));
+router.use('/', require('./routes/helpRequests'));
+router.use('/', require('./routes/needsGrading'));
 router.use('/', require('./routes/practicum'));
 router.use('/', require('./routes/gameRooms'));
 router.use('/', require('./routes/gameChat'));
