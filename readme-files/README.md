@@ -4,7 +4,7 @@
 
 ## What This Site Is
 
-This is the teacher-owned classroom website for Ms. Danylle Miller's Web Design & Development and Computer Science courses at Carson High School (CHS). It is a full-stack web application that serves as:
+This is the teacher-owned classroom website for Ms. Danylle Miller's Web Design & Development and Computer Science courses at Cohort Hatchery Studios (CHS). It is a full-stack web application that serves as:
 
 - A **public-facing course information site** (syllabus, expectations, grading policy)
 - A **teacher admin dashboard** (gradebook, roster management, payroll/timeclock, calendar, curriculum documentation)

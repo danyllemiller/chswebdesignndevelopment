@@ -190,7 +190,7 @@ async function buildPayrollUI(student_id) {
                             <div class="row border-bottom border-2 border-dark pb-3 mb-4">
                                 <div class="col-sm-6 mb-3 mb-sm-0">
                                     <h4 class="fw-bold mb-0 text-uppercase" style="letter-spacing: -1px;">CHS Web Design Studio</h4>
-                                    <div class="small fw-bold">1111 N Saliman Rd<br>Carson City, NV 89701</div>
+                                    <div class="small fw-bold">250 Hatchery Way<br>Carson City, NV 89701</div>
                                 </div>
                                 <div class="col-sm-6 text-sm-end">
                                     <h3 class="fw-bold mb-0 text-success">EARNINGS STATEMENT</h3>

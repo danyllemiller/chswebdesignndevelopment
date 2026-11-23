@@ -130,7 +130,7 @@ export function renderPaystubHtml(stub, missingAssignments) {
       <div class="check-top">
         <div>
           <div class="check-bank-name">First Classroom Bank &amp; Trust <span class="check-fake-tag">(not a real bank)</span></div>
-          <div class="check-bank-addr">CHS Web Design Studio · 1111 N Saliman Rd · Carson City, NV 89701</div>
+          <div class="check-bank-addr">CHS Web Design Studio · 250 Hatchery Way · Carson City, NV 89701</div>
         </div>
         <div class="text-end">
           <div class="check-number">No. ${checkNumber}</div>
@@ -162,7 +162,7 @@ export function renderPaystubHtml(stub, missingAssignments) {
         <div class="row align-items-start">
           <div class="col-7">
             <div class="fw-bold fs-5 text-uppercase" style="letter-spacing:-1px">CHS Web Design Studio</div>
-            <div class="small">1111 N Saliman Rd · Carson City, NV 89701</div>
+            <div class="small">250 Hatchery Way · Carson City, NV 89701</div>
           </div>
           <div class="col-5 text-end">
             <div class="fw-bold fs-5 text-success">${isEstimated ? 'ESTIMATED STATEMENT' : 'EARNINGS STATEMENT'}</div>

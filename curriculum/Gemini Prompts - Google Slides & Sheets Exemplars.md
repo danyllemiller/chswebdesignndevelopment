@@ -27,7 +27,7 @@ later, ask Claude to regenerate this file.
 ## Unit 1 — The Digital Citizenship Case File
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
 TASK: Unit 1 Project: The Digital Citizenship Case File. Build it as a Google Slides deck (minimum 8 slides).
 
@@ -157,7 +157,7 @@ If I were the employee who got that call, I'd have hung up and called the help d
 ## Unit 2 — The System & Support Deck
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
 TASK: Unit 2 Project: The System & Support Deck. It's a partner project. Build BOTH a Google Sheet (one tab named "Failure Points" with the ranked failure-point table and a real bar chart, numbers labeled "sample data") AND a Google Slides deck (minimum 6 slides). On the Data Slide, rebuild the same ranking as a slide table and note that the chart lives in the Sheet.
 
@@ -290,7 +290,7 @@ Slide — Team Credits
 ## Unit 3 — The Data Pipeline (Option A: Personal Finance)
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
 TASK: Unit 3 Project: The Data Pipeline (Option A: Personal Finance). Build it as a 4-tab Google Sheets workbook. CRITICAL: every real student uses the same Raw Data, which is intentionally NOT included here. Do not try to recreate it, and do not reuse any numbers that appear in the project instructions (for example the $150.00 opening balance, $335.16, or the $350 goal). Instead, extend the WORKED EXAMPLE's lunch-card account into a full-size parallel dataset: 8 codes of your own (mixed binary/hex/decimal, converted with DEC2BIN/HEX2DEC/BIN2DEC/CHAR/CODE formulas), 15-20 lunch-card transactions, a running balance with an absolute reference to the opening balance, the 4 KPIs, two COUNTIF-based charts, and 14 weeks of balances using the same weekly-change prediction method with a weeks-until-goal formula. Use the exact 4 tab names from the project instructions. FORBIDDEN (these are the real students' answers): do NOT use the letters D, P, W, I, F, G, E, or B as codes, and do NOT use the meanings Deposit, Purchase, ATM Withdrawal, Income, Food, Gas, Entertainment, or Bills. Use lunch-card codes instead, for example R = Reload, C = Charge, T = Transfer for types and M = Main Meal, S = Snack, K = Drink, X = Extra for categories (8 codes total, mixed binary/hex/decimal). Do NOT use a $150.00 opening balance, a $335.16 ending balance, or a $350 goal anywhere; use a $25.00 opening balance and a $60 goal. Every Reload goes ONLY in the Money In column and every Charge goes ONLY in the Money Out column; never put both on one row, and never leave a Txn number blank. After building, Logger.log each row's running balance and confirm the last balance equals opening balance + SUM(Money In) - SUM(Money Out).
 
@@ -488,7 +488,7 @@ Notice: Week 4 went up because of a reload. The average still works because it s
 ## Unit 3B — The Data Pipeline (Option B: Grade Tracker)
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
 TASK: Unit 3 Project: The Data Pipeline (Option B: Grade Tracker). Build it as a 4-tab Google Sheets workbook using the exact 4 tab names from the project instructions. In the real assignment each student uses their OWN real grades, so this example MUST use clearly fictional grades for "Jordan Example": 18 due items from a made-up semester of this CS class (CH# labs worth 25, two Unit tests worth 25, one U# Project worth 100; include 2 missing items worth 0 and dates in due-date order). Put a banner on the grade tab: "Fictional grades for an example student." FORBIDDEN (these are the real students' Stage 1 answers): do NOT use the code key from the project or the letters A, T, F, L, P, Q, G, M. Instead invent your own 8 codes (mixed binary/hex/decimal) for the same three ideas, using different letters, e.g. categories W = Weekly Work, S = Summative, X = Exam; types K = Lab, J = Project, U = Unit Test; statuses H = Has Score, Z = Zero/Missing. Convert them with DEC2BIN/HEX2DEC/BIN2DEC/CHAR/CODE formulas. Stage 3 needs the Percent column, the 4 KPIs, both COUNTIF charts, and the comparison sentence; do the (Bonus) weighted grade with SUMIF and 60/20/20 weights. Stage 4 needs the Running % column with an absolute-start SUM, Change, AVERAGE, two predictions, the goal-check formula, and Jordan's 2 sentences. After building, Logger.log the totals, overall %, weighted %, and every Running % so I can verify them.
 
@@ -655,7 +655,7 @@ Jordan's 2 sentences: “This prediction isn't realistic long-term, because one 
 ## Unit 4 — The Algorithm Design Blueprint
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
 TASK: Unit 4 Project: The Algorithm Design Blueprint. Build it as a Google Slides deck (minimum 6 slides) following the "Your Slide-by-Slide Plan" table in the instructions exactly. Put pseudocode in a monospace font (Courier New). Make the trace walkthroughs real slide tables. The pseudocode and traces must match the WORKED EXAMPLE exactly.
 
@@ -848,7 +848,7 @@ Bonus edge case: orderList = [] (empty order) — the loop runs zero times, tota
 ## Unit 5 — The Tech Impact Briefing
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
 TASK: Unit 5 Project: The Tech Impact Briefing. Build it as a Google Slides deck (minimum 7 slides) plus a Works Cited slide. Stay neutral and school-appropriate: model reasoning, not a political position.
 
@@ -1021,7 +1021,7 @@ What Jordan says: Every fact in my deck comes from one of these sources. I cited
 ## Unit 6 — The App Blueprint & Build Plan
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
 TASK: Unit 6 Project: The App Blueprint & Build Plan. Build BOTH a Google Sheet (one tab named "Data Structure Comparison": the same data as separate simple variables vs. one list/array-style table, plus 2-3 sentences on why the list scales) AND a Google Slides deck (minimum 6 slides) for every other step.
 
@@ -1158,7 +1158,7 @@ Leo Example, 15. Last Tuesday he got home at 6:00 and fed Biscuit; his dad got h
 ## Unit 7 — The Network Audit
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" so her 9th-12th graders can see exactly what a full-credit project looks like.
 
 TASK: Unit 7 Project: The Network Audit. Build it as a Google Slides deck (minimum 6 slides). Draw the network diagram with real shapes and connector lines, using only private IP ranges (nothing resembling real infrastructure).
 
@@ -1281,7 +1281,7 @@ This one makes a Google Sheet **plus** the student's own Apps Script code that g
 Run FILE 1 at script.google.com. Then open the new sheet → **Extensions → Apps Script** → paste FILE 2 → Save → reload the sheet to see the **Snack Fund** menu.
 
 ```text
-You are helping a high school Computer Science teacher at Carson High School (Nevada) make a model "finished student example" of the Google Apps Script prototype her students build across Chapters 9-16 (Unit 4-6).
+You are helping a high school Computer Science teacher in Nevada make a model "finished student example" of the Google Apps Script prototype her students build across Chapters 9-16 (Unit 4-6).
 
 TASK: Give me TWO separate code files.
 
